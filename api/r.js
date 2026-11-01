@@ -10,6 +10,8 @@ const link = (x) => (/^https:\/\/\S{3,200}$/.test(String(x || '')) ? String(x) :
 
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store')
+  // which storage variables this deployment can see (names only, never values)
+  if (req.query.path === 'storage') return res.status(200).json({ names: Object.keys(process.env).filter((k) => /BLOB|READ_WRITE|STORE/i.test(k)), env: process.env.VERCEL_ENV || null })
   if (req.query.path !== 'upload' || req.method !== 'POST') return res.status(404).json({ error: 'unknown' })
   const token = blobToken()
   if (!token) return res.status(503).json({ error: 'storage is not connected yet (Vercel: Storage → Blob → connect to this project)' })
