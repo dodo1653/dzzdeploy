@@ -1,5 +1,6 @@
 // The launcher's one server call on the hosted dzz: upload (the coin's picture + metadata JSON), kept for good in Vercel
-// Blob (public, CDN-served). Needs a Blob store connected to the project (env BLOB_READ_WRITE_TOKEN).
+// Blob (public, CDN-served). Needs a Blob store connected to the project: either a read-write key
+// (…_READ_WRITE_TOKEN) or Vercel's keyless connection (BLOB_STORE_ID + the deployment's OIDC identity, read by the SDK).
 import { put } from '@vercel/blob'
 import crypto from 'node:crypto'
 
@@ -11,10 +12,10 @@ const link = (x) => (/^https:\/\/\S{3,200}$/.test(String(x || '')) ? String(x) :
 export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store')
   // which storage variables this deployment can see (names only, never values)
-  if (req.query.path === 'storage') return res.status(200).json({ names: Object.keys(process.env).filter((k) => /BLOB|READ_WRITE|STORE/i.test(k)), env: process.env.VERCEL_ENV || null })
+  if (req.query.path === 'storage') return res.status(200).json({ names: Object.keys(process.env).filter((k) => /BLOB|READ_WRITE|STORE|OIDC/i.test(k)), oidcHeader: !!req.headers['x-vercel-oidc-token'], env: process.env.VERCEL_ENV || null })
   if (req.query.path !== 'upload' || req.method !== 'POST') return res.status(404).json({ error: 'unknown' })
   const token = blobToken()
-  if (!token) return res.status(503).json({ error: 'storage is not connected yet (Vercel: Storage → Blob → connect to this project)' })
+  if (!token && !process.env.BLOB_STORE_ID) return res.status(503).json({ error: 'storage is not connected yet (Vercel: Storage → Blob → connect to this project)' })
   try {
     const b = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {}
     const name = String(b.name || '').trim().slice(0, 32), symbol = String(b.symbol || '').trim().replace(/^\$+/, '').slice(0, 10)
@@ -24,10 +25,10 @@ export default async function handler(req, res) {
     if (!m) return res.status(400).json({ error: 'the picture must be png, jpg, webp or gif' })
     const bytes = Buffer.from(m[2], 'base64'); if (bytes.length > 1_900_000) return res.status(400).json({ error: 'the picture is too large (max 1.9 MB)' })
     const id = crypto.randomBytes(10).toString('hex'), ext = m[1] === 'jpeg' ? 'jpg' : m[1]
-    const pic = await put(`i/${id}.${ext}`, bytes, { access: 'public', contentType: `image/${m[1]}`, addRandomSuffix: false, cacheControlMaxAge: 31536000, token })
+    const pic = await put(`i/${id}.${ext}`, bytes, { access: 'public', contentType: `image/${m[1]}`, addRandomSuffix: false, cacheControlMaxAge: 31536000, ...(token ? { token } : {}) })
     const json = { name, symbol, description: String(b.description || '').slice(0, 600), image: pic.url, showName: true, twitter: link(b.twitter), telegram: link(b.telegram), website: link(b.website) }
     if (json.website) json.createdOn = json.website
-    const meta = await put(`m/${id}.json`, JSON.stringify(json), { access: 'public', contentType: 'application/json', addRandomSuffix: false, cacheControlMaxAge: 31536000, token })
+    const meta = await put(`m/${id}.json`, JSON.stringify(json), { access: 'public', contentType: 'application/json', addRandomSuffix: false, cacheControlMaxAge: 31536000, ...(token ? { token } : {}) })
     return res.status(200).json({ uri: meta.url, image: pic.url, id })
   } catch (e) { return res.status(500).json({ error: String(e.message || e).slice(0, 200) }) }
 }
