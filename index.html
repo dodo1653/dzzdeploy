@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>dzz</title>
+<meta name="description" content="Launch pump.fun coins at the contract address you choose. Found in your browser, signed in your browser, launched from your wallet.">
+<meta property="og:title" content="dzz">
+<meta property="og:description" content="Launch pump.fun coins at the contract address you choose.">
+<link rel="icon" href="/assets/icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<script src="/assets/theme.js"></script>
+<style>
+:root { --ui: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace; --serif: 'Instrument Serif', Georgia, serif; --ease: cubic-bezier(.2, .8, .2, 1);
+  --bg: #07080f; --ink: #eef0f4; --t2: #a7abb5; --t3: #6c707b; --t4: #3b3e46; --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.14); --panel: rgba(14,15,20,.72); --panel2: rgba(255,255,255,.05);
+  --acc: #6ea8ff; --acc-rgb: 110, 168, 255; --acc-ink: #041434; --card-a: rgba(22,24,32,.78); --card-b: rgba(10,11,16,.82); --c-set: #8d919c; --c-roll: #555963; --shadow: rgba(0,0,0,.6); }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+html, body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--ui); -webkit-font-smoothing: antialiased; }
+a { color: inherit; } ::selection { background: var(--acc); color: var(--acc-ink); }
+.wrap { position: relative; z-index: 1; max-width: 1180px; margin: 0 auto; padding: 0 28px; }
+
+/* nav */
+nav.top { position: sticky; top: 0; z-index: 20; }
+nav.top .in { max-width: 1180px; margin: 0 auto; padding: 16px 28px; display: flex; align-items: center; gap: 22px; }
+nav.top::before { content: ''; position: absolute; inset: 0; background: var(--panel); backdrop-filter: blur(16px) saturate(1.3); -webkit-backdrop-filter: blur(16px) saturate(1.3); border-bottom: 1px solid var(--line); opacity: 0; transition: opacity .35s; pointer-events: none; }
+nav.top.stuck::before { opacity: 1; }
+.mark { position: relative; font: 600 24px/1 var(--ui); letter-spacing: -.07em; text-decoration: none; margin-right: auto; } .mark i { font-style: normal; color: var(--acc); }
+nav.top a.l { position: relative; font: 500 13.5px var(--ui); color: var(--t2); text-decoration: none; transition: color .2s; } nav.top a.l:hover { color: var(--ink); }
+.ib { position: relative; width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(12px); display: grid; place-items: center; cursor: pointer; color: var(--t2); transition: color .2s, border-color .2s; }
+.ib:hover { color: var(--ink); border-color: var(--line2); } .ib svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+.btn { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 44px; padding: 0 20px; border-radius: 12px; font: 600 14px var(--ui); letter-spacing: -.01em; text-decoration: none; cursor: pointer; border: 0; transition: transform .15s, box-shadow .3s, background .3s; }
+.btn.p { background: var(--acc); color: var(--acc-ink); box-shadow: 0 0 0 1px rgba(var(--acc-rgb), .45), 0 12px 34px -12px rgba(var(--acc-rgb), .7); }
+.btn.p:hover { transform: translateY(-1px); box-shadow: 0 0 0 1px rgba(var(--acc-rgb), .65), 0 18px 44px -12px rgba(var(--acc-rgb), .8); }
+.btn.g { background: var(--panel); color: var(--ink); box-shadow: 0 0 0 1px var(--line2); backdrop-filter: blur(12px); } .btn.g:hover { box-shadow: 0 0 0 1px var(--t4); }
+.btn.sm { height: 36px; padding: 0 14px; font-size: 13px; border-radius: 10px; }
+.btn svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 2; }
+
+/* hero */
+.hero { min-height: calc(100vh - 68px); display: grid; align-content: center; justify-items: center; text-align: center; padding: 40px 0 70px; }
+.kick { display: inline-flex; align-items: center; gap: 10px; padding: 6px 12px 6px 8px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(12px); font: 400 12.5px var(--mono); color: var(--t2); }
+.kick b { display: inline-grid; place-items: center; height: 20px; padding: 0 8px; border-radius: 999px; background: rgba(var(--acc-rgb), .14); color: var(--acc); font: 500 11px var(--mono); }
+h1 { margin: 26px 0 0; font: 300 clamp(44px, 7.4vw, 104px)/.98 var(--ui); letter-spacing: -.055em; max-width: 13ch; }
+h1 em { font: 400 1.08em/1 var(--serif); font-style: italic; letter-spacing: -.02em; color: var(--acc); }
+.lede { margin: 26px 0 0; max-width: 600px; font: 400 17px/1.6 var(--ui); color: var(--t2); }
+.cta { display: flex; gap: 10px; margin-top: 32px; flex-wrap: wrap; justify-content: center; }
+
+/* the live forge: real addresses being searched in this browser */
+.forge { margin-top: 64px; width: min(880px, 100%); }
+.fcard { position: relative; border-radius: 22px; padding: 22px 26px 18px; border: 1px solid var(--line); background: linear-gradient(180deg, var(--card-a), var(--card-b)); backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); box-shadow: 0 40px 120px -50px var(--shadow); }
+.fcard::before { content: ''; position: absolute; inset: -1px; border-radius: 22px; padding: 1px; background: linear-gradient(180deg, rgba(var(--acc-rgb), .35), transparent 40%); -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none; }
+.fhead { display: flex; justify-content: space-between; align-items: center; font: 400 11.5px var(--mono); color: var(--t3); letter-spacing: .08em; text-transform: uppercase; }
+.fhead .live { display: inline-flex; gap: 8px; align-items: center; color: var(--t2); letter-spacing: .02em; text-transform: none; }
+.fhead .live i { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); box-shadow: 0 0 10px var(--acc); animation: blink 1.2s infinite; } @keyframes blink { 50% { opacity: .3 } }
+.cells { display: flex; justify-content: center; margin: 22px 0 18px; font: 500 clamp(12px, 2.05vw, 25px)/1 var(--mono); }
+.cells span { width: .62em; text-align: center; color: var(--c-roll); transition: color .3s; position: relative; }
+.cells span.set { color: var(--c-set); } .cells span.pat { color: var(--acc); }
+.cells span.pat::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -9px; height: 2px; border-radius: 2px; background: var(--acc); opacity: .6; }
+.cells span.lock { color: var(--ink); }
+.fstats { display: flex; justify-content: center; gap: 26px; flex-wrap: wrap; font: 400 12px var(--mono); color: var(--t3); font-variant-numeric: tabular-nums; }
+.fstats b { color: var(--ink); font-weight: 500; }
+.found { margin-top: 16px; border-top: 1px solid var(--line); padding-top: 12px; display: grid; gap: 4px; min-height: 120px; }
+.frow { display: grid; grid-template-columns: 70px 1fr auto; gap: 14px; align-items: center; font: 400 12.5px var(--mono); color: var(--t3); padding: 5px 4px; animation: rowIn .7s var(--ease) both; text-align: left; }
+.frow code { color: var(--t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .frow code b { color: var(--acc); font-weight: 500; } .frow .t { color: var(--t3); }
+@keyframes rowIn { from { opacity: 0; transform: translateY(-8px); filter: blur(4px) } }
+.note { margin-top: 12px; font: 400 11.5px var(--mono); color: var(--t3); }
+
+/* sections */
+section.s { padding: 120px 0 0; }
+.eyebrow { font: 400 12px var(--mono); color: var(--acc); letter-spacing: .1em; text-transform: uppercase; }
+h2 { margin: 14px 0 0; font: 300 clamp(34px, 4.6vw, 60px)/1.02 var(--ui); letter-spacing: -.045em; max-width: 16ch; }
+h2 em { font: 400 1.08em var(--serif); font-style: italic; color: var(--t2); letter-spacing: -.01em; }
+.sub { margin: 18px 0 0; max-width: 560px; color: var(--t2); font-size: 16px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-top: 48px; }
+.card { position: relative; border-radius: 20px; padding: 26px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(18px) saturate(1.25); -webkit-backdrop-filter: blur(18px) saturate(1.25); overflow: hidden; }
+.card .n { font: 400 12px var(--mono); color: var(--t3); } .card h3 { margin: 18px 0 8px; font: 500 20px var(--ui); letter-spacing: -.02em; } .card p { margin: 0; color: var(--t2); font-size: 14.5px; }
+.card .vis { height: 120px; margin: -6px -6px 6px; border-radius: 14px; background: rgba(0,0,0,.18); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; position: relative; }
+.vis .typed { font: 500 20px var(--mono); color: var(--c-set); } .vis .typed b { color: var(--acc); font-weight: 500; border-right: 2px solid var(--acc); animation: car 1s steps(2) infinite; } @keyframes car { 50% { border-color: transparent } }
+.vis .bars { display: flex; gap: 5px; align-items: flex-end; height: 70px; } .vis .bars i { width: 9px; border-radius: 3px; background: linear-gradient(var(--acc), rgba(var(--acc-rgb), .15)); animation: bar 1.4s var(--ease) infinite alternate; }
+@keyframes bar { from { height: 18% } to { height: 100% } }
+.vis .hold { width: 70%; height: 44px; border-radius: 12px; background: var(--panel2); box-shadow: 0 0 0 1px var(--line2); position: relative; overflow: hidden; display: grid; place-items: center; font: 600 13px var(--ui); }
+.vis .hold::before { content: ''; position: absolute; inset: 0; background: var(--acc); transform-origin: left; animation: fill 2.6s var(--ease) infinite; }
+.vis .hold span { position: absolute; inset: 0; display: grid; place-items: center; color: var(--ink); } .vis .hold span.top { color: var(--acc-ink); animation: clip 2.6s var(--ease) infinite; }
+@keyframes clip { 0% { clip-path: inset(0 100% 0 0) } 60%, 100% { clip-path: inset(0 0 0 0) } }
+@keyframes fill { 0% { transform: scaleX(0) } 60%, 100% { transform: scaleX(1) } }
+
+.speed { margin-top: 44px; border-radius: 20px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(18px); overflow: hidden; }
+.speed table { width: 100%; border-collapse: collapse; font: 400 14px var(--mono); font-variant-numeric: tabular-nums; }
+.speed th { text-align: left; font: 400 11.5px var(--mono); letter-spacing: .08em; text-transform: uppercase; color: var(--t3); padding: 16px 22px; border-bottom: 1px solid var(--line); }
+.speed td { padding: 16px 22px; border-bottom: 1px solid var(--line); color: var(--t2); } .speed tr:last-child td { border-bottom: 0; }
+.speed td:first-child { color: var(--ink); } .speed td b { color: var(--ink); font-weight: 500; } .speed .ex { color: var(--t3); }
+.speed .bar { display: inline-block; height: 4px; border-radius: 2px; background: var(--acc); vertical-align: middle; margin-right: 10px; opacity: .8; transition: width 1s var(--ease); }
+.speedfoot { padding: 14px 22px; font: 400 12px var(--mono); color: var(--t3); border-top: 1px solid var(--line); display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+
+.feat { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-top: 48px; }
+.feat .card { padding: 22px; } .feat h4 { margin: 14px 0 6px; font: 500 15.5px var(--ui); letter-spacing: -.01em; } .feat p { margin: 0; font-size: 13.5px; color: var(--t2); }
+.feat .ic { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: rgba(var(--acc-rgb), .12); color: var(--acc); }
+.feat .ic svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+.keys { display: grid; grid-template-columns: 1.1fr 1fr; gap: 30px; align-items: center; margin-top: 10px; }
+.flow { display: grid; gap: 10px; }
+.flow div { display: grid; grid-template-columns: 36px 1fr; gap: 14px; align-items: center; padding: 16px 18px; border-radius: 16px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(18px); }
+.flow i { width: 36px; height: 36px; border-radius: 10px; display: grid; place-items: center; font: 500 12px var(--mono); color: var(--acc); background: rgba(var(--acc-rgb), .12); font-style: normal; }
+.flow b { font-weight: 500; display: block; } .flow span { color: var(--t2); font-size: 13.5px; }
+
+.faq { margin-top: 40px; border-top: 1px solid var(--line); }
+details { border-bottom: 1px solid var(--line); } summary { list-style: none; cursor: pointer; padding: 22px 0; display: flex; justify-content: space-between; gap: 20px; font: 500 17px var(--ui); letter-spacing: -.01em; }
+summary::-webkit-details-marker { display: none; } summary::after { content: '+'; font: 300 24px/1 var(--ui); color: var(--t3); transition: transform .3s var(--ease); } details[open] summary::after { transform: rotate(45deg); }
+details p { margin: -6px 0 22px; max-width: 760px; color: var(--t2); }
+
+.end { margin: 140px 0 0; padding: 70px 30px; border-radius: 28px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(18px); text-align: center; }
+.end h2 { margin: 0 auto; }
+footer { padding: 50px 0 60px; display: flex; justify-content: space-between; gap: 20px; flex-wrap: wrap; font: 400 12.5px var(--mono); color: var(--t3); }
+
+.rv { opacity: 0; transform: translateY(18px); filter: blur(6px); transition: opacity .9s var(--ease), transform .9s var(--ease), filter .9s var(--ease); } .rv.on { opacity: 1; transform: none; filter: none; }
+.hero .rv { transition-delay: var(--d, 0s); }
+@media (max-width: 960px) { .steps, .feat { grid-template-columns: 1fr 1fr; } .keys { grid-template-columns: 1fr; } nav.top a.l { display: none; } }
+@media (max-width: 640px) { .steps, .feat { grid-template-columns: 1fr; } .wrap, nav.top .in { padding-left: 16px; padding-right: 16px; } .speed th, .speed td { padding: 12px 12px; } .frow { grid-template-columns: 1fr auto; } .frow .w { display: none; } }
+@media (prefers-reduced-motion: reduce) { .rv { opacity: 1; transform: none; filter: none; } }
+</style>
+</head>
+<body>
+<nav class="top"><div class="in">
+  <a class="mark" href="/">dz<i>z</i></a>
+  <a class="l" href="#how">How it works</a><a class="l" href="#speed">Speed</a><a class="l" href="#keys">Keys</a><a class="l" href="#faq">FAQ</a>
+  <button class="ib" data-theme-picker title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg></button>
+  <a class="btn p sm" href="/app">Open dzz</a>
+</div></nav>
+
+<main class="wrap">
+  <section class="hero">
+    <span class="kick rv" style="--d:.05s"><b>pump.fun</b>custom contract addresses</span>
+    <h1 class="rv" style="--d:.12s">Launch at the address <em>you choose.</em></h1>
+    <p class="lede rv" style="--d:.2s">dzz finds a contract address that starts or ends exactly how you want, right in your browser, then launches your coin on pump.fun with it. No platform fee. The keys never leave your device.</p>
+    <div class="cta rv" style="--d:.28s"><a class="btn p" href="/app">Open dzz <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a class="btn g" href="#how">How it works</a></div>
+
+    <div class="forge rv" style="--d:.38s">
+      <div class="fcard">
+        <div class="fhead"><span>Searching on your device</span><span class="live"><i></i><span id="lvLabel">starting…</span></span></div>
+        <div class="cells" id="cells"></div>
+        <div class="fstats" id="fstats"><span>warming up the engine</span></div>
+        <div class="found" id="found"></div>
+      </div>
+      <div class="note">a live demo on 2 threads of this device · the app uses every core</div>
+    </div>
+  </section>
+
+  <section class="s" id="how">
+    <div class="eyebrow rv">How it works</div>
+    <h2 class="rv">Three steps. <em>One approval.</em></h2>
+    <div class="steps">
+      <div class="card rv"><div class="vis"><div class="typed">7xKp…Vq<b id="tw">moon</b></div></div><div class="n">01</div><h3>Choose the ending</h3><p>Type how the address should start, end, or both. Exact case, or any case for speed. Skip it and dzz uses pump.fun's own …pump format.</p></div>
+      <div class="card rv"><div class="vis"><div class="bars"><i style="animation-delay:-.1s"></i><i style="animation-delay:-.5s"></i><i style="animation-delay:-.9s"></i><i style="animation-delay:-.3s"></i><i style="animation-delay:-.7s"></i><i style="animation-delay:-1.1s"></i><i style="animation-delay:-.2s"></i><i style="animation-delay:-.6s"></i><i style="animation-delay:-1s"></i></div></div><div class="n">02</div><h3>dzz finds it</h3><p>Every core of your device searches millions of addresses a second. A match settles into place, and its key is kept in your browser only.</p></div>
+      <div class="card rv"><div class="vis"><div class="hold"><span>Hold to launch</span><span class="top">Hold to launch</span></div></div><div class="n">03</div><h3>Launch on pump.fun</h3><p>Picture, name, ticker, pair, creator fee. Hold to launch, approve once in your wallet, and the coin is live at your address.</p></div>
+    </div>
+  </section>
+
+  <section class="s" id="speed">
+    <div class="eyebrow rv">Speed</div>
+    <h2 class="rv">How long it takes, <em>measured on this device.</em></h2>
+    <p class="sub rv">These figures come from the live demo above, scaled to every core you have. Each extra character makes it 58 times longer; any case brings most letters back down by half.</p>
+    <div class="speed rv">
+      <table><thead><tr><th>Characters</th><th>Exact case</th><th>Any case (letters)</th></tr></thead><tbody id="speedRows"></tbody></table>
+      <div class="speedfoot"><span id="speedRate">measuring…</span><span>averages · some finds come sooner, some later</span></div>
+    </div>
+  </section>
+
+  <section class="s">
+    <div class="eyebrow rv">Built for launches</div>
+    <h2 class="rv">Everything a launch needs. <em>Nothing it doesn't.</em></h2>
+    <div class="feat">
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h10M4 17h7"/></svg></div><h4>Start, end, or both</h4><p>Up to 9 characters in total, matched exactly or in any case.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M8 12h8"/></svg></div><h4>Normal by default</h4><p>No custom address picked? You get pump.fun's own …pump format, found at launch.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M7 7h10v10H7z"/><path d="M3 12h4M17 12h4"/></svg></div><h4>Any pair</h4><p>SOL, HYPE, or any pump.fun coin as the quote.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18M7 8l5-5 5 5"/></svg></div><h4>Your creator fee</h4><p>Pump.fun's default, or 0.5 to 3 %, fixed at launch.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 4v16M12 12l7-6M12 12l-7 6"/></svg></div><h4>Fee splits on chain</h4><p>Share creator fees with up to 3 wallets, written into pump.fun's fee sharing.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M5 12l4 4 10-10"/></svg></div><h4>Optional dev buy</h4><p>Buy at launch in the same approval, or don't.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><rect x="4" y="5" width="16" height="14" rx="3"/><path d="M4 15l5-4 4 3 3-2 4 3"/></svg></div><h4>Permanent metadata</h4><p>Picture and details stored for good, served fast so terminals show them at once.</p></div>
+      <div class="card rv"><div class="ic"><svg viewBox="0 0 24 24"><path d="M12 3l7 4v5c0 4-3 7-7 9-4-2-7-5-7-9V7z"/></svg></div><h4>No platform fee</h4><p>You pay pump.fun's account rent, about 0.0055 SOL, and nothing to dzz.</p></div>
+    </div>
+  </section>
+
+  <section class="s" id="keys">
+    <div class="keys">
+      <div>
+        <div class="eyebrow rv">Your keys</div>
+        <h2 class="rv">Found here. <em>Signed here.</em> Never sent.</h2>
+        <p class="sub rv">An address is only yours if nobody else has its key. dzz searches inside your browser, keeps each key on your device, and signs the launch right here. No server ever sees a key.</p>
+      </div>
+      <div class="flow">
+        <div class="rv"><i>01</i><span><b>Search in your browser</b>WebAssembly on every core, nothing uploaded</span></div>
+        <div class="rv"><i>02</i><span><b>Key stays on this device</b>kept in this browser, deleted when you clear it</span></div>
+        <div class="rv"><i>03</i><span><b>Signed before it leaves</b>every signature is checked against the address first</span></div>
+        <div class="rv"><i>04</i><span><b>Your wallet pays and approves</b>one approval, straight to Solana</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="s" id="faq">
+    <div class="eyebrow rv">FAQ</div>
+    <h2 class="rv">Questions, <em>answered.</em></h2>
+    <div class="faq rv">
+      <details><summary>What does dzz cost?</summary><p>Nothing. A launch costs pump.fun's account rent, about 0.0055 SOL paired with SOL (0.007 with HYPE, 0.011 with a fee split), plus any dev buy you choose.</p></details>
+      <details><summary>How long is too long?</summary><p>On a modern PC, 5 characters take about a minute exact or seconds in any case, and 6 in any case a minute or two. 7 exact is days. The speed table above is measured on your own device.</p></details>
+      <details><summary>Is the coin a normal pump.fun coin?</summary><p>Yes. dzz uses pump.fun's own program and create instruction. The coin trades on pump.fun's curve and graduates the same way; only its address is your choice.</p></details>
+      <details><summary>Where are the keys kept?</summary><p>In this browser only. Clearing the site's data deletes found addresses you haven't used. A launched coin no longer needs its key.</p></details>
+      <details><summary>Which characters can I use?</summary><p>Solana addresses use base58: no 0, O, I or lowercase l. In any case mode, an l matches L and an o matches o.</p></details>
+      <details><summary>Which wallets work?</summary><p>Phantom, Solflare and Backpack in the browser.</p></details>
+    </div>
+  </section>
+
+  <section class="end rv">
+    <h2>Your next coin, <em>at your address.</em></h2>
+    <div class="cta" style="margin-top:28px"><a class="btn p" href="/app">Open dzz <svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+  </section>
+
+  <footer><span>dzz · custom-CA launches on pump.fun</span><span>Independent tool. Not affiliated with pump.fun.</span></footer>
+</main>
+
+<script src="/assets/bg.js"></script>
+<script src="/assets/engine.js"></script>
+<script>
+const $ = (id) => document.getElementById(id), LEN = 44
+const big = (n) => (n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(1) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(Math.round(n)))
+const dur = (s) => (!isFinite(s) ? '–' : s < 1 ? 'under a second' : s < 90 ? Math.round(s) + ' s' : s < 5400 ? Math.round(s / 60) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : Math.round(s / 86400) + ' days')
+
+addEventListener('scroll', () => document.querySelector('nav.top').classList.toggle('stuck', scrollY > 20), { passive: true })
+// reveal on scroll
+const io = new IntersectionObserver((es) => es.forEach((e) => e.isIntersecting && (e.target.classList.add('on'), io.unobserve(e.target))), { threshold: .12 })
+document.querySelectorAll('.rv').forEach((el) => io.observe(el))
+requestAnimationFrame(() => document.querySelectorAll('.hero .rv').forEach((el) => el.classList.add('on')))
+
+// typing demo in step 01
+;(() => { const words = ['moon', 'cook', 'send', 'gm', 'pump', 'dzz'], el = $('tw'); let w = 0, i = 0, del = false
+  setInterval(() => { const t = words[w]; if (!del) { i++; if (i > t.length) { del = true; i = t.length + 6 } } else { i--; if (i <= 0) { del = false; w = (w + 1) % words.length; i = 0 } } el.textContent = t.slice(0, Math.min(i, t.length)) }, 160) })()
+
+// ---------------------------------------------------------------- the live forge: real searching, 2 threads, any case
+const cells = []
+for (let i = 0; i < LEN; i++) { const s = document.createElement('span'); s.textContent = DZZ.ALPHA[(Math.random() * 58) | 0]; $('cells').appendChild(s); cells.push({ el: s, target: s.textContent, rolls: 0, next: 0 }) }
+const rnd = () => DZZ.ALPHA[(Math.random() * 58) | 0]
+function roll(str, stagger, rolls, lockAll, upto = LEN) {
+  const now = performance.now()
+  for (let i = 0; i < upto; i++) { const c = cells[i], t = str[i] || ' '; c.target = t; c.rolls = rolls + ((Math.random() * 2) | 0); c.next = now + i * stagger; c.el.classList.toggle('lock', !!lockAll) }
+}
+;(function frame(now) { for (const c of cells) if (c.rolls > 0 && now >= c.next) { c.rolls--; c.el.textContent = c.rolls ? rnd() : c.target; c.next = now + 40; c.el.classList.toggle('set', !c.rolls) } requestAnimationFrame(frame) })(0)
+const WORDS = ['dzz', 'moon', 'cook', 'send', 'pump', 'gm', 'based', 'ape', 'wagmi']
+let eng = null, tried = 0, t0 = 0, rate = 0, word = '', since = 0, visible = true, busy = false
+function setPattern(wd) {
+  cells.forEach((c, i) => c.el.classList.toggle('pat', i >= LEN - wd.length))
+  for (let i = 0; i < wd.length; i++) { const c = cells[LEN - wd.length + i]; c.target = wd[i]; c.rolls = 4; c.next = performance.now() + i * 60 }
+}
+async function next() {
+  if (!eng || !visible) return
+  word = WORDS[(WORDS.indexOf(word) + 1) % WORDS.length]; since = performance.now(); busy = true
+  $('lvLabel').textContent = `looking for …${word}`; setPattern(word)
+  eng.start({ suffix: word, ci: true }, {
+    onTick(n, sample) {
+      tried += n; rate = tried / ((performance.now() - t0) / 1000)
+      const s = sample.slice(0, LEN - word.length).padEnd(LEN - word.length, ' ')
+      roll(s, 3, 2, false, LEN - word.length)
+      $('fstats').innerHTML = `<span><b>${big(tried)}</b> checked</span><span><b>${big(rate)}</b> / s on 2 threads</span><span>any case · ends in <b>${word}</b></span>`
+      speedTable()
+    },
+    onHit({ mint }) {
+      if (!busy) return; busy = false; eng.stop(); window.DZZBG?.flash()
+      roll(mint.padEnd(LEN, ' '), 14, 5, true); cells.forEach((c, i) => c.el.classList.toggle('pat', i >= mint.length - word.length && i < mint.length))
+      const secs = (performance.now() - since) / 1000
+      const row = document.createElement('div'); row.className = 'frow'
+      row.innerHTML = `<span class="w">…${word}</span><code>${mint.slice(0, -word.length)}<b>${mint.slice(-word.length)}</b></code><span class="t">${secs < 1 ? '<1' : secs.toFixed(1)} s</span>`
+      $('found').prepend(row); while ($('found').children.length > 5) $('found').lastChild.remove()
+      setTimeout(next, 2200)
+    },
+  })
+}
+// only while the hero can be seen, and only on 2 threads: a demo, not a space heater
+new IntersectionObserver((es) => { visible = es[0].isIntersecting; if (!eng) return; if (!visible) { eng.stop(); busy = false } else if (!busy) next() }, { threshold: .05 }).observe($('cells'))
+DZZ.engine({ threads: 2 }).then((e) => { eng = e; t0 = performance.now(); next() }).catch(() => { $('fstats').innerHTML = '<span>this browser cannot run the engine</span>' })
+
+// the speed table: this device, every core
+function speedTable() {
+  const cores = navigator.hardwareConcurrency || 4, full = rate / 2 * Math.max(1, cores - 1)
+  if (!full) return
+  const rows = [3, 4, 5, 6, 7].map((n) => { const ex = Math.pow(58, n) / full, ci = Math.pow(29, n) / full; return { n, ex, ci } })
+  const max = Math.log10(rows[rows.length - 1].ex + 1)
+  $('speedRows').innerHTML = rows.map((r) => `<tr><td>${r.n} characters</td><td><span class="bar" style="width:${Math.max(4, Math.log10(r.ex + 1) / max * 90)}px"></span><b>${dur(r.ex)}</b></td><td><span class="bar" style="width:${Math.max(4, Math.log10(r.ci + 1) / max * 90)}px"></span><b>${dur(r.ci)}</b></td></tr>`).join('')
+  $('speedRate').textContent = `about ${big(full)} addresses / s on ${cores - 1} of ${cores} threads here`
+}
+</script>
+</body>
+</html>

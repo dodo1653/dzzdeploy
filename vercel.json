@@ -1,0 +1,7 @@
+{
+  "cleanUrls": true,
+  "headers": [
+    { "source": "/assets/(.*)", "headers": [{ "key": "cache-control", "value": "public, max-age=3600" }] },
+    { "source": "/(m|i)/(.*)", "headers": [{ "key": "cache-control", "value": "public, max-age=31536000, immutable" }, { "key": "access-control-allow-origin", "value": "*" }] }
+  ]
+}
