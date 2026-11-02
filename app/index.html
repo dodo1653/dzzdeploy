@@ -154,6 +154,17 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
 .done .t { font: italic 400 30px/1.05 var(--serif); } .done code { display: block; margin: 10px 0 16px; font: 500 15px var(--mono); word-break: break-all; color: var(--ink); } .done code b { color: var(--acc); }
 .done a { color: var(--t2); text-decoration: none; margin-right: 18px; font-size: 13px; border-bottom: 1px solid var(--line2); padding-bottom: 1px; transition: color .2s, border-color .2s; } .done a:hover { color: var(--acc); border-color: var(--acc); }
 
+/* launched with dzz: the public list */
+.lrow { display: grid; grid-template-columns: 44px minmax(0, 1.2fr) minmax(0, 1.6fr) 90px 70px auto; gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.lrow:first-child { border-top: 0; } .lrow img, .lrow .ph { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; background: var(--bg2); display: grid; place-items: center; font: 600 15px var(--mono); color: var(--t3); }
+.lrow b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lrow b small { color: var(--t3); font: 400 12px var(--mono); margin-left: 6px; }
+.ca { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; padding: 7px 8px 7px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); cursor: pointer; font: 500 12.5px var(--mono); color: var(--t2); transition: border-color .2s, color .2s; }
+.ca:hover { border-color: rgba(var(--acc-rgb), .5); color: var(--ink); } .ca code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ca code em { font-style: normal; color: var(--acc); }
+.ca span { flex: none; font: 500 11px var(--ui); padding: 3px 8px; border-radius: 7px; background: var(--panel2); color: var(--t2); } .ca.ok span { background: var(--acc); color: var(--acc-ink); }
+.lrow .mc { font: 500 13px var(--mono); color: var(--ink); text-align: right; } .lrow .age { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
+.lrow .lk { display: flex; gap: 10px; font-size: 12.5px; } .lrow .lk a { color: var(--t3); text-decoration: none; } .lrow .lk a:hover { color: var(--acc); }
+.lempty { color: var(--t3); font: 400 13px var(--mono); padding: 18px 0 6px; }
+@media (max-width: 760px) { .lrow { grid-template-columns: 40px 1fr auto; } .lrow .ca, .lrow .age, .lrow .lk { grid-column: 2 / -1; } }
 /* history + settings */
 .hrow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
 .hrow:first-child { border-top: 0; } .hrow img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--bg2); }
@@ -245,6 +256,7 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
       <div id="done"></div>
     </div>
     <div class="card wide" id="histCard" hidden><h3>Launched <small id="histN"></small><em>yours</em></h3><div id="hist"></div></div>
+    <div class="card wide" id="pubCard"><h3>Launched with dzz <small id="pubN"></small><em>everyone's</em></h3><div id="pub"><div class="lempty">loading…</div></div></div>
   </section>
 </main>
 
@@ -598,6 +610,7 @@ async function launch() {
     const k = st?.keys.find((x) => x.mint === r.mint)
     $('done').innerHTML = `<div class="done"><div class="t">$${esc(symbol)} is live.</div><code>${mark(r.mint, k?.pattern)}</code>
       <a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a><a href="https://axiom.trade/meme/${esc(r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
+    registerLaunch(r.mint, r.signature)
     $('copyCa').onclick = (e) => { e.preventDefault(); navigator.clipboard.writeText(r.mint); e.target.textContent = 'Copied'; S.click() }
   } catch (e) {
     let m = String(e?.message || e)
@@ -614,6 +627,44 @@ async function launch() {
 $('setBtn').onclick = (e) => { e.stopPropagation(); $('settings').classList.toggle('on'); S.soft() }
 addEventListener('click', (e) => { if (!e.target.closest('#settings') && !e.target.closest('#setBtn')) $('settings').classList.remove('on') })
 $('sSave').onclick = async () => { const r = await post('settings', { rpc: $('sRpc').value.trim(), threads: +$('sThreads').value }); $('sNote').textContent = r.error || 'Saved'; S.click(); render(r) }
+
+// ---------------------------------------------------------------- launched with dzz: every verified dzz launch, with its CA
+const DZZ_API = 'https://dzzdeploy.vercel.app/api/launched'
+const ago = (t) => { const s = Math.max(1, (Date.now() - t) / 1000); return s < 60 ? Math.round(s) + 's' : s < 3600 ? Math.round(s / 60) + 'm' : s < 86400 ? Math.round(s / 3600) + 'h' : Math.round(s / 86400) + 'd' }
+const usd = (v) => (v == null ? '–' : '$' + (v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : Math.round(v)))
+async function loadPublic() {
+  let coins = []
+  try { coins = (await (await fetch(DZZ_API, { cache: 'no-store' })).json()).coins || [] } catch { $('pub').innerHTML = '<div class="lempty">could not load the list right now</div>'; return }
+  $('pubN').textContent = coins.length || ''
+  if (!coins.length) { $('pub').innerHTML = '<div class="lempty">no coins yet · yours can be the first</div>'; return }
+  const mcs = {}
+  for (let i = 0; i < Math.min(coins.length, 90); i += 30) {
+    try { const pairs = await (await fetch('https://api.dexscreener.com/tokens/v1/solana/' + coins.slice(i, i + 30).map((c) => c.mint).join(','))).json(); for (const p of pairs || []) { const m = p.baseToken?.address; if (m && (mcs[m] == null || (p.marketCap || 0) > mcs[m])) mcs[m] = p.marketCap || p.fdv } } catch {}
+  }
+  $('pub').innerHTML = coins.slice(0, 60).map((c) => {
+    const k = c.mint, tail = k.slice(-4)
+    return `<div class="lrow">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}
+      <b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b>
+      <button class="ca" data-ca="${esc(k)}" title="Copy CA"><code>${esc(k.slice(0, 6))}…${esc(k.slice(-12, -4))}<em>${esc(tail)}</em></code><span>Copy CA</span></button>
+      <span class="mc">${usd(mcs[k])}</span><span class="age">${ago(c.at)}</span>
+      <span class="lk"><a href="https://pump.fun/coin/${esc(k)}" target="_blank" rel="noopener">pump</a><a href="https://axiom.trade/meme/${esc(k)}" target="_blank" rel="noopener">axiom</a><a href="https://dexscreener.com/solana/${esc(k)}" target="_blank" rel="noopener">dex</a></span></div>`
+  }).join('')
+}
+$('pub').addEventListener('click', async (e) => {
+  const b = e.target.closest('.ca'); if (!b) return
+  try { await navigator.clipboard.writeText(b.dataset.ca) } catch { const t = document.createElement('textarea'); t.value = b.dataset.ca; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove() }
+  b.classList.add('ok'); b.querySelector('span').textContent = 'Copied'; S.click()
+  setTimeout(() => { b.classList.remove('ok'); b.querySelector('span').textContent = 'Copy CA' }, 1400)
+})
+// after a launch: hand the coin to the public list (the server checks it on chain before listing it)
+async function registerLaunch(mint, signature) {
+  for (let i = 0; i < 3; i++) {
+    try { const r = await (await fetch(DZZ_API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mint, signature }) })).json(); if (r.ok) break } catch {}
+    await new Promise((ok) => setTimeout(ok, 8000))
+  }
+  loadPublic()
+}
+loadPublic(); setInterval(loadPublic, 60000)
 summary(); stats()
 </script>
 </body>

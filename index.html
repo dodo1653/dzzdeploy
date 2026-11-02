@@ -116,6 +116,15 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
 .chain { display: flex; gap: 8px; flex-wrap: wrap; } .chain span { font: 400 11px var(--mono); color: var(--t3); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); transition: all .4s var(--ease); }
 .chain span.on { color: var(--acc-ink); background: var(--acc); border-color: var(--acc); }
 
+/* the launched list */
+.pubgrid { display: grid; gap: 8px; width: 100%; max-width: 640px; }
+.prow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); }
+.prow img, .prow .ph { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; background: var(--panel2); display: grid; place-items: center; font: 900 16px var(--dot); color: var(--t3); }
+.prow b { display: block; font: 500 15px var(--ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .prow b small { color: var(--t3); font: 400 12px var(--mono); margin-left: 6px; }
+.prow code { display: block; font: 400 12px var(--mono); color: var(--t3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .prow code em { color: var(--acc); font-style: normal; }
+.cp { all: unset; cursor: pointer; font: 400 11px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line2); color: var(--t2); transition: all .2s; }
+.cp:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), .6); } .cp.ok { background: var(--acc); color: var(--acc-ink); border-color: var(--acc); }
+.pubempty { font: 400 13px var(--mono); color: var(--t3); padding: 20px 0; }
 /* scene 4: spec sheet */
 .spec { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 60px; align-items: center; }
 .spec h2 { margin: 22px 0 0; font: 900 clamp(34px, 4.4vw, 64px)/.95 var(--dot); text-transform: uppercase; }
@@ -197,6 +206,17 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
     </div>
   </section>
 
+  <!-- live -->
+  <section class="scene step" data-name="Launched">
+    <div>
+      <div class="label">live list</div>
+      <h2 style="font:900 clamp(34px,4.4vw,64px)/.95 var(--dot);text-transform:uppercase;margin-top:22px">Launched with <span style="color:var(--acc);text-shadow:0 0 26px rgba(var(--acc-rgb),.5)">dzz</span></h2>
+      <p>Every coin here was launched with dzz and checked on Solana before it was listed. Copy a CA in one click.</p>
+      <div class="facts"><div class="fact">listed<b id="pubCount">–</b></div><div class="fact">verified<b>on chain, per launch</b></div></div>
+    </div>
+    <div class="vis"><div class="pubgrid" id="pubList"><div class="pubempty">loading…</div></div></div>
+  </section>
+
   <!-- 4 -->
   <section class="scene spec" data-name="Spec">
     <div>
@@ -220,7 +240,7 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
   </section>
 </div>
 
-<div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div>
+<div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div>
 
 <script src="/assets/bg.js"></script>
 <script src="/assets/engine.js"></script>
@@ -254,7 +274,7 @@ function stage() {
   requestAnimationFrame(stage)
 }
 requestAnimationFrame(stage)
-addEventListener('keydown', (e) => { if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(Math.min(4, Math.round(p) + 1)) } if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(Math.max(0, Math.round(p) - 1)) } })
+addEventListener('keydown', (e) => { if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(Math.min(scenes.length - 1, Math.round(p) + 1)) } if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(Math.max(0, Math.round(p) - 1)) } })
 
 // ---------------------------------------------------------------- LED boards
 function board(el, n) {
@@ -330,6 +350,22 @@ function next() {
 }
 document.addEventListener('visibilitychange', () => { if (!eng) return; if (document.hidden) { eng.stop(); busy = false } else if (!busy) next() })
 DZZ.engine({ threads: 2 }).then((e) => { eng = e; t0 = performance.now(); next() }).catch(() => { $('heroSub').textContent = 'this browser cannot run the engine' })
+
+// the live list: coins launched with dzz (verified on chain by /api/launched), copy a CA in one click
+async function pubList() {
+  let coins = []
+  try { coins = (await (await fetch('/api/launched')).json()).coins || [] } catch {}
+  $('pubCount').textContent = coins.length ? coins.length + (coins.length === 1 ? ' coin' : ' coins') : 'none yet'
+  const esc = (x) => String(x ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
+  $('pubList').innerHTML = coins.length ? coins.slice(0, 6).map((c) => `<div class="prow">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b><code>${esc(c.mint.slice(0, 8))}…${esc(c.mint.slice(-10, -4))}<em>${esc(c.mint.slice(-4))}</em></code></div><button class="cp" data-ca="${esc(c.mint)}">Copy CA</button></div>`).join('')
+    : '<div class="pubempty">no coins yet · the first one launched with dzz shows up here</div>'
+}
+$('pubList').addEventListener('click', async (e) => {
+  const b = e.target.closest('.cp'); if (!b) return
+  try { await navigator.clipboard.writeText(b.dataset.ca) } catch {}
+  b.classList.add('ok'); b.textContent = 'Copied'; setTimeout(() => { b.classList.remove('ok'); b.textContent = 'Copy CA' }, 1400)
+})
+pubList(); setInterval(pubList, 60000)
 </script>
 </body>
 </html>
