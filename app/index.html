@@ -118,6 +118,16 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
 .drop b { display: block; font-weight: 500; } .drop small { color: var(--t3); font-size: 12px; }
 .row2 { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
 .hint { color: var(--t3); font-size: 12px; margin: 0; }
+/* any-token pair picker: every token pump.fun lists as a pair, read live from its program */
+.tp { display: grid; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg2); }
+.tp .tbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; } .tp .tbar .in { flex: 1; min-width: 180px; }
+.tp .tlist { max-height: 264px; overflow: auto; display: grid; gap: 2px; margin: 0 -4px; padding: 0 4px; }
+.tp .tok { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
+.tp .tok:hover { background: var(--panel2); } .tp .tok.on { border-color: rgba(var(--acc-rgb), .55); background: var(--panel2); }
+.tp .tok img, .tp .tok .ph { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: var(--panel2); }
+.tp .tok b { display: block; font: 600 13px var(--ui); color: var(--ink); } .tp .tok small { display: block; font: 400 12px var(--ui); color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp .tok span { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
+.tp .empty { color: var(--t3); font: 400 12.5px var(--mono); padding: 10px; }
 .split { display: grid; grid-template-columns: minmax(0, 1fr) 84px 38px; gap: 8px; align-items: center; animation: chipIn .5s var(--ease) both; }
 .ghost { border: 1px dashed var(--line2); background: none; border-radius: 10px; padding: 9px 12px; color: var(--t3); font-size: 12.5px; cursor: pointer; transition: color .2s, border-color .2s; }
 .ghost:hover { color: var(--ink); border-color: var(--t4); }
@@ -234,12 +244,14 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
     <div class="card">
       <h3>The market <small>03</small><em>set it</em></h3>
       <div class="grid" style="gap:18px">
-        <div class="fl">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="COIN">A pump.fun coin</button></div>
-          <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden></div>
-        <div class="fl">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div></div>
+        <div class="fl">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
+          <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden>
+          <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
+            <div class="tlist" id="tl"><div class="empty">loading pump.fun's list…</div></div></div></div>
+        <div class="fl">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint" id="feeNote"></p></div>
         <div class="row2">
           <label class="fl" style="width:180px"><span>Dev buy, <span id="unit">SOL</span></span><input class="in mono" id="buy" type="number" min="0" step="0.01" value="0"></label>
-          <p class="hint" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. A HYPE buy is paid in SOL in the same approval.</p>
+          <p class="hint" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.</p>
         </div>
         <div class="fl">Fee split <span style="color:var(--t4)">optional · written on chain at launch · the rest is yours</span>
           <div id="splits" class="grid" style="gap:8px"></div>
@@ -440,7 +452,32 @@ function seg(id, onPick) {
 }
 seg('ci', (v) => { ci = v === '1'; stats() })
 seg('cnt', (v) => { count = +v; stats() })
-seg('pair', (v) => { pair = v; $('qc').hidden = v !== 'COIN'; $('unit').textContent = v === 'COIN' ? 'that coin' : v; summary() })
+seg('pair', (v) => { pair = v; $('qc').hidden = v !== 'COIN'; $('tp').hidden = v !== 'TOKEN'; if (v === 'TOKEN') loadPairs(); pairUi(); summary() })
+// ---------------------------------------------------------------- any token pump.fun lists as a pair
+let tokenPick = null, pairList = null, tkind = 'All', solUsd = 0
+const pairLabel = () => (pair === 'COIN' ? 'a pump.fun coin' : pair === 'TOKEN' ? (tokenPick ? tokenPick.symbol : 'a token') : pair)
+function pairUi() {
+  $('unit').textContent = pair === 'COIN' ? 'that coin' : pair === 'TOKEN' ? (tokenPick ? tokenPick.symbol : 'token') : pair
+  $('feeNote').textContent = pair === 'SOL' ? "On a SOL pair pump.fun uses its standard creator fee; a set rate applies to token pairs." : ''
+}
+async function loadPairs() {
+  if (pairList) return drawPairs()
+  try {
+    pairList = await window.PumpLaunch.listPairs()
+    try { solUsd = (await (await fetch('https://lite-api.jup.ag/tokens/v2/search?query=So11111111111111111111111111111111111111112')).json())[0].usdPrice || 0 } catch {}
+    drawPairs()
+  } catch (e) { pairList = null; $('tl').innerHTML = '<div class="empty">could not read the pair list right now, try again</div>' }
+}
+const usdK = (v) => (v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? '$' + (v / 1e3).toFixed(0) + 'K' : '$' + Math.round(v))
+function drawPairs() {
+  const q = $('tq').value.trim().toLowerCase()
+  const rows = pairList.filter((t) => (tkind === 'All' || t.kind === tkind) && (!q || (t.symbol + ' ' + t.name + ' ' + t.mint).toLowerCase().includes(q))).slice(0, 120)
+  $('tl').innerHTML = rows.length ? rows.map((t) => `<div class="tok${tokenPick?.mint === t.mint ? ' on' : ''}" data-m="${t.mint}">${t.icon ? `<img src="${esc(t.icon)}" alt="" loading="lazy">` : '<i class="ph"></i>'}<div><b>${esc(t.symbol)}</b><small>${esc(t.name || t.mint)}</small></div><span>${t.kind}${t.liquidity ? ' · ' + usdK(t.liquidity) : ''}</span></div>`).join('') : '<div class="empty">nothing matches</div>'
+}
+$('tq').addEventListener('input', () => pairList && drawPairs())
+seg('tk', (v) => { tkind = v; pairList && drawPairs() })
+$('tl').addEventListener('click', (e) => { const r = e.target.closest('.tok'); if (!r) return; tokenPick = pairList.find((t) => t.mint === r.dataset.m); S.click(); drawPairs(); pairUi(); summary() })
+pairUi()
 seg('fee', (v) => { feeBps = +v; summary() })
 
 // ---------------------------------------------------------------- odds and the live meter
@@ -538,7 +575,7 @@ const splits = () => [...$('splits').children].map((d) => { const [a, p] = d.que
 function summary() {
   const sp = splits(), others = sp.reduce((a, s) => a + s.shareBps, 0) / 100, m = st?.selected, k = st?.keys.find((x) => x.mint === m)
   const name = $('name').value.trim(), sym = $('sym').value.trim()
-  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>paired with <b>${pair === 'COIN' ? 'a pump.fun coin' : pair}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
+  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
 }
 
 // ---------------------------------------------------------------- hold to launch
@@ -555,7 +592,7 @@ async function balance() {
 }
 setInterval(balance, 20000)
 // what this launch needs: account rent (measured: SOL pair 0.0055, HYPE 0.0070, a fee split +0.0059), fees, a margin, the dev buy
-const needSol = () => { const buy = +$('buy').value || 0; return (pair === 'HYPE' ? 0.0071 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : 0) }
+const needSol = () => { const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
 // running out of SOL is its own, plainly named error: a banner with what the launch needs and what the wallet has
 const SHORT_RE = /"Custom":1}|insufficient (funds|lamports)|InsufficientFunds|no record of a prior credit|AccountNotFound|ResultWithNegativeLamports/i
 function showShort(need, have) {
@@ -575,6 +612,7 @@ function check() {
   const sp = splits(), buy = +$('buy').value || 0
   if (sp.reduce((a, s) => a + s.shareBps, 0) >= 10000) return 'the split has to leave you something'
   if (sp.length && buy > 0) return "a fee split and a dev buy don't fit in one transaction: pick one"
+  if (pair === 'TOKEN' && !tokenPick) return 'pick the token to pair with'
   if (pair === 'COIN' && buy > 0) return 'no dev buy on a coin paired with another pump.fun coin'
   if (pair === 'COIN' && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test($('qc').value.trim())) return "paste the CA of the coin to pair with"
 }
@@ -601,7 +639,7 @@ async function launch() {
     if (!st?.selected) { note('finding a normal …pump address'); setTimeout(poll, 300) }
     const mint = await L.mintFor()
     const r = await PumpLaunch.launch({ mint, signMint: (msg) => L.sign(mint, msg), owner: sol, image: pic64, name, symbol, description: $('desc').value.trim(), twitter: $('x').value, website: $('web').value, telegram: $('tg').value,
-      pair: pair === 'COIN' ? 'SOL' : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, (t) => {
+      pair: pair === 'COIN' ? 'SOL' : pair === 'TOKEN' ? tokenPick.mint : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, (t) => {
       note(t)
       if (/approve|sign/i.test(t) && cur === 'meta') { step('meta', 'ok'); step((cur = 'sign'), 'run'); S.soft() }
       if (/send/i.test(t) && cur !== 'live') { step('meta', 'ok'); step('sign', 'ok'); step((cur = 'live'), 'run'); S.soft() }
