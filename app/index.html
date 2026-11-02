@@ -119,6 +119,7 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
 .row2 { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
 .hint { color: var(--t3); font-size: 12px; margin: 0; }
 /* any-token pair picker: every token pump.fun lists as a pair, read live from its program */
+[hidden] { display: none !important; }
 .tp { display: grid; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg2); }
 .tp .tbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; } .tp .tbar .in { flex: 1; min-width: 180px; }
 .tp .tlist { max-height: 264px; overflow: auto; display: grid; gap: 2px; margin: 0 -4px; padding: 0 4px; }
@@ -460,14 +461,25 @@ function pairUi() {
   $('unit').textContent = pair === 'COIN' ? 'that coin' : pair === 'TOKEN' ? (tokenPick ? tokenPick.symbol : 'token') : pair
   $('feeNote').textContent = pair === 'SOL' ? "On a SOL pair pump.fun uses its standard creator fee; a set rate applies to token pairs." : ''
 }
-async function loadPairs() {
-  if (pairList) return drawPairs()
-  try {
-    pairList = await window.PumpLaunch.listPairs()
-    try { solUsd = (await (await fetch('https://lite-api.jup.ag/tokens/v2/search?query=So11111111111111111111111111111111111111112')).json())[0].usdPrice || 0 } catch {}
-    drawPairs()
-  } catch (e) { pairList = null; $('tl').innerHTML = '<div class="empty">could not read the pair list right now, try again</div>' }
+// the list shows at once from this browser's last copy or the site's snapshot, then refreshes live from the chain
+const PAIRS_URL = '/assets/pairs.json'
+let pairsLive = null, pairsQuick = null
+const pairsCache = () => { try { const c = JSON.parse(localStorage.getItem('dzz-pairs') || 'null'); return c?.list?.length ? c.list : null } catch { return null } }
+function quickPairs() {
+  if (!pairsQuick) pairsQuick = Promise.resolve(pairsCache() || fetch(PAIRS_URL).then((r) => r.json()).then((j) => j.list?.length ? j.list : null).catch(() => null))
+    .then((l) => { if (l && !pairList) pairList = l; return l })
+  return pairsQuick
 }
+async function loadPairs() {
+  if (!solUsd) fetch('https://lite-api.jup.ag/tokens/v2/search?query=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => { solUsd = j[0]?.usdPrice || 0; summary() }).catch(() => {})
+  await quickPairs(); if (pairList) drawPairs()
+  pairsLive ||= window.PumpLaunch.listPairs().then((l) => {
+    pairList = l; try { localStorage.setItem('dzz-pairs', JSON.stringify({ at: Date.now(), list: l })) } catch {}
+    if (tokenPick) tokenPick = l.find((t) => t.mint === tokenPick.mint) || tokenPick
+    if (pair === 'TOKEN') { drawPairs(); pairUi(); summary() }
+  }).catch(() => { pairsLive = null; if (!pairList) $('tl').innerHTML = '<div class="empty">could not read the pair list right now, try again</div>' })
+}
+;(window.requestIdleCallback || setTimeout)(() => quickPairs())
 const usdK = (v) => (v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? '$' + (v / 1e3).toFixed(0) + 'K' : '$' + Math.round(v))
 function drawPairs() {
   const q = $('tq').value.trim().toLowerCase()
@@ -476,7 +488,11 @@ function drawPairs() {
 }
 $('tq').addEventListener('input', () => pairList && drawPairs())
 seg('tk', (v) => { tkind = v; pairList && drawPairs() })
-$('tl').addEventListener('click', (e) => { const r = e.target.closest('.tok'); if (!r) return; tokenPick = pairList.find((t) => t.mint === r.dataset.m); S.click(); drawPairs(); pairUi(); summary() })
+// click a picked token again to unpick it
+$('tl').addEventListener('click', (e) => { const r = e.target.closest('.tok'); if (!r) return; tokenPick = tokenPick?.mint === r.dataset.m ? null : pairList.find((t) => t.mint === r.dataset.m); S.click(); drawPairs(); pairUi(); summary() })
+// click an active option again to undo it: a kind tab goes back to All, a pair back to SOL
+const undoSeg = (id, base) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && b.classList.contains('on') && b.dataset.v !== base) setTimeout(() => $(id).querySelector(`[data-v="${base}"]`).click()) }, true)
+undoSeg('tk', 'All'); undoSeg('pair', 'SOL')
 pairUi()
 seg('fee', (v) => { feeBps = +v; summary() })
 
