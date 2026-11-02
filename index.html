@@ -139,9 +139,20 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
 .cue { position: fixed; z-index: 30; left: 50%; bottom: 22px; translate: -50% 0; font: 400 12px var(--mono); color: var(--t3); letter-spacing: .08em; text-transform: uppercase; display: grid; justify-items: center; gap: 8px; transition: opacity .4s; }
 .cue i { width: 1px; height: 26px; background: linear-gradient(var(--t3), transparent); animation: drip 2s ease-in-out infinite; transform-origin: top; } @keyframes drip { 0% { scale: 1 0 } 50% { scale: 1 1 } 100% { scale: 1 1; opacity: 0 } }
 
+/* the official coin: $dzz, launched with dzz at a Dzz…dzz address */
+.tok { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; height: 34px; padding: 0 6px 0 14px; border-radius: 12px; border: 1px solid var(--line2); background: var(--panel); backdrop-filter: blur(14px); font: 400 13px var(--mono); color: var(--t2); transition: border-color .2s, color .2s; }
+.tok:hover { border-color: rgba(var(--acc-rgb), .5); color: var(--ink); } .tok b { color: var(--ink); font-weight: 500; } .tok em { font-style: normal; color: var(--acc); }
+.tok span { font: 500 12px var(--ui); padding: 4px 9px; border-radius: 8px; background: var(--panel2); color: var(--t2); } .tok.ok span { background: var(--acc); color: var(--acc-ink); }
+.official { margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 16px; font: 400 13px var(--mono); color: var(--t3); }
+.official a { color: var(--t2); text-decoration: none; border-bottom: 1px solid var(--line2); } .official a:hover { color: var(--ink); border-color: var(--acc); }
+.official code { color: var(--ink); font: 500 13px var(--mono); } .official code em { font-style: normal; color: var(--acc); }
 @media (max-width: 980px) {
   .stage, .scene { padding: 0; inset: 80px 20px 60px 20px; } .step, .spec { grid-template-columns: 1fr; gap: 26px; } .rail, .foot { display: none; }
-  .num { font-size: 64px; } .coin, .holddemo { min-width: 0; width: 100%; } .rate { display: none; } .bar { padding: 16px 18px; }
+  .num { font-size: 64px; } .coin, .holddemo { min-width: 0; width: 100%; } .rate { display: none; } .bar { padding: 16px 18px; } .tok code { display: none; } .official code { font-size: 11.5px; }
+}
+@media (max-width: 600px) {
+  .h { font-size: 7.1vw; } .s0 .board { padding: 14px 14px; } .s0 .board .cells { font-size: 2.55vw !important; } .lede { font-size: 15px; }
+  .bar { gap: 10px; } .tok, .key.sm { white-space: nowrap; } .bar .tok { padding-left: 12px; } .bar .round { display: none; }
 }
 @media (prefers-reduced-motion: reduce) { .scene { transition: none !important; } }
 </style>
@@ -150,6 +161,7 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
 <header class="bar">
   <a class="word" href="/">dz<i>z</i></a>
   <span class="rate"><i></i><span id="rateTop">warming up</span></span>
+  <button class="tok" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" title="Copy the $dzz contract address"><b>$dzz</b><code><em>Dzz</em>pJ3W…QC<em>dzz</em></code><span>Copy CA</span></button>
   <button class="round" data-theme-picker title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg></button>
   <a class="key sm" href="/app">Launch app<span class="arw"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>
 </header>
@@ -166,6 +178,7 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
     <div class="sub" id="heroSub">searching on this device</div>
     <p class="lede">dzz finds a contract address that starts or ends exactly how you want, inside your browser, then launches your coin on pump.fun with it. No platform fee. The keys never leave your device.</p>
     <div class="cta"><a class="key" href="/app">Open dzz<span class="arw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a><a class="tline" data-go="1">How it works</a></div>
+    <div class="official">$dzz, launched with dzz:<code><em>Dzz</em>pJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QC<em>dzz</em></code><button class="tok" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz"><span>Copy CA</span></button><a href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">pump.fun</a><a href="https://dexscreener.com/solana/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">chart</a></div>
   </section>
 
   <!-- 1 -->
@@ -241,6 +254,16 @@ a { color: inherit; text-decoration: none; } ::selection { background: var(--acc
 
 <div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div>
 
+<script>
+// copy the official CA (any .tok button)
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('.tok'); if (!b) return
+  const ca = b.dataset.ca
+  try { await navigator.clipboard.writeText(ca) } catch { const t = document.createElement('textarea'); t.value = ca; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove() }
+  const sp = b.querySelector('span'); b.classList.add('ok'); sp.textContent = 'Copied'; window.dzzClick?.()
+  setTimeout(() => { b.classList.remove('ok'); sp.textContent = 'Copy CA' }, 1400)
+})
+</script>
 <script src="/assets/bg.js"></script>
 <script src="/assets/engine.js"></script>
 <script>
