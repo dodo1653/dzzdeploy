@@ -16,7 +16,7 @@
   const css = Object.entries(T).map(([id, t]) => {
     const d = t.dark
     return `:root[data-theme="${id}"]{--acc:${t.acc};--acc-rgb:${rgb(t.acc)};--acc-ink:${t.ink};--bg:${t.bg};--g1:${t.g1};--g2:${t.g2};` + (d
-      ? `--bg2:rgba(255,255,255,.035);--panel:rgba(14,15,20,.72);--panel2:rgba(255,255,255,.05);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--ink:#eef0f4;--t2:#a7abb5;--t3:#6c707b;--t4:#3b3e46;--card-a:rgba(22,24,32,.78);--card-b:rgba(10,11,16,.82);--c-set:#8d919c;--c-roll:#555963;--in-focus:rgba(255,255,255,.06);--shadow:rgba(0,0,0,.6);color-scheme:dark}`
+      ? `--bg2:rgba(255,255,255,.035);--panel:rgba(14,15,20,.72);--panel2:rgba(255,255,255,.05);--line:rgba(255,255,255,.08);--line2:rgba(255,255,255,.14);--ink:#eef0f4;--t2:#a7abb5;--t3:#9298a3;--t4:#3b3e46;--card-a:rgba(22,24,32,.78);--card-b:rgba(10,11,16,.82);--c-set:#8d919c;--c-roll:#555963;--in-focus:rgba(255,255,255,.06);--shadow:rgba(0,0,0,.6);color-scheme:dark}`
       : `--bg2:rgba(255,255,255,.7);--panel:rgba(255,255,255,.72);--panel2:#ffffff;--line:rgba(10,20,40,.10);--line2:rgba(10,20,40,.18);--ink:#0e1117;--t2:#4b515c;--t3:#7d838e;--t4:#b9bec7;--card-a:rgba(255,255,255,.88);--card-b:rgba(248,248,246,.9);--c-set:#5b616c;--c-roll:#a5abb5;--in-focus:#ffffff;--shadow:rgba(20,30,60,.16);color-scheme:light}`)
   }).join('\n')
   const st = document.createElement('style'); st.textContent = css; document.head.appendChild(st)
