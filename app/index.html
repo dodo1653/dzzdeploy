@@ -501,9 +501,11 @@ pairUi()
 seg('fee', (v) => { feeBps = +v; summary() })
 // ---------------------------------------------------------------- Meteora: the other place a coin can launch (hosted dzz only)
 const METEORA_JS = '/assets/meteora.js'
-let venue = 'pump', mFee = 100, mGrad = 400, mSnipe = true, meteoraLib = null
+let venue = 'pump', mFee = 100, mGrad = 400, mSnipe = true, mShared = false, meteoraLib = null
 const GRAD_NOTE = { 200: 'The curve fills after about 56 SOL of buying.', 400: 'The curve fills after about 86 SOL of buying, about the same as pump.fun.', 800: 'The curve fills after about 130 SOL of buying.' }
 const meteora = () => (meteoraLib ||= new Promise((ok, no) => { const t = document.createElement('script'); t.src = METEORA_JS; t.onload = () => ok(window.MeteoraLaunch); t.onerror = () => { meteoraLib = null; no(new Error('the Meteora launcher did not load, try again')) }; document.head.append(t) }))
+// the first launch with a set of settings creates the shared config; later ones skip its rent
+const mCheck = async () => { try { const M = await meteora(); mShared = await M.sharedReady({ feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad }) } catch { mShared = false } lowCheck(); summary() }
 const mNotes = () => {
   $('mgradNote').textContent = GRAD_NOTE[mGrad] + ' The coin then moves to a Meteora pool with its liquidity locked for good.'
   $('msnipeNote').textContent = mSnipe ? `For the first 2 minutes the fee starts at 50% and falls to ${mFee / 100}%. Your dev buy pays the normal fee.` : `Every trade pays ${mFee / 100}% from the first second.`
@@ -512,7 +514,7 @@ function setVenue(v) {
   venue = v; const met = v === 'meteora'
   document.querySelectorAll('[data-only]').forEach((d) => { d.hidden = d.dataset.only !== v })
   $('splitNote').textContent = met ? 'optional · one wallet on Meteora · it claims its own share' : 'optional · written on chain at launch · the rest is yours'
-  if (met) { meteora().catch((e) => note(e.message, true)); mNotes(); [...$('splits').children].slice(1).forEach((d) => d.remove()) }
+  if (met) { meteora().catch((e) => note(e.message, true)); mNotes(); mCheck(); [...$('splits').children].slice(1).forEach((d) => d.remove()) }
   $('addSplit').hidden = met && $('splits').children.length > 0
   $('buyNote').textContent = met ? '0 means no dev buy. It lands in the same transaction as the pool, so nobody can buy before you.' : '0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.'
   document.querySelector('.timeline [data-k="live"]').textContent = met ? 'Live on Meteora' : 'Live on pump.fun'
@@ -522,9 +524,9 @@ function setVenue(v) {
 if (METEORA_JS) {
   $('venueRow').hidden = false
   seg('venue', setVenue)
-  seg('mfee', (v) => { mFee = +v; mNotes(); summary() })
-  seg('mgrad', (v) => { mGrad = +v; mNotes(); summary() })
-  seg('msnipe', (v) => { mSnipe = v === '1'; mNotes(); summary() })
+  seg('mfee', (v) => { mFee = +v; mNotes(); summary(); mCheck() })
+  seg('mgrad', (v) => { mGrad = +v; mNotes(); summary(); mCheck() })
+  seg('msnipe', (v) => { mSnipe = v === '1'; mNotes(); summary(); mCheck() })
 }
 
 // ---------------------------------------------------------------- odds and the live meter
@@ -640,7 +642,7 @@ async function balance() {
 }
 setInterval(balance, 20000)
 // what this launch needs: account rent (measured: SOL pair 0.0055, HYPE 0.0070, a fee split +0.0059), fees, a margin, the dev buy
-const needSol = () => { if (venue === 'meteora') { const b = +$('buy').value || 0; return 0.017 + (b > 0 ? 0.003 + b : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
+const needSol = () => { if (venue === 'meteora') { const b = +$('buy').value || 0; return (mShared && !splits().length ? 0.0105 : 0.017) + (b > 0 ? 0.003 + b : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
 // running out of SOL is its own, plainly named error: a banner with what the launch needs and what the wallet has
 const SHORT_RE = /"Custom":1}|insufficient (funds|lamports)|InsufficientFunds|no record of a prior credit|AccountNotFound|ResultWithNegativeLamports/i
 function showShort(need, have) {
