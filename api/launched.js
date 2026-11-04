@@ -8,7 +8,7 @@ import { put, head } from '@vercel/blob'
 
 const PUMP = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
 const DBC = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'                  // Meteora's bonding curve program
-const DBC_CREATE = Buffer.from([140, 85, 215, 176, 102, 54, 104, 79])        // initialize_virtual_pool_with_spl_token: accounts 3 = mint, 5 = pool
+const DBC_CREATE = [[140, 85, 215, 176, 102, 54, 104, 79], [169, 118, 51, 78, 145, 110, 220, 155]].map((d) => Buffer.from(d))   // initialize_virtual_pool_with_spl_token / _token2022: accounts 3 = mint, 5 = pool
 const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean)
 const OURS = /^https:\/\/([a-z0-9]+\.public\.blob\.vercel-storage\.com|cdn\.jsdelivr\.net\/gh\/dodo1653\/dzzdeploy@)/i
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
@@ -59,7 +59,7 @@ export default async function handler(req, res) {
       const prog = keys[ix.programIdIndex]
       try {
         if (prog === PUMP) { const a = createArgs(b58dec(ix.data)); if (keys[ix.accounts[0]] === mint) { meta = a; break } }
-        if (prog === DBC) { const d = b58dec(ix.data); if (d.subarray(0, 8).equals(DBC_CREATE) && keys[ix.accounts[3]] === mint) { meta = createArgs(d); extra = { venue: 'meteora', pool: keys[ix.accounts[5]] }; break } }
+        if (prog === DBC) { const d = b58dec(ix.data); if (DBC_CREATE.some((x) => d.subarray(0, 8).equals(x)) && keys[ix.accounts[3]] === mint) { meta = createArgs(d); extra = { venue: 'meteora', pool: keys[ix.accounts[5]] }; break } }
       } catch {}
     }
     if (!meta) return res.status(400).json({ error: 'no pump.fun or Meteora create for this mint in that transaction' })

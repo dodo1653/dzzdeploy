@@ -640,7 +640,7 @@ async function balance() {
 }
 setInterval(balance, 20000)
 // what this launch needs: account rent (measured: SOL pair 0.0055, HYPE 0.0070, a fee split +0.0059), fees, a margin, the dev buy
-const needSol = () => { if (venue === 'meteora') return 0.038 + (+$('buy').value || 0); const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
+const needSol = () => { if (venue === 'meteora') { const b = +$('buy').value || 0; return 0.017 + (b > 0 ? 0.003 + b : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
 // running out of SOL is its own, plainly named error: a banner with what the launch needs and what the wallet has
 const SHORT_RE = /"Custom":1}|insufficient (funds|lamports)|InsufficientFunds|no record of a prior credit|AccountNotFound|ResultWithNegativeLamports/i
 function showShort(need, have) {

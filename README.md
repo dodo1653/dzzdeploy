@@ -15,4 +15,4 @@ The engine source is `forge/wasm` (Rust → wasm32: point stepping + batch inver
 
 ## Meteora
 
-`assets/meteora.js` (from `launch-tech/kit/browser/meteora.js`, bundled by `build.mjs`) launches on Meteora's Dynamic Bonding Curve and loads only when someone picks Meteora. Each launch creates its own config and pool, so no partner key is involved. SOL pair, 1B supply, mint and freeze authority revoked, liquidity locked for good at graduation. Trading fees stay in the pool until claimed with the **fees** button in the Launched list. About 0.035 SOL a launch.
+`assets/meteora.js` (from `launch-tech/kit/browser/meteora.js`, bundled by `build.mjs`) launches on Meteora's Dynamic Bonding Curve and loads only when someone picks Meteora. Each launch creates its own config and pool, so no partner key is involved. SOL pair, Token-2022, 1B supply, mint, freeze and update authority revoked, liquidity locked for good at graduation. Trading fees stay in the pool until claimed with the **fees** button in the Launched list. About 0.015 SOL a launch.
