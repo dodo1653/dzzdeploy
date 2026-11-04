@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>dzz</title>
 <link rel="icon" href="/assets/icon.png">
-<meta name="description" content="Launch pump.fun coins at the contract address you choose. Found in your browser; the keys never leave it.">
+<meta name="description" content="Launch coins on pump.fun or Meteora at the contract address you choose. Found in your browser; the keys never leave it.">
 <script src="/assets/theme.js"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -173,7 +173,7 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
 .ca:hover { border-color: rgba(var(--acc-rgb), .5); color: var(--ink); } .ca code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ca code em { font-style: normal; color: var(--acc); }
 .ca span { flex: none; font: 500 12px var(--ui); padding: 3px 8px; border-radius: 7px; background: var(--panel2); color: var(--t2); } .ca.ok span { background: var(--acc); color: var(--acc-ink); }
 .lrow .mc { font: 500 13px var(--mono); color: var(--ink); text-align: right; } .lrow .age { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
-.lrow .lk { display: flex; gap: 10px; font-size: 12.5px; } .lrow .lk a { color: var(--t3); text-decoration: none; } .lrow .lk a:hover { color: var(--acc); }
+.lrow .lk { display: flex; gap: 10px; font-size: 12.5px; } .lrow .lk a { color: var(--t3); text-decoration: none; } .lrow .lk a:hover { color: var(--acc); } .lrow .lk .fees { all: unset; cursor: pointer; color: var(--acc); font: inherit; } .lrow .lk .fees:hover { text-decoration: underline; }
 .lempty { color: var(--t3); font: 400 13px var(--mono); padding: 18px 0 6px; }
 @media (max-width: 760px) { .lrow { grid-template-columns: 40px 1fr auto; } .lrow .ca, .lrow .age, .lrow .lk { grid-column: 2 / -1; } }
 /* history + settings */
@@ -245,16 +245,20 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
     <div class="card">
       <h3>The market <small>03</small><em>set it</em></h3>
       <div class="grid" style="gap:18px">
-        <div class="fl">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
+        <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on">pump.fun</button><button data-v="meteora">Meteora</button></div></div>
+        <div class="fl" data-only="pump">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
           <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden>
           <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
-            <div class="tlist" id="tl"><div class="empty">loading pump.fun's list…</div></div></div></div>
-        <div class="fl">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint" id="feeNote"></p></div>
+            <div class="tlist" id="tlist"><div class="empty">loading pump.fun's list…</div></div></div></div>
+        <div class="fl" data-only="pump">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint" id="feeNote"></p></div>
+        <div class="fl" data-only="meteora" hidden>Trading fee<div class="seg" id="mfee" style="justify-self:start"><span class="thumb"></span><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint">Paid on every trade. Meteora keeps 20% of it, the rest is yours to claim. It is not sent to you by itself.</p></div>
+        <div class="fl" data-only="meteora" hidden>Graduates at<div class="seg" id="mgrad" style="justify-self:start"><span class="thumb"></span><button data-v="200">200 SOL</button><button data-v="400" class="on">400 SOL</button><button data-v="800">800 SOL</button></div><p class="hint" id="mgradNote"></p></div>
+        <div class="fl" data-only="meteora" hidden>Anti-snipe<div class="seg" id="msnipe" style="justify-self:start"><span class="thumb"></span><button data-v="1" class="on">On</button><button data-v="0">Off</button></div><p class="hint" id="msnipeNote"></p></div>
         <div class="row2">
           <label class="fl" style="width:180px"><span>Dev buy, <span id="unit">SOL</span></span><input class="in mono" id="buy" type="number" min="0" step="0.01" value="0"></label>
-          <p class="hint" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.</p>
+          <p class="hint" id="buyNote" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.</p>
         </div>
-        <div class="fl">Fee split <span style="color:var(--t4)">optional · written on chain at launch · the rest is yours</span>
+        <div class="fl">Fee split <span style="color:var(--t4)" id="splitNote">optional · written on chain at launch · the rest is yours</span>
           <div id="splits" class="grid" style="gap:8px"></div>
           <button class="ghost" id="addSplit" style="justify-self:start">+ add a wallet</button></div>
       </div>
@@ -477,24 +481,51 @@ async function loadPairs() {
     pairList = l; try { localStorage.setItem('dzz-pairs', JSON.stringify({ at: Date.now(), list: l })) } catch {}
     if (tokenPick) tokenPick = l.find((t) => t.mint === tokenPick.mint) || tokenPick
     if (pair === 'TOKEN') { drawPairs(); pairUi(); summary() }
-  }).catch(() => { pairsLive = null; if (!pairList) $('tl').innerHTML = '<div class="empty">could not read the pair list right now, try again</div>' })
+  }).catch(() => { pairsLive = null; if (!pairList) $('tlist').innerHTML = '<div class="empty">could not read the pair list right now, try again</div>' })
 }
 ;(window.requestIdleCallback || setTimeout)(() => quickPairs())
 const usdK = (v) => (v >= 1e6 ? '$' + (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? '$' + (v / 1e3).toFixed(0) + 'K' : '$' + Math.round(v))
 function drawPairs() {
   const q = $('tq').value.trim().toLowerCase()
   const rows = pairList.filter((t) => (tkind === 'All' || t.kind === tkind) && (!q || (t.symbol + ' ' + t.name + ' ' + t.mint).toLowerCase().includes(q))).slice(0, 120)
-  $('tl').innerHTML = rows.length ? rows.map((t) => `<div class="tok${tokenPick?.mint === t.mint ? ' on' : ''}" data-m="${t.mint}">${t.icon ? `<img src="${esc(t.icon)}" alt="" loading="lazy">` : '<i class="ph"></i>'}<div><b>${esc(t.symbol)}</b><small>${esc(t.name || t.mint)}</small></div><span>${t.kind}${t.liquidity ? ' · ' + usdK(t.liquidity) : ''}</span></div>`).join('') : '<div class="empty">nothing matches</div>'
+  $('tlist').innerHTML = rows.length ? rows.map((t) => `<div class="tok${tokenPick?.mint === t.mint ? ' on' : ''}" data-m="${t.mint}">${t.icon ? `<img src="${esc(t.icon)}" alt="" loading="lazy">` : '<i class="ph"></i>'}<div><b>${esc(t.symbol)}</b><small>${esc(t.name || t.mint)}</small></div><span>${t.kind}${t.liquidity ? ' · ' + usdK(t.liquidity) : ''}</span></div>`).join('') : '<div class="empty">nothing matches</div>'
 }
 $('tq').addEventListener('input', () => pairList && drawPairs())
 seg('tk', (v) => { tkind = v; pairList && drawPairs() })
 // click a picked token again to unpick it
-$('tl').addEventListener('click', (e) => { const r = e.target.closest('.tok'); if (!r) return; tokenPick = tokenPick?.mint === r.dataset.m ? null : pairList.find((t) => t.mint === r.dataset.m); S.click(); drawPairs(); pairUi(); summary() })
+$('tlist').addEventListener('click', (e) => { const r = e.target.closest('.tok'); if (!r) return; tokenPick = tokenPick?.mint === r.dataset.m ? null : pairList.find((t) => t.mint === r.dataset.m); S.click(); drawPairs(); pairUi(); summary() })
 // click an active option again to undo it: a kind tab goes back to All, a pair back to SOL
 const undoSeg = (id, base) => $(id).addEventListener('click', (e) => { const b = e.target.closest('button'); if (b && b.classList.contains('on') && b.dataset.v !== base) setTimeout(() => $(id).querySelector(`[data-v="${base}"]`).click()) }, true)
 undoSeg('tk', 'All'); undoSeg('pair', 'SOL')
 pairUi()
 seg('fee', (v) => { feeBps = +v; summary() })
+// ---------------------------------------------------------------- Meteora: the other place a coin can launch (hosted dzz only)
+const METEORA_JS = '/assets/meteora.js'
+let venue = 'pump', mFee = 100, mGrad = 400, mSnipe = true, meteoraLib = null
+const GRAD_NOTE = { 200: 'The curve fills after about 56 SOL of buying.', 400: 'The curve fills after about 86 SOL of buying, about the same as pump.fun.', 800: 'The curve fills after about 130 SOL of buying.' }
+const meteora = () => (meteoraLib ||= new Promise((ok, no) => { const t = document.createElement('script'); t.src = METEORA_JS; t.onload = () => ok(window.MeteoraLaunch); t.onerror = () => { meteoraLib = null; no(new Error('the Meteora launcher did not load, try again')) }; document.head.append(t) }))
+const mNotes = () => {
+  $('mgradNote').textContent = GRAD_NOTE[mGrad] + ' The coin then moves to a Meteora pool with its liquidity locked for good.'
+  $('msnipeNote').textContent = mSnipe ? `For the first 2 minutes the fee starts at 50% and falls to ${mFee / 100}%. Your dev buy pays the normal fee.` : `Every trade pays ${mFee / 100}% from the first second.`
+}
+function setVenue(v) {
+  venue = v; const met = v === 'meteora'
+  document.querySelectorAll('[data-only]').forEach((d) => { d.hidden = d.dataset.only !== v })
+  $('splitNote').textContent = met ? 'optional · one wallet on Meteora · it claims its own share' : 'optional · written on chain at launch · the rest is yours'
+  if (met) { meteora().catch((e) => note(e.message, true)); mNotes(); [...$('splits').children].slice(1).forEach((d) => d.remove()) }
+  $('addSplit').hidden = met && $('splits').children.length > 0
+  $('buyNote').textContent = met ? '0 means no dev buy. It lands in the same transaction as the pool, so nobody can buy before you.' : '0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.'
+  document.querySelector('.timeline [data-k="live"]').textContent = met ? 'Live on Meteora' : 'Live on pump.fun'
+  if (st) render(st)
+  requestAnimationFrame(() => dispatchEvent(new Event('resize'))); lowCheck(); summary()
+}
+if (METEORA_JS) {
+  $('venueRow').hidden = false
+  seg('venue', setVenue)
+  seg('mfee', (v) => { mFee = +v; mNotes(); summary() })
+  seg('mgrad', (v) => { mGrad = +v; mNotes(); summary() })
+  seg('msnipe', (v) => { mSnipe = v === '1'; mNotes(); summary() })
+}
 
 // ---------------------------------------------------------------- odds and the live meter
 const odds = () => { let p = 1; for (const ch of pre() + suf()) p *= ci ? [...A].filter((a) => a.toLowerCase() === ch.toLowerCase()).length / 58 : 1 / 58; return p }
@@ -538,7 +569,7 @@ function render(v) {
   if (running && j.rate) { lastRate = j.rate; try { localStorage.setItem('dzz-rate', j.rate) } catch {} }
   $('grind').innerHTML = running ? 'Stop' : 'Find address <kbd>↵</kbd>'; $('grind').classList.toggle('stop', !!running)
   $('live').classList.toggle('run', !!running); $('state').classList.toggle('run', !!running)
-  $('state').textContent = running ? (j.auto ? 'finding a normal …pump address' : `searching · ${big(j.rate)}/s`) : v.selected ? 'custom · ' + v.selected.slice(0, 4) + '…' + v.selected.slice(-5) : 'normal · …pump'
+  $('state').textContent = running ? (j.auto ? 'finding a normal …pump address' : `searching · ${big(j.rate)}/s`) : v.selected ? 'custom · ' + v.selected.slice(0, 4) + '…' + v.selected.slice(-5) : venue === 'meteora' ? 'random address' : 'normal · …pump'
   window.DZZBG?.activity(running ? 1 : 0)
   // live: the middle rolls through real addresses the grinder just checked
   if (running && j.sample && j.sample !== lastSample) {
@@ -554,10 +585,10 @@ function render(v) {
   if (j && j.done && mode === 'run') { mode = 'idle'; layout() }
   // your addresses
   const prev = new Set([...$('found').children].map((c) => c.dataset.m))
-  $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>normal · …<b>pump</b></code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
+  $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>${venue === 'meteora' ? 'random address' : 'normal · …<b>pump</b>'}</code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
   // history
   $('histCard').hidden = !v.history.length; $('histN').textContent = v.history.length
-  $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div><a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a><a href="https://axiom.trade/meme/${esc(h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
+  $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
   stats(); summary()
 }
 $('found').onclick = async (e) => {
@@ -584,14 +615,15 @@ $('addSplit').onclick = () => {
   if ($('splits').children.length >= 3) return S.err()
   const d = document.createElement('div'); d.className = 'split'
   d.innerHTML = '<input class="in mono" placeholder="wallet address" spellcheck="false"><input class="in mono" type="number" min="1" max="99" placeholder="%"><button class="ghost" title="Remove" style="padding:9px 0">×</button>'
-  d.querySelector('button').onclick = () => { d.remove(); S.soft(); summary() }; d.querySelectorAll('input').forEach((i) => (i.oninput = summary))
+  d.querySelector('button').onclick = () => { d.remove(); $('addSplit').hidden = false; S.soft(); summary() }; d.querySelectorAll('input').forEach((i) => (i.oninput = summary))
+  if (venue === 'meteora') { d.querySelectorAll('input')[1].max = 100; $('addSplit').hidden = true }
   $('splits').appendChild(d); S.click(); summary()
 }
 const splits = () => [...$('splits').children].map((d) => { const [a, p] = d.querySelectorAll('input'); return { address: a.value.trim(), shareBps: Math.round(+p.value * 100) } }).filter((s) => s.address && s.shareBps > 0)
 function summary() {
   const sp = splits(), others = sp.reduce((a, s) => a + s.shareBps, 0) / 100, m = st?.selected, k = st?.keys.find((x) => x.mint === m)
   const name = $('name').value.trim(), sym = $('sym').value.trim()
-  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
+  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : venue === 'meteora' ? 'random address · made at launch' : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>${venue === 'meteora' ? `on <b>Meteora</b> · paired with <b>SOL</b> · <b>${mFee / 100}%</b> trading fee · anti-snipe <b>${mSnipe ? 'on' : 'off'}</b>` : `paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee`}${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
 }
 
 // ---------------------------------------------------------------- hold to launch
@@ -608,7 +640,7 @@ async function balance() {
 }
 setInterval(balance, 20000)
 // what this launch needs: account rent (measured: SOL pair 0.0055, HYPE 0.0070, a fee split +0.0059), fees, a margin, the dev buy
-const needSol = () => { const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
+const needSol = () => { if (venue === 'meteora') return 0.038 + (+$('buy').value || 0); const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
 // running out of SOL is its own, plainly named error: a banner with what the launch needs and what the wallet has
 const SHORT_RE = /"Custom":1}|insufficient (funds|lamports)|InsufficientFunds|no record of a prior credit|AccountNotFound|ResultWithNegativeLamports/i
 function showShort(need, have) {
@@ -626,6 +658,11 @@ $('wallet').onclick = () => connect().catch((e) => note(e.message, true))
 function check() {
   if (!$('name').value.trim() || !$('sym').value.trim() || !pic64) return 'a picture, a name and a ticker first'
   const sp = splits(), buy = +$('buy').value || 0
+  if (venue === 'meteora') {
+    if (sp[0] && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(sp[0].address)) return 'that fee wallet is not a Solana address'
+    if (sp[0] && (sp[0].shareBps % 100 || sp[0].shareBps > 10000)) return 'the fee wallet takes a whole percent, 1 to 100'
+    return
+  }
   if (sp.reduce((a, s) => a + s.shareBps, 0) >= 10000) return 'the split has to leave you something'
   if (sp.length && buy > 0) return "a fee split and a dev buy don't fit in one transaction: pick one"
   if (pair === 'TOKEN' && !tokenPick) return 'pick the token to pair with'
@@ -643,6 +680,8 @@ function holdDown(e) {
 function holdUp() { if (busy || !holdStart) return; cancelAnimationFrame(holdRaf); holdStart = 0; S.release(); hold.classList.add('back'); hold.style.setProperty('--h', 0); hold.classList.remove('full') }
 hold.addEventListener('pointerdown', holdDown); hold.addEventListener('pointerup', holdUp); hold.addEventListener('pointercancel', holdUp)
 hold.addEventListener('keydown', (e) => { if ((e.key === ' ' || e.key === 'Enter') && !e.repeat) holdDown(e) }); hold.addEventListener('keyup', (e) => { if (e.key === ' ' || e.key === 'Enter') holdUp() })
+const pumpLaunch = async (o, prog) => { if (!st?.selected) { note('finding a normal …pump address'); setTimeout(poll, 300) }; const mint = await L.mintFor(); return PumpLaunch.launch({ ...o, mint, signMint: (msg) => L.sign(mint, msg) }, prog) }
+const meteoraMint = () => { const mint = st?.selected; return mint ? { mint, signMint: (msg) => L.sign(mint, msg) } : {} }
 async function launch() {
   busy = true; holdStart = 0; hold.classList.add('busy'); hold.disabled = true; $('holdTxt').textContent = 'Launching…'
   const name = $('name').value.trim(), symbol = $('sym').value.trim(), sp = splits()
@@ -652,18 +691,20 @@ async function launch() {
     const have = await balance(), need = needSol()
     if (have != null && have < need) { const e = new Error('short'); e.short = { need, have }; throw e }
     step('meta', 'run')
-    if (!st?.selected) { note('finding a normal …pump address'); setTimeout(poll, 300) }
-    const mint = await L.mintFor()
-    const r = await PumpLaunch.launch({ mint, signMint: (msg) => L.sign(mint, msg), owner: sol, image: pic64, name, symbol, description: $('desc').value.trim(), twitter: $('x').value, website: $('web').value, telegram: $('tg').value,
-      pair: pair === 'COIN' ? 'SOL' : pair === 'TOKEN' ? tokenPick.mint : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, (t) => {
+    const prog = (t) => {
       note(t)
       if (/approve|sign/i.test(t) && cur === 'meta') { step('meta', 'ok'); step((cur = 'sign'), 'run'); S.soft() }
       if (/send/i.test(t) && cur !== 'live') { step('meta', 'ok'); step('sign', 'ok'); step((cur = 'live'), 'run'); S.soft() }
-    })
-    ;['meta', 'sign', 'live'].forEach((k) => step(k, 'ok')); note(''); S.launched(); L.launched(r.mint, r.signature, { name, symbol, image: r.image })
+    }
+    const coin = { owner: sol, image: pic64, name, symbol, description: $('desc').value.trim(), twitter: $('x').value, website: $('web').value, telegram: $('tg').value }
+    const r = venue === 'meteora'
+      ? await (await meteora()).launch({ ...coin, ...meteoraMint(), buySol: +$('buy').value || 0, feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad, feeWallet: sp[0]?.address, feeShare: sp[0] ? sp[0].shareBps / 100 : 0 }, prog)
+      : await pumpLaunch({ ...coin, pair: pair === 'COIN' ? 'SOL' : pair === 'TOKEN' ? tokenPick.mint : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, prog)
+    ;['meta', 'sign', 'live'].forEach((k) => step(k, 'ok')); note(''); S.launched(); L.launched(r.mint, r.signature, { name, symbol, image: r.image, venue: r.venue, pool: r.pool })
     const k = st?.keys.find((x) => x.mint === r.mint)
     $('done').innerHTML = `<div class="done"><div class="t">$${esc(symbol)} is live.</div><code>${mark(r.mint, k?.pattern)}</code>
-      <a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a><a href="https://axiom.trade/meme/${esc(r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
+      ${r.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(r.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(r.pool || r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
+    if (r.venue === 'meteora') $('done').insertAdjacentHTML('beforeend', '<p class="hint" style="margin-top:12px">Trading fees wait in the pool until you claim them. Press <b>fees</b> on your coin in the Launched list.</p>')
     registerLaunch(r.mint, r.signature)
     $('copyCa').onclick = (e) => { e.preventDefault(); navigator.clipboard.writeText(r.mint); e.target.textContent = 'Copied'; S.click() }
   } catch (e) {
@@ -701,10 +742,24 @@ async function loadPublic() {
       <b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b>
       <button class="ca" data-ca="${esc(k)}" title="Copy CA"><code>${esc(k.slice(0, 6))}…${esc(k.slice(-12, -4))}<em>${esc(tail)}</em></code><span>Copy CA</span></button>
       <span class="mc">${usd(mcs[k])}</span><span class="age">${ago(c.at)}</span>
-      <span class="lk"><a href="https://pump.fun/coin/${esc(k)}" target="_blank" rel="noopener">pump</a><a href="https://axiom.trade/meme/${esc(k)}" target="_blank" rel="noopener">axiom</a><a href="https://dexscreener.com/solana/${esc(k)}" target="_blank" rel="noopener">dex</a></span></div>`
+      <span class="lk">${c.venue === 'meteora' ? `<button class="fees" data-pool="${esc(c.pool)}">fees</button><a href="https://jup.ag/tokens/${esc(k)}" target="_blank" rel="noopener">jupiter</a>` : `<a href="https://pump.fun/coin/${esc(k)}" target="_blank" rel="noopener">pump</a>`}<a href="https://axiom.trade/meme/${esc(c.pool || k)}" target="_blank" rel="noopener">axiom</a><a href="https://dexscreener.com/solana/${esc(k)}" target="_blank" rel="noopener">dex</a></span></div>`
   }).join('')
 }
 $('pub').addEventListener('click', async (e) => {
+  const f = e.target.closest('.fees')
+  if (f) {
+    if (f.disabled) return; f.disabled = true
+    try {
+      const M = await meteora(); if (!sol) await connect()
+      if (f.dataset.ready) { f.textContent = 'claiming…'; await M.claim({ owner: sol, pool: f.dataset.pool }); f.textContent = 'claimed'; delete f.dataset.ready; S.click(); balance() }
+      else {
+        f.textContent = 'reading…'; const v = await M.feesOf(f.dataset.pool, sol)
+        if (v.sol > 0) { f.dataset.ready = '1'; f.textContent = `claim ${v.sol.toFixed(4)} SOL` }
+        else f.textContent = v.yours ? 'nothing to claim yet' : 'not your coin'
+      }
+    } catch (x) { f.textContent = 'fees'; delete f.dataset.ready; if (!/rejected/i.test(x.message)) note(String(x.message).slice(0, 200), true) }
+    f.disabled = false; return
+  }
   const b = e.target.closest('.ca'); if (!b) return
   try { await navigator.clipboard.writeText(b.dataset.ca) } catch { const t = document.createElement('textarea'); t.value = b.dataset.ca; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove() }
   b.classList.add('ok'); b.querySelector('span').textContent = 'Copied'; S.click()

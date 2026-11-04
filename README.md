@@ -1,6 +1,6 @@
 # dzz
 
-Launch pump.fun coins at the contract address you choose.
+Launch coins on pump.fun or Meteora at the contract address you choose.
 
 - `/` the landing page (its hero searches for addresses live in the visitor's browser, 2 threads)
 - `/app` the launcher: the address search runs in the browser (`assets/dzz.wasm` on every core through
@@ -12,3 +12,7 @@ Launch pump.fun coins at the contract address you choose.
   (fluted-glass WebGL shader that follows the theme and the search).
 
 The engine source is `forge/wasm` (Rust → wasm32: point stepping + batch inversion, ~0.9M keys/s per thread).
+
+## Meteora
+
+`assets/meteora.js` (from `launch-tech/kit/browser/meteora.js`, bundled by `build.mjs`) launches on Meteora's Dynamic Bonding Curve and loads only when someone picks Meteora. Each launch creates its own config and pool, so no partner key is involved. SOL pair, 1B supply, mint and freeze authority revoked, liquidity locked for good at graduation. Trading fees stay in the pool until claimed with the **fees** button in the Launched list. About 0.035 SOL a launch.

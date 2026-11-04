@@ -1,12 +1,14 @@
 // The public list of coins launched with dzz.
-//   GET  /api/launched                 → { coins: [{ mint, name, symbol, image, uri, sig, at }] } newest first (cached ~15 s)
+//   GET  /api/launched                 → { coins: [{ mint, name, symbol, image, uri, sig, at, venue?, pool? }] } newest first (cached ~15 s)
 //   POST /api/launched { mint, signature }
-// A POST is only listed after it checks out on Solana: the transaction succeeded, it ran pump.fun's create for exactly
-// that mint, and the coin's metadata lives where dzz puts it (this project's Blob store, or the desktop app's
+// A POST is only listed after it checks out on Solana: the transaction succeeded, it ran pump.fun's or Meteora's create for
+// exactly that mint, and the coin's metadata lives where dzz puts it (this project's Blob store, or the desktop app's
 // jsDelivr-served dzzdeploy repo). The list is one JSON file in Vercel Blob (launched.json).
 import { put, head } from '@vercel/blob'
 
 const PUMP = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
+const DBC = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'                  // Meteora's bonding curve program
+const DBC_CREATE = Buffer.from([140, 85, 215, 176, 102, 54, 104, 79])        // initialize_virtual_pool_with_spl_token: accounts 3 = mint, 5 = pool
 const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean)
 const OURS = /^https:\/\/([a-z0-9]+\.public\.blob\.vercel-storage\.com|cdn\.jsdelivr\.net\/gh\/dodo1653\/dzzdeploy@)/i
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
@@ -24,7 +26,7 @@ async function rpc(method, params) {
   }
   throw last
 }
-// pump.fun create / create_v2 arguments start with three borsh strings: name, symbol, uri
+// pump.fun's and Meteora's create arguments both start with three borsh strings: name, symbol, uri
 function createArgs(data) {
   let o = 8; const str = () => { const n = data.readUInt32LE(o); o += 4; if (n > 400) throw new Error('not a create'); const s = data.subarray(o, o + n).toString('utf8'); o += n; return s }
   return { name: str(), symbol: str(), uri: str() }
@@ -52,15 +54,18 @@ export default async function handler(req, res) {
     if (tx.meta?.err) return res.status(400).json({ error: 'that transaction failed on chain' })
     const keys = [...tx.transaction.message.accountKeys, ...(tx.meta?.loadedAddresses?.writable || []), ...(tx.meta?.loadedAddresses?.readonly || [])]
     if (!keys.includes(mint)) return res.status(400).json({ error: 'that transaction does not touch this mint' })
-    let meta = null
+    let meta = null, extra = {}
     for (const ix of tx.transaction.message.instructions) {
-      if (keys[ix.programIdIndex] !== PUMP) continue
-      try { const a = createArgs(b58dec(ix.data)); if (keys[ix.accounts[0]] === mint) { meta = a; break } } catch {}
+      const prog = keys[ix.programIdIndex]
+      try {
+        if (prog === PUMP) { const a = createArgs(b58dec(ix.data)); if (keys[ix.accounts[0]] === mint) { meta = a; break } }
+        if (prog === DBC) { const d = b58dec(ix.data); if (d.subarray(0, 8).equals(DBC_CREATE) && keys[ix.accounts[3]] === mint) { meta = createArgs(d); extra = { venue: 'meteora', pool: keys[ix.accounts[5]] }; break } }
+      } catch {}
     }
-    if (!meta) return res.status(400).json({ error: 'no pump.fun create for this mint in that transaction' })
+    if (!meta) return res.status(400).json({ error: 'no pump.fun or Meteora create for this mint in that transaction' })
     if (!OURS.test(meta.uri)) return res.status(400).json({ error: 'not launched with dzz' })
     let image = ''; try { image = (await (await fetch(meta.uri)).json()).image || '' } catch {}
-    const coin = { mint, name: meta.name.slice(0, 32), symbol: meta.symbol.slice(0, 10), image, uri: meta.uri, sig, at: (tx.blockTime || Math.floor(Date.now() / 1000)) * 1000 }
+    const coin = { mint, name: meta.name.slice(0, 32), symbol: meta.symbol.slice(0, 10), image, uri: meta.uri, sig, at: (tx.blockTime || Math.floor(Date.now() / 1000)) * 1000, ...extra }
     list = [coin, ...(await readList()).filter((c) => c.mint !== mint)].slice(0, 500)
     await put('launched.json', JSON.stringify({ coins: list }), { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true, cacheControlMaxAge: 60, ...opts() })
     return res.status(200).json({ ok: true, coin })
