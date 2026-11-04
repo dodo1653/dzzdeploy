@@ -706,7 +706,7 @@ async function launch() {
     const k = st?.keys.find((x) => x.mint === r.mint)
     $('done').innerHTML = `<div class="done"><div class="t">$${esc(symbol)} is live.</div><code>${mark(r.mint, k?.pattern)}</code>
       ${r.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(r.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(r.pool || r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
-    if (r.venue === 'meteora') $('done').insertAdjacentHTML('beforeend', '<p class="hint" style="margin-top:12px">Trading fees wait in the pool until you claim them. Press <b>fees</b> on your coin in the Launched list.</p>')
+    if (r.venue === 'meteora') $('done').insertAdjacentHTML('beforeend', '<p class="hint" style="margin-top:12px">Trading fees wait until you claim them. Press <b>fees</b> on your coin in the Launched list, before or after graduation.</p>')
     registerLaunch(r.mint, r.signature)
     $('copyCa').onclick = (e) => { e.preventDefault(); navigator.clipboard.writeText(r.mint); e.target.textContent = 'Copied'; S.click() }
   } catch (e) {
