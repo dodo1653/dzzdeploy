@@ -4,10 +4,22 @@
 // wallet, not per coin: its figures are the wallet's, read from every movement through its vaults, a batch at a time, remembered
 // in Blob.
 import { put, head } from '@vercel/blob'
-import { PublicKey } from '@solana/web3.js'
+import { ed25519 } from '@noble/curves/ed25519'
+import crypto from 'node:crypto'
 
-const PUMP = new PublicKey('6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'), AMM = new PublicKey('pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA')
-const TOKEN = new PublicKey('TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'), ATA = new PublicKey('ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL'), WSOL = new PublicKey('So11111111111111111111111111111111111111112')
+const PUMP = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P', AMM = 'pAMMBay6oceH9fJKBRHGP5D4bD4sWpmSwMn52FMfXEA', TOKEN = 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', ATA = 'ATokenGPvbdGVxr1b2hvZbsiqW5xWH25efTNsLJA8knL', WSOL = 'So11111111111111111111111111111111111111112'
+// addresses by hand: @solana/web3.js crashes this function on start
+const A58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
+const enc58 = (b) => { let n = 0n; for (const x of b) n = n * 256n + BigInt(x); let s = ''; while (n > 0n) { s = A58[Number(n % 58n)] + s; n /= 58n } for (const x of b) { if (x) break; s = '1' + s } return s }
+const dec58 = (s) => { let n = 0n; for (const c of s) n = n * 58n + BigInt(A58.indexOf(c)); const o = Buffer.alloc(32); for (let i = 31; i >= 0; i--) { o[i] = Number(n & 255n); n >>= 8n } return o }
+const onCurve = (b) => { try { ed25519.ExtendedPoint.fromHex(b); return true } catch { return false } }
+export function pda(seeds, program) {
+  for (let bump = 255; bump >= 0; bump--) {
+    const h = crypto.createHash('sha256'); for (const s of seeds) h.update(s); h.update(Buffer.from([bump])).update(dec58(program)).update('ProgramDerivedAddress')
+    const d = h.digest(); if (!onCurve(d)) return d
+  }
+  throw new Error('no address')
+}
 const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 40
 const token = () => process.env.BLOB_READ_WRITE_TOKEN || Object.entries(process.env).find(([k, v]) => /READ_WRITE_TOKEN$/.test(k) && /^vercel_blob_rw_/.test(String(v)))?.[1]
 const opts = () => (token() ? { token: token() } : {})
@@ -30,17 +42,17 @@ const u64 = (d, o) => Number(d.readBigUInt64LE(o))
 // a Meteora curve pool: total_trading_quote_fee is everything the dev side ever earned, the two fee fields are what's still unclaimed
 export function poolFees(d) {
   const generated = u64(d, 336), waiting = u64(d, 272) + u64(d, 360)
-  return { generated, waiting, claimed: generated - waiting, dev: new PublicKey(d.subarray(104, 136)).toBase58(), config: new PublicKey(d.subarray(72, 104)).toBase58(), graduated: d[305] === 1 }
+  return { generated, waiting, claimed: generated - waiting, dev: enc58(d.subarray(104, 136)), config: enc58(d.subarray(72, 104)), graduated: d[305] === 1 }
 }
 
 async function meteoraRows(coins) {
   const accs = (await rpc('getMultipleAccounts', [coins.map((c) => c.pool), { encoding: 'base64' }]))?.value || []
   const rows = coins.map((c, i) => (accs[i] ? { c, ...poolFees(Buffer.from(accs[i].data[0], 'base64')) } : { c, missing: true }))
   const cfgKeys = [...new Set(rows.filter((r) => r.config).map((r) => r.config))]
-  const cfgs = (await rpc('getMultipleAccounts', [cfgKeys, { encoding: 'base64' }]))?.value || [], quote = new Map(cfgKeys.map((k, i) => [k, cfgs[i] ? new PublicKey(Buffer.from(cfgs[i].data[0], 'base64').subarray(8, 40)).toBase58() : null]))
+  const cfgs = (await rpc('getMultipleAccounts', [cfgKeys, { encoding: 'base64' }]))?.value || [], quote = new Map(cfgKeys.map((k, i) => [k, cfgs[i] ? enc58(Buffer.from(cfgs[i].data[0], 'base64').subarray(8, 40)) : null]))
   return rows.map((r) => {
     if (r.missing) return { ...base(r.c), note: 'could not read this pool' }
-    const sol = quote.get(r.config) === WSOL.toBase58()
+    const sol = quote.get(r.config) === WSOL
     return { ...base(r.c), dev: r.dev, generated: sol ? r.generated : null, claimed: sol ? r.claimed : null, waiting: sol ? r.waiting : null, note: !sol ? 'fees are in its paired token, not SOL' : r.graduated ? 'graduated: fees from the locked pool aren’t counted' : '' }
   })
 }
@@ -69,8 +81,8 @@ async function flows(address, isToken) {
 }
 
 async function vaults(dev) {
-  const key = new PublicKey(dev), curve = PublicKey.findProgramAddressSync([Buffer.from('creator-vault'), key.toBuffer()], PUMP)[0].toBase58()
-  const auth = PublicKey.findProgramAddressSync([Buffer.from('creator_vault'), key.toBuffer()], AMM)[0], pool = PublicKey.findProgramAddressSync([auth.toBuffer(), TOKEN.toBuffer(), WSOL.toBuffer()], ATA)[0].toBase58()
+  const key = dec58(dev), curve = enc58(pda([Buffer.from('creator-vault'), key], PUMP))
+  const auth = pda([Buffer.from('creator_vault'), key], AMM), pool = enc58(pda([auth, dec58(TOKEN), dec58(WSOL)], ATA))
   const [bal, tok, rent] = await Promise.all([rpc('getBalance', [curve]), rpc('getTokenAccountBalance', [pool]), rpc('getMinimumBalanceForRentExemption', [0])])
   const [a, b] = await Promise.all([flows(curve, false), tok ? flows(pool, true) : { out: 0, done: true }])
   const waiting = Math.max(0, (bal?.value || 0) - (rent || 0)) + Number(tok?.value?.amount || 0), claimed = a.out + b.out
