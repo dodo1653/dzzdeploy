@@ -20,7 +20,8 @@ export function pda(seeds, program) {
   }
   throw new Error('no address')
 }
-const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 40
+// publicnode only keeps recent history, so anything that reads the past has to ask a full node first or it undercounts
+const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), HISTORY = [process.env.RPC_URL, 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 40
 const token = () => process.env.BLOB_READ_WRITE_TOKEN || Object.entries(process.env).find(([k, v]) => /READ_WRITE_TOKEN$/.test(k) && /^vercel_blob_rw_/.test(String(v)))?.[1]
 const opts = () => (token() ? { token: token() } : {})
 const sleep = (ms) => new Promise((f) => setTimeout(f, ms))
@@ -28,7 +29,7 @@ const sleep = (ms) => new Promise((f) => setTimeout(f, ms))
 // a null answer counts as a miss: public RPCs drop old transactions, so the next one may still have it
 async function rpc(method, params) {
   for (let round = 0; round < 3; round++) {
-    for (const url of RPCS) {
+    for (const url of /^get(Signatures|Transaction)/.test(method) ? HISTORY : RPCS) {
       try { const r = await (await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) })).json(); if (!r.error && r.result != null) return r.result } catch {}
     }
     await sleep(500 * (round + 1))
