@@ -31,8 +31,8 @@ td { padding: 13px 12px; border-bottom: 1px solid var(--line, rgba(255,255,255,.
 </style></head><body>
 <main>
   <div class="top"><b>dzz</b><a href="/app">Launch a coin</a></div>
-  <h1>What devs made.</h1>
-  <p class="sub">What every coin launched with dzz has generated in fees for its dev, and how much of it they've claimed. Read live from Solana.</p>
+  <h1>Creator fees.</h1>
+  <p class="sub">What every coin launched with dzz made in creator fees, and how much its dev has claimed. Read live from Solana.</p>
   <div class="sum"><div><b id="tg">…</b><span>SOL generated</span></div><div><b id="tc">…</b><span>SOL claimed</span></div><div><b id="tw">…</b><span>SOL waiting to be claimed</span></div></div>
   <table><thead><tr><th>Coin</th><th>Dev</th><th>Generated</th><th>Claimed</th><th>Waiting</th></tr></thead><tbody id="rows"></tbody></table>
   <p id="state" role="status">Reading Solana…</p>
@@ -44,11 +44,11 @@ const sol = (l) => (l == null ? '—' : l === 0 ? '0' : (l / 1e9).toFixed(l < 1e
 async function load() {
   try {
     const d = await (await fetch('/api/fees')).json(); if (d.error) throw new Error(d.error)
-    const r = d.coins || []
-    $('tg').textContent = sol(sum(r, 'generated')); $('tc').textContent = sol(sum(r, 'claimed')); $('tw').textContent = sol(sum(r, 'waiting'))
+    const r = d.coins || [], done = r.filter((c) => !c.reading), cell = (c, k) => (c.reading ? 'reading…' : sol(c[k]))
+    $('tg').textContent = sol(sum(done, 'generated')); $('tc').textContent = sol(sum(done, 'claimed')); $('tw').textContent = sol(sum(done, 'waiting'))
     $('rows').innerHTML = r.map((c) => `<tr><td><a class="coin" href="https://solscan.io/token/${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : '<i></i>'}<span>$${esc(c.symbol)}${c.venue === 'pump' ? ' <span class="star">*</span>' : ''}<small>${c.venue === 'pump' ? 'pump.fun' : 'Meteora'}</small></span></a></td>
       <td data-l="Dev">${c.dev ? `<a class="dev" href="https://solscan.io/account/${esc(c.dev)}" target="_blank" rel="noopener">${short(c.dev)}</a>` : '—'}</td>
-      <td data-l="Generated">${sol(c.generated)}</td><td data-l="Claimed">${sol(c.claimed)}</td><td data-l="Waiting" class="${c.waiting ? 'wait' : 'zero'}">${sol(c.waiting)}</td></tr>${c.venue !== 'pump' && c.note ? `<tr><td colspan="5" style="text-align:left;color:var(--t3);font-size:12.5px;padding-top:0">${esc(c.note)}</td></tr>` : ''}`).join('')
+      <td data-l="Generated">${cell(c, 'generated')}</td><td data-l="Claimed">${cell(c, 'claimed')}</td><td data-l="Waiting" class="${c.waiting ? 'wait' : 'zero'}">${cell(c, 'waiting')}</td></tr>${c.venue !== 'pump' && c.note ? `<tr><td colspan="5" style="text-align:left;color:var(--t3);font-size:12.5px;padding-top:0">${esc(c.note)}</td></tr>` : ''}`).join('')
     $('state').textContent = d.reading ? 'Still reading the pump.fun vaults. Those rows will fill in shortly.' : `Read ${new Date(d.at).toLocaleTimeString()}`
     if (d.reading) setTimeout(load, 25000)
   } catch { $('state').textContent = 'Couldn’t read Solana just now. Try again in a moment.'; setTimeout(load, 30000) }

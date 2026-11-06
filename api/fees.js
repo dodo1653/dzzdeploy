@@ -25,12 +25,13 @@ const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https:/
 const token = () => process.env.BLOB_READ_WRITE_TOKEN || Object.entries(process.env).find(([k, v]) => /READ_WRITE_TOKEN$/.test(k) && /^vercel_blob_rw_/.test(String(v)))?.[1]
 const opts = () => (token() ? { token: token() } : {})
 const sleep = (ms) => new Promise((f) => setTimeout(f, ms))
+const BUDGET = +process.env.FEES_BUDGET || 28000; let stopAt = Date.now() + BUDGET   // stop reading in time to save progress and answer
 
 // a null answer counts as a miss: public RPCs drop old transactions, so the next one may still have it
 async function rpc(method, params) {
-  for (let round = 0; round < 3; round++) {
+  for (let round = 0; round < 3 && Date.now() < stopAt; round++) {
     for (const url of /^get(Signatures|Transaction)/.test(method) ? HISTORY : RPCS) {
-      try { const r = await (await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) })).json(); if (!r.error && r.result != null) return r.result } catch {}
+      try { const r = await (await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: AbortSignal.timeout(5000) })).json(); if (!r.error && r.result != null) return r.result } catch {}
     }
     await sleep(500 * (round + 1))
   }
@@ -68,17 +69,17 @@ async function flows(address, isToken) {
     if (!sigs) { full = false; break }
     todo.push(...sigs.filter((x) => !x.err && !(x.signature in s.moves))); if (sigs.length < 1000) break; before = sigs.at(-1).signature
   }
-  let left = PER_RUN, changed = false
+  let left = PER_RUN, changed = false, did = 0
   for (const x of todo) {
-    if (!left--) break
+    if (!left-- || Date.now() > stopAt) break
     const tx = await rpc('getTransaction', [x.signature, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]); if (!tx) { full = false; continue }
     const keys = [...tx.transaction.message.accountKeys, ...(tx.meta.loadedAddresses?.writable || []), ...(tx.meta.loadedAddresses?.readonly || [])], i = keys.indexOf(address)
     const held = (list) => Number((list || []).find((t) => t.accountIndex === i)?.uiTokenAmount.amount || 0)
-    s.moves[x.signature] = i < 0 ? 0 : isToken ? held(tx.meta.postTokenBalances) - held(tx.meta.preTokenBalances) : tx.meta.postBalances[i] - tx.meta.preBalances[i]; changed = true
+    s.moves[x.signature] = i < 0 ? 0 : isToken ? held(tx.meta.postTokenBalances) - held(tx.meta.preTokenBalances) : tx.meta.postBalances[i] - tx.meta.preBalances[i]; changed = true; did++
   }
   if (changed) await save(file, s)
   const v = Object.values(s.moves)
-  return { out: v.filter((n) => n < 0).reduce((a, n) => a - n, 0), read: v.length, done: full && todo.length <= PER_RUN }
+  return { out: v.filter((n) => n < 0).reduce((a, n) => a - n, 0), read: v.length, done: full && did === todo.length }
 }
 
 async function vaults(dev) {
@@ -104,7 +105,7 @@ async function pumpRows(coins) {
 }
 
 export default async function handler(req, res) {
-  res.setHeader('access-control-allow-origin', '*')
+  res.setHeader('access-control-allow-origin', '*'); stopAt = Date.now() + BUDGET
   try {
     const coins = (await load('launched.json'))?.coins || (await (await fetch('https://dzzdeploy.vercel.app/api/launched')).json()).coins || []
     const met = coins.filter((c) => c.venue === 'meteora' && c.pool), pump = coins.filter((c) => c.venue !== 'meteora')
