@@ -44,7 +44,7 @@ const sol = (l) => (l == null ? '—' : l === 0 ? '0' : (l / 1e9).toFixed(l < 1e
 async function load() {
   try {
     const d = await (await fetch('/api/fees')).json(); if (d.error) throw new Error(d.error)
-    const r = d.coins || [], done = r.filter((c) => !c.reading), cell = (c, k) => (c.reading ? 'reading…' : sol(c[k]))
+    const r = d.coins || [], done = r, cell = (c, k) => (c.reading && k !== 'waiting' ? `at least ${sol(c[k])}` : sol(c[k]))
     $('tg').textContent = sol(sum(done, 'generated')); $('tc').textContent = sol(sum(done, 'claimed')); $('tw').textContent = sol(sum(done, 'waiting'))
     $('rows').innerHTML = r.map((c) => `<tr><td><a class="coin" href="https://solscan.io/token/${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : '<i></i>'}<span>$${esc(c.symbol)}${c.venue === 'pump' ? ' <span class="star">*</span>' : ''}<small>${c.venue === 'pump' ? 'pump.fun' : 'Meteora'}</small></span></a></td>
       <td data-l="Dev">${c.dev ? `<a class="dev" href="https://solscan.io/account/${esc(c.dev)}" target="_blank" rel="noopener">${short(c.dev)}</a>` : '—'}</td>
