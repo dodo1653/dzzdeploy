@@ -20,7 +20,7 @@ body { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-rows:
 .top a.back .ic { transform: scaleX(-1); width: 15px; height: 15px; }
 .center { position: relative; z-index: 2; display: grid; place-items: center; padding: 24px 16px 70px; }
 .stack { width: min(340px, 100%); text-align: center; }
-.logo { display: inline-flex; margin: 0 auto 26px; } .logo b { font-size: 38px; }
+.bigmark { display: inline-flex; margin: 0 auto 28px; } .bigmark .logo { height: 34px; }
 h1 { margin: 0; font: 500 clamp(30px, 3.4vw, 36px)/1.1 var(--ui); letter-spacing: -.045em; }
 .sub { margin: 12px 0 34px; color: var(--t2); font-size: 15px; }
 .opts { display: grid; gap: 10px; }
@@ -51,7 +51,7 @@ h1 { margin: 0; font: 500 clamp(30px, 3.4vw, 36px)/1.1 var(--ui); letter-spacing
 
 <div class="center">
   <div class="stack">
-    <a class="mark logo in-1" href="/about"><b>dz<i>z</i></b></a>
+    <a class="mark bigmark in-1" href="/about"><svg class="logo" viewBox="0 0 80 28" role="img" aria-label="dzz" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="17.5" r="6"/><path d="M15.5 4.5v19"/><path d="M26 11.5h11L26 23.5h11"/><rect x="47" y="4.5" width="29" height="22" rx="5.5" fill="currentColor" stroke="none"/><path class="lg-cut" d="M56 10.5h11L56 20.5h11"/></svg></a>
     <h1 class="in-2">Sign in to <span class="grad">dzz</span></h1>
     <p class="sub in-2">Launch at the address you choose.</p>
     <div class="opts in-3">

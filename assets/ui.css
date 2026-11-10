@@ -156,3 +156,8 @@ textarea.in { resize: vertical; min-height: 76px; }
 /* headings and figures in Geist, body in Inter */
 h1, h2, h3, h4, .display, .mark b, .stats4 b { font-family: var(--head); }
 body { font-feature-settings: 'cv11', 'ss01'; }
+
+/* the dzz mark: d and z drawn as address characters, the last z picked out as a tile (the ending you choose) */
+.logo { display: block; height: 22px; width: auto; color: var(--ink); overflow: visible; }
+.logo .lg-cut { stroke: var(--logo-cut, var(--bg)); }
+.mark .logo { height: 22px; }

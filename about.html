@@ -33,7 +33,7 @@ main, header, footer { position: relative; z-index: 2; }
 .hd .W { height: 64px; display: flex; align-items: center; }
 .brand { display: inline-flex; align-items: center; gap: 10px; text-decoration: none; color: var(--ink); }
 .brand .g { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; background: linear-gradient(160deg, #fff, #c9d4ff); color: #0b0d16; font: 700 13.5px/1 var(--head); letter-spacing: -.06em; }
-.brand b { font: 600 17px var(--head); letter-spacing: -.035em; }
+.brand .logo { height: 23px; --logo-cut: #050814; }
 .hd nav { position: absolute; left: 50%; transform: translateX(-50%); display: flex; gap: 28px; font-size: 14px; color: var(--t2); }
 .hd nav a { text-decoration: none; transition: color .2s; } .hd nav a:hover { color: var(--ink); }
 .hd .rt { margin-left: auto; display: flex; align-items: center; gap: 6px; }
@@ -220,7 +220,7 @@ html.flow .hint { display: none; }
 
 <header class="hd">
   <div class="W">
-    <a class="brand" href="/about"><span class="g">dz</span><b>dzz</b></a>
+    <a class="brand" href="/about"><svg class="logo" viewBox="0 0 80 28" role="img" aria-label="dzz" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="17.5" r="6"/><path d="M15.5 4.5v19"/><path d="M26 11.5h11L26 23.5h11"/><rect x="47" y="4.5" width="29" height="22" rx="5.5" fill="currentColor" stroke="none"/><path class="lg-cut" d="M56 10.5h11L56 20.5h11"/></svg></a>
     <nav><a href="#how" data-go>How it works</a><a href="#launched" data-go>Launched</a><a href="#accounts" data-go>Accounts</a><a href="/fees">Fees</a></nav>
     <div class="rt">
       <a class="ico" href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener" title="$dzz on pump.fun"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg></a>
@@ -336,7 +336,7 @@ html.flow .hint { display: none; }
     <footer class="ft">
   <div class="W">
     <div class="cols">
-      <div class="about"><a class="brand" href="/about"><span class="g">dz</span><b>dzz</b></a><p>Custom contract addresses for coins on pump.fun and Meteora. Found in your browser, launched from your wallet.</p></div>
+      <div class="about"><a class="brand" href="/about"><svg class="logo" viewBox="0 0 80 28" role="img" aria-label="dzz" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="17.5" r="6"/><path d="M15.5 4.5v19"/><path d="M26 11.5h11L26 23.5h11"/><rect x="47" y="4.5" width="29" height="22" rx="5.5" fill="currentColor" stroke="none"/><path class="lg-cut" d="M56 10.5h11L56 20.5h11"/></svg></a><p>Custom contract addresses for coins on pump.fun and Meteora. Found in your browser, launched from your wallet.</p></div>
       <div><h4>Product</h4><ul><li><a href="/app">Launch a coin</a></li><li><a href="/app#explore">Launched coins</a></li><li><a href="/fees">Creator fees</a></li><li><a href="/app#dashboard">Dashboard</a></li></ul></div>
       <div><h4>Learn</h4><ul><li><a href="#how" data-go>How it works</a></li><li><a href="#spec" data-go>Specification</a></li><li><a href="#accounts" data-go>Accounts</a></li></ul></div>
       <div><h4>$dzz</h4><ul><li><a href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">pump.fun</a></li><li><a href="https://dexscreener.com/solana/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">Chart</a></li><li><a href="#" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz">Copy CA</a></li></ul></div>
