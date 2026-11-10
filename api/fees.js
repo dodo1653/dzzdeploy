@@ -159,6 +159,8 @@ export default async function handler(req, res) {
   res.setHeader('access-control-allow-origin', '*')
   try {
     const snap = await load(SNAP), age = snap ? Date.now() - snap.at : Infinity
+    // ?fresh=1 right after a claim: read again now (at most every 8 s), so the page shows the claim at once
+    if (req.query?.fresh && age > 8000) { const s2 = await readAll(20000); res.setHeader('cache-control', 'no-store'); return res.status(200).json(s2) }
     if (!snap) { const s = await readAll(BUDGET); res.setHeader('cache-control', 'public, s-maxage=10'); return res.status(200).json(s) }
     // stale: one refresh at a time (busy marks one in flight), up to ~50 s after the answer
     if (age > (snap.reading ? 15000 : 90000) && !(snap.busy && Date.now() - snap.busy < 65000)) {
