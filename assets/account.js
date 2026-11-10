@@ -71,6 +71,8 @@
     async unlinkWallet(wallet) { return set((await api('/p/unlink', { wallet })).profile) },
     async unlinkIdentity(provider) { return set((await api('/p/unlink-identity', { provider })).profile) },
     async rename(name) { return set((await api('/p/name', { name })).profile) },
+    // kind 'avatar' | 'banner'; one of { data: 'data:image/...' } | { preset: 'preset:id' } | { url: <a connected account's picture> } | { clear: true }
+    async setImage(kind, v) { return set((await api('/p/image', { kind, ...v })).profile) },
     signOut() { tok.set(null); set(null) },
   }
 })()

@@ -186,6 +186,43 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 .crow .who { font: 400 11.5px var(--mono); color: var(--t3); }
 .claim-any { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .claim-any .in { flex: 1; }
+
+/* profile card: banner + icon */
+.phero { position: relative; border: 1px solid var(--line); border-radius: var(--r3); background: var(--card); overflow: hidden; margin-bottom: 18px; }
+.pbanner { position: relative; height: 150px; background: linear-gradient(120deg, #0b1020, #1e3a8a 60%, #3b82f6); background-size: cover; background-position: center; }
+.pbanner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.35)); pointer-events: none; }
+.pedit { position: absolute; right: 14px; top: 14px; z-index: 1; background: rgba(0,0,0,.45); border-color: rgba(255,255,255,.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
+.pbody { position: relative; display: flex; align-items: flex-end; gap: 18px; padding: 0 22px 20px; flex-wrap: wrap; }
+.pav { width: 92px; height: 92px; margin-top: -46px; border-radius: 22px; border: 4px solid var(--bg); background: var(--s3); display: grid; place-items: center; overflow: hidden; font: 600 32px var(--head); color: var(--t2); flex: none; position: relative; z-index: 1; padding: 0; }
+.pav img { width: 100%; height: 100%; object-fit: cover; }
+button.pav.editable { cursor: pointer; }
+button.pav.editable::after { content: 'Change'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.55); color: #fff; font: 500 12px var(--ui); opacity: 0; transition: opacity .2s; }
+button.pav.editable:hover::after { opacity: 1; }
+.pname { flex: 1; min-width: 220px; padding-bottom: 4px; }
+.pname h2 { margin: 0; font: 500 clamp(22px, 2.3vw, 28px)/1.15 var(--head); letter-spacing: -.04em; }
+.pname p { margin: 6px 0 0; color: var(--t3); font-size: 13.5px; }
+.pend { display: flex; gap: 8px; padding-bottom: 6px; flex-wrap: wrap; }
+/* the picker */
+.modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(0,0,0,.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 16px; animation: rise .3s var(--ease); }
+.mbox { width: min(520px, 100%); max-height: calc(100vh - 32px); overflow: auto; border-radius: 16px; border: 1px solid var(--line2); background: var(--pop); padding: 20px; box-shadow: 0 40px 100px rgba(0,0,0,.6); }
+.mh { display: flex; align-items: center; justify-content: space-between; }
+.mh h3 { margin: 0; font: 500 18px var(--head); letter-spacing: -.02em; }
+.mprev { margin: 16px 0 6px; height: 120px; border-radius: 12px; border: 1px solid var(--line); background-size: cover; background-position: center; display: grid; place-items: center; overflow: hidden; }
+.mprev.av { width: 120px; margin-left: auto; margin-right: auto; border-radius: 26px; font: 600 40px var(--head); color: var(--t2); background-color: var(--s3); }
+.mprev img { width: 100%; height: 100%; object-fit: cover; }
+.mlbl { font: 500 11.5px var(--mono); color: var(--t3); letter-spacing: .04em; margin: 16px 0 8px; }
+.up { display: flex; align-items: center; gap: 10px; padding: 14px; border-radius: 12px; border: 1px dashed var(--line2); cursor: pointer; transition: border-color .2s, background .2s; }
+.up:hover { border-color: rgba(var(--acc-rgb), .6); background: rgba(var(--acc-rgb), .05); }
+.up small { margin-left: auto; color: var(--t3); font-size: 12px; }
+.grid-pick { display: grid; grid-template-columns: repeat(auto-fill, minmax(64px, 1fr)); gap: 8px; }
+.grid-pick button { all: unset; cursor: pointer; aspect-ratio: 1; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background-size: cover; background-position: center; transition: transform .15s, border-color .2s; }
+.grid-pick.wide { grid-template-columns: repeat(auto-fill, minmax(140px, 1fr)); }
+.grid-pick.wide button { aspect-ratio: 3 / 1; }
+.grid-pick button:hover { border-color: rgba(var(--acc-rgb), .7); transform: translateY(-1px); }
+.grid-pick button img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.mfoot { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
+.mmsg { font-size: 13px; color: var(--t2); } .mmsg.err { color: var(--bad); }
+@media (max-width: 640px) { .pbanner { height: 110px; } .pav { width: 76px; height: 76px; margin-top: -38px; } .pend { width: 100%; } }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
@@ -254,8 +291,14 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
     <!-- DASHBOARD -->
     <section class="view" data-view="dashboard" hidden>
-      <div class="vh"><div><h2 class="dash-h">Welcome back, <span class="grad" id="dashName">…</span></h2><p id="dashSub">Your launches and creator fees from every wallet on your account.</p></div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="#account"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg>Wallets</a><a class="btn primary" href="#launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a></div></div>
+      <div class="phero">
+        <div class="pbanner" data-banner></div>
+        <div class="pbody">
+          <span class="pav" data-avatar></span>
+          <div class="pname"><h2 class="dash-h">Welcome back, <span class="grad" id="dashName">…</span></h2><p id="dashSub">Your launches and creator fees from every wallet on your account.</p></div>
+          <div class="pend"><a class="btn" href="#account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Edit profile</a><a class="btn primary" href="#launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a></div>
+        </div>
+      </div>
         <div class="stats4">
           <div><b id="aCoins">–</b><span>coins launched</span></div>
           <div><b id="aClaimed">–</b><span>SOL collected <i id="aClaimedUsd"></i></span></div>
@@ -384,7 +427,14 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
         </div>
       </div>
       <div id="accIn" hidden>
-        <div class="acc-head"><span class="av" id="accAv"></span><div><h2 id="accName">…</h2><p id="accSub"></p></div><div class="end"><button class="btn sm" id="accRename">Rename</button><button class="btn sm ghost" id="accOutBtn"><svg class="ic"><use href="/assets/icons.svg#out"/></svg>Sign out</button></div></div>
+        <div class="phero">
+          <div class="pbanner" data-banner><button class="btn sm pedit" id="editBanner" type="button">Change banner</button></div>
+          <div class="pbody">
+            <button class="pav editable" data-avatar id="editAv" type="button" title="Change icon"></button>
+            <div class="pname"><h2 id="accName">…</h2><p id="accSub"></p></div>
+            <div class="pend"><button class="btn sm" id="accRename">Rename</button><button class="btn sm ghost" id="accOutBtn"><svg class="ic"><use href="/assets/icons.svg#out"/></svg>Sign out</button></div>
+          </div>
+        </div>
         <div class="two">
           <div class="card"><div class="card-h"><h3>Sign-in accounts</h3><span class="sub">use any of them to sign in</span></div><div id="accIds"></div></div>
           <div class="card"><div class="card-h"><h3>Wallets</h3><span class="end"><button class="btn sm" id="accLink"><svg class="ic"><use href="/assets/icons.svg#plus"/></svg>Link this wallet</button></span></div><div id="accWallets"></div><p class="hint" style="margin-top:12px">To add another wallet, switch to it in your wallet app, then press Link this wallet and sign. A wallet that already had launches brings them along.</p></div>
@@ -399,6 +449,17 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
   <label class="fl">Solana RPC<input class="in mono" id="sRpc"></label>
   <label class="fl">Threads<input class="in mono" id="sThreads" type="number" min="1"></label>
   <button class="btn" id="sSave">Save</button><p class="hint" id="sNote"></p>
+</div>
+<div class="modal" id="pick" hidden>
+  <div class="mbox" role="dialog" aria-modal="true" aria-labelledby="pickT">
+    <div class="mh"><h3 id="pickT">Change icon</h3><button class="iconbtn" id="pickX" type="button" aria-label="Close"><svg class="ic"><use href="/assets/icons.svg#close"/></svg></button></div>
+    <div class="mprev" id="pickPrev"></div>
+    <div class="mlbl">Upload</div>
+    <label class="up"><input type="file" id="pickFile" accept="image/png,image/jpeg,image/webp,image/gif" hidden><svg class="ic"><use href="/assets/icons.svg#plus"/></svg><span>Choose an image</span><small id="pickHint">square works best · cropped to fit</small></label>
+    <div id="pickAccW"><div class="mlbl">From your accounts</div><div class="grid-pick" id="pickAcc"></div></div>
+    <div class="mlbl">Presets</div><div class="grid-pick" id="pickPre"></div>
+    <div class="mfoot"><button class="btn ghost" id="pickClear" type="button">Remove</button><span class="mmsg" id="pickMsg"></span></div>
+  </div>
 </div>
 <div class="toast" id="toast"></div>
 
@@ -970,12 +1031,94 @@ summary(); stats()
   $('accRename').onclick = async () => { const n = prompt('Name on your account', $('accName').textContent); if (!n) return; try { await DzzAuth.rename(n) } catch (e) { toast(e.message, true) } }
   $('accLink').onclick = async () => { try { say('Sign the message in your wallet…'); await DzzAuth.linkWallet(); say(''); toast('Wallet linked') } catch (e) { say(e.message, true) } }
 
+  // ---------------------------------------------------------------- profile icon and banner
+  const BANNERS = {
+    night: 'linear-gradient(to top, rgba(59,130,246,.7), rgba(59,130,246,0) 78%), repeating-linear-gradient(90deg, rgba(255,255,255,.05) 0 1px, transparent 1px 46px), #060912',
+    dusk: 'linear-gradient(120deg, #0b1020, #1e3a8a 60%, #3b82f6)',
+    glacier: 'radial-gradient(120% 150% at 20% 120%, #22b8e6, transparent 55%), linear-gradient(120deg, #05121a, #0a2a3a)',
+    jade: 'radial-gradient(120% 160% at 0% 110%, #10b981, transparent 55%), linear-gradient(120deg, #04110c, #06261b)',
+    ember: 'radial-gradient(120% 140% at 100% 110%, #f97316, transparent 55%), linear-gradient(120deg, #140805, #3a1206)',
+    orchid: 'radial-gradient(110% 140% at 80% 120%, #a855f7, transparent 60%), linear-gradient(120deg, #0d0717, #241040)',
+    graphite: 'radial-gradient(120% 140% at 50% 130%, #6b7280, transparent 60%), linear-gradient(180deg, #0b0b0c, #18181b)',
+    paper: 'linear-gradient(120deg, #eef1f7, #cfd8ea)',
+  }
+  const bannerCss = (v) => (!v ? BANNERS.dusk : v.startsWith('preset:') ? BANNERS[v.slice(7)] || BANNERS.dusk : `center / cover no-repeat url("${v.replace(/"/g, '')}")`)
+  function paint(p) {
+    document.querySelectorAll('[data-banner]').forEach((el) => (el.style.background = bannerCss(p?.banner)))
+    document.querySelectorAll('[data-avatar]').forEach((el) => (el.innerHTML = avatar(p)))
+  }
+  // preset icons: a flat white mark on a deep colour, drawn here and saved like an upload
+  const ICONS = [['#1e3a8a', 'z'], ['#0f766e', 'circle'], ['#7c2d12', 'tri'], ['#4c1d95', 'diamond'], ['#111827', 'bars'], ['#0c4a6e', 'ring'], ['#365314', 'square'], ['#831843', 'plus']]
+  function iconData([bg, g], size = 256) {
+    const c = document.createElement('canvas'); c.width = c.height = size; const x = c.getContext('2d'), k = size / 24
+    const gr = x.createRadialGradient(size * .5, size * 1.1, 0, size * .5, size * 1.1, size * 1.1); gr.addColorStop(0, '#ffffff22'); gr.addColorStop(1, '#00000000')
+    x.fillStyle = bg; x.fillRect(0, 0, size, size); x.fillStyle = gr; x.fillRect(0, 0, size, size)
+    x.fillStyle = '#f4f6fb'; x.strokeStyle = '#f4f6fb'; x.lineWidth = 2.6 * k; x.lineJoin = 'round'
+    const P = (pts) => { x.beginPath(); pts.forEach(([a, b], i) => (i ? x.lineTo(a * k, b * k) : x.moveTo(a * k, b * k))); x.closePath(); x.fill() }
+    if (g === 'z') { P([[6.5, 6.5], [17.5, 6.5], [17.5, 8.8], [6.5, 8.8]]); P([[14.3, 9.9], [17.5, 9.9], [9.7, 14.1], [6.5, 14.1]]); P([[6.5, 15.2], [17.5, 15.2], [17.5, 17.5], [6.5, 17.5]]) }
+    if (g === 'circle') { x.beginPath(); x.arc(12 * k, 12 * k, 5.4 * k, 0, 7); x.fill() }
+    if (g === 'tri') P([[12, 6.2], [18, 17], [6, 17]])
+    if (g === 'diamond') P([[12, 5.6], [18.4, 12], [12, 18.4], [5.6, 12]])
+    if (g === 'bars') { P([[6.5, 7], [17.5, 7], [17.5, 9.2], [6.5, 9.2]]); P([[6.5, 10.9], [14, 10.9], [14, 13.1], [6.5, 13.1]]); P([[6.5, 14.8], [17.5, 14.8], [17.5, 17], [6.5, 17]]) }
+    if (g === 'ring') { x.beginPath(); x.arc(12 * k, 12 * k, 4.6 * k, 0, 7); x.stroke() }
+    if (g === 'square') P([[7.2, 7.2], [16.8, 7.2], [16.8, 16.8], [7.2, 16.8]])
+    if (g === 'plus') { P([[10.8, 6.2], [13.2, 6.2], [13.2, 17.8], [10.8, 17.8]]); P([[6.2, 10.8], [17.8, 10.8], [17.8, 13.2], [6.2, 13.2]]) }
+    return c.toDataURL('image/png')
+  }
+  // an uploaded picture, cropped to fill the shape and sized down before it leaves the browser
+  function fit(file, w, h) {
+    return new Promise((ok, no) => {
+      const img = new Image(), url = URL.createObjectURL(file)
+      img.onload = () => {
+        const c = document.createElement('canvas'); c.width = w; c.height = h; const x = c.getContext('2d'), r = Math.max(w / img.width, h / img.height)
+        x.imageSmoothingQuality = 'high'; x.drawImage(img, (w - img.width * r) / 2, (h - img.height * r) / 2, img.width * r, img.height * r); URL.revokeObjectURL(url)
+        let q = .9, d = c.toDataURL('image/webp', q); if (!d.startsWith('data:image/webp')) d = c.toDataURL('image/jpeg', q)
+        while (d.length > 1.9e6 && q > .4) { q -= .1; d = c.toDataURL(d.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg', q) }
+        ok(d)
+      }
+      img.onerror = () => no(new Error('that file is not an image this browser can read'))
+      img.src = url
+    })
+  }
+  let pickKind = 'avatar'
+  const pmsg = (t, err) => { $('pickMsg').textContent = t || ''; $('pickMsg').className = 'mmsg' + (err ? ' err' : '') }
+  async function openPick(kind) {
+    pickKind = kind; const p = await DzzAuth.me(); if (!p) return
+    $('pickT').textContent = kind === 'avatar' ? 'Change icon' : 'Change banner'
+    $('pickHint').textContent = kind === 'avatar' ? 'square works best · cropped to fit' : 'wide works best · cropped to 1500 × 500'
+    const prev = $('pickPrev'); prev.className = 'mprev' + (kind === 'avatar' ? ' av' : '')
+    if (kind === 'avatar') { prev.style.background = ''; prev.innerHTML = avatar(p) } else { prev.innerHTML = ''; prev.style.background = bannerCss(p.banner) }
+    const accs = kind === 'avatar' ? (p.identities || []).filter((i) => i.avatar) : []
+    $('pickAccW').hidden = !accs.length
+    $('pickAcc').innerHTML = accs.map((i) => `<button type="button" data-url="${esc(i.avatar)}" title="${esc(NAMES[i.provider])}"><img src="${esc(i.avatar)}" alt=""></button>`).join('')
+    const pre = $('pickPre'); pre.className = 'grid-pick' + (kind === 'banner' ? ' wide' : '')
+    pre.innerHTML = kind === 'avatar' ? ICONS.map((ic, i) => `<button type="button" data-icon="${i}"><img src="${iconData(ic, 96)}" alt=""></button>`).join('')
+      : Object.keys(BANNERS).map((k) => `<button type="button" data-preset="${k}" title="${k}" style="background:${BANNERS[k]}"></button>`).join('')
+    pmsg(''); $('pick').hidden = false
+  }
+  async function savePick(v, label = 'Saving…') {
+    pmsg(label)
+    try { const p = await DzzAuth.setImage(pickKind, v); paint(p); meCard(p); $('pick').hidden = true; toast(pickKind === 'avatar' ? 'Icon updated' : 'Banner updated') }
+    catch (e) { pmsg(e.message, true) }
+  }
+  $('editAv').onclick = () => openPick('avatar'); $('editBanner').onclick = () => openPick('banner')
+  $('pickX').onclick = () => ($('pick').hidden = true)
+  $('pick').addEventListener('click', (e) => { if (e.target.id === 'pick') $('pick').hidden = true })
+  addEventListener('keydown', (e) => { if (e.key === 'Escape') $('pick').hidden = true })
+  $('pickClear').onclick = () => savePick({ clear: true }, 'Removing…')
+  $('pickAcc').onclick = (e) => { const b = e.target.closest('button[data-url]'); if (b) savePick({ url: b.dataset.url }) }
+  $('pickPre').onclick = (e) => { const b = e.target.closest('button'); if (!b) return; if (b.dataset.preset) savePick({ preset: 'preset:' + b.dataset.preset }); else savePick({ data: iconData(ICONS[+b.dataset.icon]) }) }
+  $('pickFile').onchange = async (e) => {
+    const f = e.target.files[0]; e.target.value = ''; if (!f) return
+    try { pmsg('Preparing…'); const d = await (pickKind === 'avatar' ? fit(f, 256, 256) : fit(f, 1500, 500)); await savePick({ data: d }, 'Uploading…') } catch (x) { pmsg(x.message, true) }
+  }
+
   async function account() {
     const p = await DzzAuth.me()
     $('accOut').hidden = !!p; $('accIn').hidden = !p
     if (!p) { if (!DzzAuth.token() && !DzzAuth.lastError) location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); return }
     $('dashName').textContent = p.name
-    $('accAv').innerHTML = avatar(p); $('accName').textContent = p.name
+    paint(p); $('accName').textContent = p.name
     $('accSub').textContent = `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'} · ${p.identities?.length || 0} sign-in account${p.identities?.length === 1 ? '' : 's'}`
     const ids = p.identities || [], canDrop = ids.length + p.wallets.length > 1
     $('accIds').innerHTML = ['google', 'discord', 'x'].map((k) => {
