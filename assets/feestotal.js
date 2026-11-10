@@ -26,7 +26,7 @@
 @media (max-width: 640px) { #feesTotal .ft { grid-template-columns: 1fr; } }`
   document.head.appendChild(css)
 
-  let busy = false
+  let busy = false, again = false
   async function signIn() {
     const p = provider(); if (!p) return foot('No Solana wallet found in this browser.')
     try {
@@ -38,7 +38,7 @@
   const foot = (t) => { const f = root.querySelector('.fx span'); if (f) f.textContent = t }
 
   async function draw() {
-    if (busy) return; busy = true
+    if (busy) { again = true; return } busy = true
     try {
       let wallets = [], name = ''
       if (token.get()) { try { const p = (await api('me')).profile; wallets = p.wallets; name = p.name } catch { token.set(null) } }
@@ -65,7 +65,7 @@
       root.querySelector('[data-signin]')?.addEventListener('click', signIn)
       if (f.reading) setTimeout(draw, 25000)
     } catch { root.innerHTML = '<div class="fx"><span>Could not read your fees just now.</span></div>' }
-    finally { busy = false }
+    finally { busy = false; if (again) { again = false; draw() } }
   }
   window.DzzFeesTotal = { refresh: draw }
   draw()
