@@ -2,8 +2,8 @@
 //   GET /api/fees → { coins: [{ mint, name, symbol, image, venue, dev, generated, claimed, waiting, note }], reading, at }   amounts in lamports
 // Meteora keeps running totals on the coin's pool, so those are exact and need no history. pump.fun keeps one fee vault per dev
 // wallet, not per coin: its figures are the wallet's, read from every movement through its vaults, a batch at a time, remembered
-// in Blob.
-import { put, head } from '@vercel/blob'
+// in dzz's store.
+import { put, getJson } from './_store.js'
 import { ed25519 } from '@noble/curves/ed25519'
 import crypto from 'node:crypto'
 
@@ -22,8 +22,6 @@ export function pda(seeds, program) {
 }
 // publicnode only keeps recent history, so anything that reads the past has to ask a full node first or it undercounts
 const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), HISTORY = [process.env.RPC_URL, 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 40
-const token = () => process.env.BLOB_READ_WRITE_TOKEN || Object.entries(process.env).find(([k, v]) => /READ_WRITE_TOKEN$/.test(k) && /^vercel_blob_rw_/.test(String(v)))?.[1]
-const opts = () => (token() ? { token: token() } : {})
 const sleep = (ms) => new Promise((f) => setTimeout(f, ms))
 const BUDGET = +process.env.FEES_BUDGET || 28000; let stopAt = Date.now() + BUDGET   // stop reading in time to save progress and answer
 
@@ -37,8 +35,8 @@ async function rpc(method, params) {
   }
   return null
 }
-const load = async (name) => { try { const h = await head(name, opts()); const r = await fetch(`${h.url}?t=${Date.now()}`, { cache: 'no-store' }); if (r.ok) return await r.json() } catch {} return null }
-const save = async (name, v) => { try { await put(name, JSON.stringify(v), { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true, ...opts() }) } catch {} }
+const load = (name) => getJson(name)
+const save = async (name, v) => { try { await put(name, JSON.stringify(v)) } catch {} }
 const u64 = (d, o) => Number(d.readBigUInt64LE(o))
 
 // a Meteora curve pool: total_trading_quote_fee is everything the dev side ever earned, the two fee fields are what's still unclaimed

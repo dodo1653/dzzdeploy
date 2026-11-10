@@ -198,6 +198,7 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
   <button class="ib" id="snd" title="Sound"><svg viewBox="0 0 24 24"><path d="M4 9h3l5-4v14l-5-4H4z"/><path class="on-i" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off-i" d="m16.5 9.5 5 5m0-5-5 5"/></svg></button>
   <button class="ib" data-theme-picker title="Theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg></button>
   <button class="ib" id="setBtn" title="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
+  <a class="pill" href="/me" style="text-decoration:none">Profile</a>
   <button class="pill" id="wallet"><i></i><span>Connect wallet</span></button>
 </header>
 
@@ -251,6 +252,7 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
           <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
             <div class="tlist" id="tlist"><div class="empty">loading pump.fun's list…</div></div></div></div>
         <div class="fl" data-only="pump">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint" id="feeNote"></p></div>
+        <div class="fl" data-only="meteora" hidden>Paired with<div class="seg" id="mpair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TTWO">Take-Two (TTWO)</button><button data-v="ANY">Any token</button></div><div id="manyRow" hidden style="margin-top:10px"><input class="in mono" id="manyMint" placeholder="Paste the token's mint address" spellcheck="false" autocomplete="off"></div><p class="hint" id="mpairNote"></p></div>
         <div class="fl" data-only="meteora" hidden>Trading fee<div class="seg" id="mfee" style="justify-self:start"><span class="thumb"></span><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint">Paid on every trade. Meteora keeps 20% of it, the rest is yours to claim. It is not sent to you by itself.</p></div>
         <div class="fl" data-only="meteora" hidden>Graduates at<div class="seg" id="mgrad" style="justify-self:start"><span class="thumb"></span><button data-v="200">200 SOL</button><button data-v="400" class="on">400 SOL</button><button data-v="800">800 SOL</button></div><p class="hint" id="mgradNote"></p></div>
         <div class="fl" data-only="meteora" hidden>Anti-snipe<div class="seg" id="msnipe" style="justify-self:start"><span class="thumb"></span><button data-v="1" class="on">On</button><button data-v="0">Off</button></div><p class="hint" id="msnipeNote"></p></div>
@@ -501,13 +503,32 @@ pairUi()
 seg('fee', (v) => { feeBps = +v; summary() })
 // ---------------------------------------------------------------- Meteora: the other place a coin can launch (hosted dzz only)
 const METEORA_JS = '/assets/meteora.js'
-let venue = 'pump', mFee = 100, mGrad = 400, mSnipe = true, mShared = false, meteoraLib = null
+let venue = 'pump', mFee = 100, mGrad = 400, mSnipe = true, mShared = false, meteoraLib = null, mPair = 'SOL', mRate = 0
+// pairs other than SOL: tokenized Take-Two (a Token-2022 stock token Meteora takes through its token badge), HYPE, or any token
+const TTWO_Q = { mint: 'TTWofwAge91oFhZs7kpQdyrVRkmevgM88xijGvQFbKo', decimals: 6, program: 'TokenzQdBNbLqP5VEhdkAS6EPFLC1PHnBqCXEpPxuEb', symbol: 'TTWO' }
+const HYPE_Q = { mint: '98sMhvDwXj1RQi5c5Mndm3vPe9cBqPrbLaufMXFNMh5g', decimals: 9, program: 'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA', symbol: 'HYPE' }
+const M_QUOTES = { TTWO: TTWO_Q, HYPE: HYPE_Q }, M_LABEL = { SOL: 'SOL', TTWO: 'Take-Two (TTWO)', HYPE: 'HYPE' }
+let anyQ = null, anyT = 0, anyErr = ''                             // "Any token": the pair resolved from a pasted mint (MeteoraLaunch.resolveQuote)
+const mQuote = () => (mPair === 'ANY' ? anyQ : M_QUOTES[mPair])
+const mUnit = () => (mPair === 'ANY' ? anyQ?.symbol || 'the token' : mPair)
+const mLabel = () => (mPair === 'ANY' ? (anyQ ? anyQ.symbol : 'a token') : M_LABEL[mPair])
+function anyResolve() {
+  clearTimeout(anyT); anyQ = null; anyErr = ''; const v = $('manyMint').value.trim(); mNotes(); summary(); if (!v) return
+  anyErr = 'checking that token…'; mNotes()
+  anyT = setTimeout(async () => { try { const q = await (await meteora()).resolveQuote(v); if ($('manyMint').value.trim() !== v) return; anyQ = q; mRate = q.rate; anyErr = '' } catch (e) { anyQ = null; anyErr = e.message } mNotes(); summary(); lowCheck() }, 450)
+}
 const GRAD_NOTE = { 200: 'The curve fills after about 56 SOL of buying.', 400: 'The curve fills after about 86 SOL of buying, about the same as pump.fun.', 800: 'The curve fills after about 130 SOL of buying.' }
 const meteora = () => (meteoraLib ||= new Promise((ok, no) => { const t = document.createElement('script'); t.src = METEORA_JS; t.onload = () => ok(window.MeteoraLaunch); t.onerror = () => { meteoraLib = null; no(new Error('the Meteora launcher did not load, try again')) }; document.head.append(t) }))
 // the first launch with a set of settings creates the shared config; later ones skip its rent
-const mCheck = async () => { try { const M = await meteora(); mShared = await M.sharedReady({ feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad }) } catch { mShared = false } lowCheck(); summary() }
+const mCheck = async () => { try { const M = await meteora(); mShared = mPair === 'SOL' && await M.sharedReady({ feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad }); if (mQuote()) { mRate = await M.perSolOf(mQuote()); mNotes() } } catch { mShared = false } lowCheck(); summary() }
 const mNotes = () => {
-  $('mgradNote').textContent = GRAD_NOTE[mGrad] + ' The coin then moves to a Meteora pool with its liquidity locked for good.'
+  $('mgradNote').textContent = GRAD_NOTE[mGrad] + ' The coin then moves to a Meteora pool with its liquidity locked for good.' + (mQuote() ? ` In ${mUnit()} that is about ${mRate ? Math.round(mGrad * mRate).toLocaleString() + ' ' + mUnit() : 'the same in ' + mUnit()}, at today's rate.` : '')
+  $('manyRow').hidden = mPair !== 'ANY'
+  const keeperNote = "Meteora's keeper only graduates SOL and USDC pairs, so a full curve waits for someone to press Graduate."
+  $('mpairNote').textContent = mPair === 'ANY' ? (anyErr || (anyQ ? `Priced in ${anyQ.symbol}${anyQ.name && anyQ.name !== anyQ.symbol ? ' (' + anyQ.name + ')' : ''}: 1 SOL = ${anyQ.rate.toLocaleString(undefined, { maximumFractionDigits: 3 })} ${anyQ.symbol} now. Buyers pay in ${anyQ.symbol}, or in SOL through Jupiter. ` + (anyQ.keeper ? "Meteora's keeper graduates this pair by itself." : keeperNote) + (anyQ.freezable ? ` Note: ${anyQ.symbol}'s issuer can freeze accounts.` : '') : 'Paste the mint address of any Solana token Jupiter can trade. dzz checks it on chain before you launch.'))
+    : mPair === 'TTWO' ? `Priced in Backpack's tokenized Take-Two${mRate ? ` (1 SOL = ${mRate.toFixed(3)} TTWO now)` : ''}. Buyers pay in TTWO, or in SOL through Jupiter. ${keeperNote}`
+    : mPair === 'HYPE' ? `Priced in HYPE, Hyperliquid's token on Solana${mRate ? ` (1 SOL = ${mRate.toFixed(3)} HYPE now)` : ''}. Every trade's fees are paid in HYPE. Buyers pay in HYPE, or in SOL through Jupiter. ${keeperNote}` : 'Priced in SOL, like pump.fun.'
+  if (venue === 'meteora') $('buyNote').textContent = mQuote() ? `0 means no dev buy. Your SOL goes into ${mPair === 'TTWO' ? 'Take-Two' : mUnit()} through Jupiter first (one more approval), then the buy lands with the pool, so nobody can buy before you.` : '0 means no dev buy. It lands in the same transaction as the pool, so nobody can buy before you.'
   $('msnipeNote').textContent = mSnipe ? `For the first 2 minutes the fee starts at 50% and falls to ${mFee / 100}%. Your dev buy pays the normal fee.` : `Every trade pays ${mFee / 100}% from the first second.`
 }
 function setVenue(v) {
@@ -527,6 +548,8 @@ if (METEORA_JS) {
   seg('mfee', (v) => { mFee = +v; mNotes(); summary(); mCheck() })
   seg('mgrad', (v) => { mGrad = +v; mNotes(); summary(); mCheck() })
   seg('msnipe', (v) => { mSnipe = v === '1'; mNotes(); summary(); mCheck() })
+  seg('mpair', (v) => { mPair = v; if (v === 'ANY') { mRate = anyQ?.rate || 0; setTimeout(() => $('manyMint').focus(), 50) } mNotes(); summary(); if (v !== 'ANY') mCheck() })
+  $('manyMint').addEventListener('input', anyResolve)
 }
 
 // ---------------------------------------------------------------- odds and the live meter
@@ -625,7 +648,7 @@ const splits = () => [...$('splits').children].map((d) => { const [a, p] = d.que
 function summary() {
   const sp = splits(), others = sp.reduce((a, s) => a + s.shareBps, 0) / 100, m = st?.selected, k = st?.keys.find((x) => x.mint === m)
   const name = $('name').value.trim(), sym = $('sym').value.trim()
-  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : venue === 'meteora' ? 'random address · made at launch' : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>${venue === 'meteora' ? `on <b>Meteora</b> · paired with <b>SOL</b> · <b>${mFee / 100}%</b> trading fee · anti-snipe <b>${mSnipe ? 'on' : 'off'}</b>` : `paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee`}${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
+  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : venue === 'meteora' ? 'random address · made at launch' : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>${venue === 'meteora' ? `on <b>Meteora</b> · paired with <b>${esc(mLabel())}</b> · paired with <b>SOL</b> · <b>${mFee / 100}%</b> trading fee · anti-snipe <b>${mSnipe ? 'on' : 'off'}</b>` : `paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee`}${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
 }
 
 // ---------------------------------------------------------------- hold to launch
@@ -642,7 +665,7 @@ async function balance() {
 }
 setInterval(balance, 20000)
 // what this launch needs: account rent (measured: SOL pair 0.0055, HYPE 0.0070, a fee split +0.0059), fees, a margin, the dev buy
-const needSol = () => { if (venue === 'meteora') { const b = +$('buy').value || 0; return (mShared && !splits().length ? 0.0105 : 0.017) + (b > 0 ? 0.003 + b : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
+const needSol = () => { if (venue === 'meteora') { const b = +$('buy').value || 0; return (mShared && !splits().length ? 0.0105 : 0.017) + (b > 0 ? 0.003 + b + (mQuote() ? 0.0045 : 0) : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
 // running out of SOL is its own, plainly named error: a banner with what the launch needs and what the wallet has
 const SHORT_RE = /"Custom":1}|insufficient (funds|lamports)|InsufficientFunds|no record of a prior credit|AccountNotFound|ResultWithNegativeLamports/i
 function showShort(need, have) {
@@ -661,6 +684,7 @@ function check() {
   if (!$('name').value.trim() || !$('sym').value.trim() || !pic64) return 'a picture, a name and a ticker first'
   const sp = splits(), buy = +$('buy').value || 0
   if (venue === 'meteora') {
+    if (mPair === 'ANY' && !anyQ) return anyErr && !/checking/.test(anyErr) ? anyErr : 'paste the mint address of the token to pair with'
     if (sp[0] && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(sp[0].address)) return 'that fee wallet is not a Solana address'
     if (sp[0] && (sp[0].shareBps % 100 || sp[0].shareBps > 10000)) return 'the fee wallet takes a whole percent, 1 to 100'
     return
@@ -700,7 +724,7 @@ async function launch() {
     }
     const coin = { owner: sol, image: pic64, name, symbol, description: $('desc').value.trim(), twitter: $('x').value, website: $('web').value, telegram: $('tg').value }
     const r = venue === 'meteora'
-      ? await (await meteora()).launch({ ...coin, ...meteoraMint(), buySol: +$('buy').value || 0, feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad, feeWallet: sp[0]?.address, feeShare: sp[0] ? sp[0].shareBps / 100 : 0 }, prog)
+      ? await (await meteora()).launch({ ...coin, ...meteoraMint(), quote: mQuote(), buySol: +$('buy').value || 0, feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad, feeWallet: sp[0]?.address, feeShare: sp[0] ? sp[0].shareBps / 100 : 0 }, prog)
       : await pumpLaunch({ ...coin, pair: pair === 'COIN' ? 'SOL' : pair === 'TOKEN' ? tokenPick.mint : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, prog)
     ;['meta', 'sign', 'live'].forEach((k) => step(k, 'ok')); note(''); S.launched(); L.launched(r.mint, r.signature, { name, symbol, image: r.image, venue: r.venue, pool: r.pool })
     const k = st?.keys.find((x) => x.mint === r.mint)

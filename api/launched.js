@@ -1,20 +1,19 @@
 // The public list of coins launched with dzz.
-//   GET  /api/launched                 → { coins: [{ mint, name, symbol, image, uri, sig, at, venue?, pool? }] } newest first (cached ~15 s)
+//   GET  /api/launched                 → { coins: [{ mint, name, symbol, image, uri, sig, at, dev, venue?, pool? }] } newest first (cached ~15 s)
 //   POST /api/launched { mint, signature }
 // A POST is only listed after it checks out on Solana: the transaction succeeded, it ran pump.fun's or Meteora's create for
 // exactly that mint, and the coin's metadata lives where dzz puts it (this project's Blob store, or the desktop app's
-// jsDelivr-served dzzdeploy repo). The list is one JSON file in Vercel Blob (launched.json).
-import { put, head } from '@vercel/blob'
+// jsDelivr-served dzzdeploy repo, or the old Blob store). `dev` is the wallet that signed and paid for the launch (profiles
+// group coins by it). The list is one JSON file in dzz's store (launched.json).
+import { put, getJson, STORE } from './_store.js'
 
 const PUMP = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
 const DBC = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'                  // Meteora's bonding curve program
 const DBC_CREATE = [[140, 85, 215, 176, 102, 54, 104, 79], [169, 118, 51, 78, 145, 110, 220, 155]].map((d) => Buffer.from(d))   // initialize_virtual_pool_with_spl_token / _token2022: accounts 3 = mint, 5 = pool
 const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean)
-const OURS = /^https:\/\/([a-z0-9]+\.public\.blob\.vercel-storage\.com|cdn\.jsdelivr\.net\/gh\/dodo1653\/dzzdeploy@)/i
+const OURS = new RegExp('^(https://([a-z0-9]+\.public\.blob\.vercel-storage\.com|cdn\.jsdelivr\.net/gh/dodo1653/dzzdeploy@)|' + STORE.replace(/[.*+?^${}()|[\]\/]/g, '\$&') + '/s/m/)', 'i')
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const b58dec = (s) => { let n = 0n; for (const c of s) { const i = B58.indexOf(c); if (i < 0) throw new Error('bad base58'); n = n * 58n + BigInt(i) } let h = n.toString(16); if (h.length % 2) h = '0' + h; const out = Buffer.from(h === '0' ? '' : h, 'hex'); let z = 0; for (const c of s) { if (c !== '1') break; z++ } return Buffer.concat([Buffer.alloc(z), out]) }
-const token = () => process.env.BLOB_READ_WRITE_TOKEN || Object.entries(process.env).find(([k, v]) => /READ_WRITE_TOKEN$/.test(k) && /^vercel_blob_rw_/.test(String(v)))?.[1]
-const opts = () => (token() ? { token: token() } : {})
 
 async function rpc(method, params) {
   let last
@@ -32,8 +31,7 @@ function createArgs(data) {
   return { name: str(), symbol: str(), uri: str() }
 }
 async function readList() {
-  try { const h = await head('launched.json', opts()); const r = await fetch(h.url + '?t=' + Date.now(), { cache: 'no-store' }); if (r.ok) return (await r.json()).coins || [] } catch {}
-  return []
+  return (await getJson('launched.json'))?.coins || []
 }
 
 export default async function handler(req, res) {
@@ -65,9 +63,9 @@ export default async function handler(req, res) {
     if (!meta) return res.status(400).json({ error: 'no pump.fun or Meteora create for this mint in that transaction' })
     if (!OURS.test(meta.uri)) return res.status(400).json({ error: 'not launched with dzz' })
     let image = ''; try { image = (await (await fetch(meta.uri)).json()).image || '' } catch {}
-    const coin = { mint, name: meta.name.slice(0, 32), symbol: meta.symbol.slice(0, 10), image, uri: meta.uri, sig, at: (tx.blockTime || Math.floor(Date.now() / 1000)) * 1000, ...extra }
+    const coin = { mint, name: meta.name.slice(0, 32), symbol: meta.symbol.slice(0, 10), image, uri: meta.uri, sig, at: (tx.blockTime || Math.floor(Date.now() / 1000)) * 1000, dev: keys[0], ...extra }
     list = [coin, ...(await readList()).filter((c) => c.mint !== mint)].slice(0, 500)
-    await put('launched.json', JSON.stringify({ coins: list }), { access: 'public', contentType: 'application/json', addRandomSuffix: false, allowOverwrite: true, cacheControlMaxAge: 60, ...opts() })
+    await put('launched.json', JSON.stringify({ coins: list }))
     return res.status(200).json({ ok: true, coin })
   } catch (e) { return res.status(500).json({ error: String(e.message || e).slice(0, 200) }) }
 }
