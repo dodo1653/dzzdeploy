@@ -24,7 +24,7 @@ export function pda(seeds, program) {
   throw new Error('no address')
 }
 // publicnode only keeps recent history, so anything that reads the past has to ask a full node first or it undercounts
-const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), HISTORY = [process.env.RPC_URL, 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 120
+const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), HISTORY = [process.env.RPC_URL, 'https://api.mainnet-beta.solana.com', 'https://solana-mainnet.gateway.tatum.io'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 120
 const sleep = (ms) => new Promise((f) => setTimeout(f, ms))
 const BUDGET = +process.env.FEES_BUDGET || 28000; let stopAt = Date.now() + BUDGET   // stop reading in time to save progress and answer
 
