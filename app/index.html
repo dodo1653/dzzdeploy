@@ -85,7 +85,7 @@ body { min-height: 100vh; background: radial-gradient(1200px 520px at 60% -180px
 .meter { margin: 44px auto 0; max-width: 760px; }
 .track { position: relative; height: 2px; background: var(--line); border-radius: 2px; }
 .track i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, rgba(var(--acc-rgb),.12), var(--acc)); border-radius: 2px; transition: width .35s linear; }
-.track i::after { content: ''; position: absolute; right: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--acc); opacity: var(--head, 0); transition: opacity .3s; }
+.track i::after { content: ''; position: absolute; right: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--acc); opacity: var(--track-head, 0); transition: opacity .3s; }
 #stats { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 14px; font: 400 12.5px var(--mono); color: var(--t3); font-variant-numeric: tabular-nums; min-height: 19px; }
 #stats b { color: var(--ink); font-weight: 500; } #stats .bad { color: var(--bad); }
 .controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
@@ -184,6 +184,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 .crow .amt { font: 500 14px var(--mono); text-align: right; } .crow .amt small { display: block; font: 400 11.5px var(--mono); color: var(--t3); }
 .crow .btn { min-width: 108px; } .crow .btn.acc[disabled] { opacity: .5; }
 .crow .who { font: 400 11.5px var(--mono); color: var(--t3); }
+.crow .nothing { min-width: 108px; text-align: center; font: 400 12.5px var(--ui); color: var(--t3); }
 .claim-any { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
 .claim-any .in { flex: 1; }
 
@@ -192,16 +193,16 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 .pbanner { position: relative; height: 150px; background: linear-gradient(120deg, #0b1020, #1e3a8a 60%, #3b82f6); background-size: cover; background-position: center; }
 .pbanner::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 40%, rgba(0,0,0,.35)); pointer-events: none; }
 .pedit { position: absolute; right: 14px; top: 14px; z-index: 1; background: rgba(0,0,0,.45); border-color: rgba(255,255,255,.18); backdrop-filter: blur(8px); -webkit-backdrop-filter: blur(8px); }
-.pbody { position: relative; display: flex; align-items: flex-end; gap: 18px; padding: 0 22px 20px; flex-wrap: wrap; }
+.pbody { position: relative; display: flex; align-items: flex-end; gap: 20px; padding: 0 24px 24px; flex-wrap: wrap; }
 .pav { width: 92px; height: 92px; margin-top: -46px; border-radius: 22px; border: 4px solid var(--bg); background: var(--s3); display: grid; place-items: center; overflow: hidden; font: 600 32px var(--head); color: var(--t2); flex: none; position: relative; z-index: 1; padding: 0; }
 .pav img { width: 100%; height: 100%; object-fit: cover; }
 button.pav.editable { cursor: pointer; }
 button.pav.editable::after { content: 'Change'; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(0,0,0,.55); color: #fff; font: 500 12px var(--ui); opacity: 0; transition: opacity .2s; }
 button.pav.editable:hover::after { opacity: 1; }
-.pname { flex: 1; min-width: 220px; padding-bottom: 4px; }
+.pname { flex: 1; min-width: 220px; padding-top: 24px; padding-bottom: 2px; }
 .pname h2 { margin: 0; font: 500 clamp(22px, 2.3vw, 28px)/1.15 var(--head); letter-spacing: -.04em; }
-.pname p { margin: 6px 0 0; color: var(--t3); font-size: 13.5px; }
-.pend { display: flex; gap: 8px; padding-bottom: 6px; flex-wrap: wrap; }
+.pname p { margin: 8px 0 0; color: var(--t3); font-size: 13.5px; line-height: 1.5; }
+.pend { display: flex; gap: 8px; padding-bottom: 2px; flex-wrap: wrap; }
 /* the picker */
 .modal { position: fixed; inset: 0; z-index: 70; display: grid; place-items: center; background: rgba(0,0,0,.6); backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px); padding: 16px; animation: rise .3s var(--ease); }
 .mbox { width: min(520px, 100%); max-height: calc(100vh - 32px); overflow: auto; border-radius: 16px; border: 1px solid var(--line2); background: var(--pop); padding: 20px; box-shadow: 0 40px 100px rgba(0,0,0,.6); }
@@ -222,7 +223,7 @@ button.pav.editable:hover::after { opacity: 1; }
 .grid-pick button img { width: 100%; height: 100%; object-fit: cover; display: block; }
 .mfoot { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
 .mmsg { font-size: 13px; color: var(--t2); } .mmsg.err { color: var(--bad); }
-@media (max-width: 640px) { .pbanner { height: 110px; } .pav { width: 76px; height: 76px; margin-top: -38px; } .pend { width: 100%; } }
+@media (max-width: 640px) { .pbanner { height: 110px; } .pav { width: 76px; height: 76px; margin-top: -38px; } .pbody { padding: 0 18px 18px; gap: 14px; } .pname { padding-top: 0; min-width: 0; width: 100%; } .pend { width: 100%; } }
 .mbox.ask { width: min(400px, 100%); } .mbox.ask h3 { margin: 0; font: 500 18px var(--head); letter-spacing: -.02em; } .mbox.ask p { margin: 8px 0 0; color: var(--t2); font-size: 14px; }
 .mbox.ask .mfoot { justify-content: flex-end; margin-top: 20px; }
 /* name: edited in place */
@@ -231,6 +232,44 @@ button.pav.editable:hover::after { opacity: 1; }
 .nm-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .nm-form .in { width: min(320px, 100%); font: 500 20px var(--head); letter-spacing: -.03em; padding: 6px 10px; }
 .nm-form small { color: var(--t3); font-size: 12px; width: 100%; }
+/* explore: address plates */
+.xbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
+.xsearch { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--s1); color: var(--t3); transition: border-color .2s; }
+.xsearch:focus-within { border-color: rgba(var(--acc-rgb), .55); }
+.xsearch input { all: unset; flex: 1; color: var(--ink); font: 400 14px var(--ui); } .xsearch input::placeholder { color: var(--t4); }
+.xspot { position: relative; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 16px; background: var(--card); isolation: isolate; }
+.xspot .art { position: relative; display: grid; place-items: center; min-height: 240px; overflow: hidden; }
+.xspot .art::before { content: ''; position: absolute; inset: -20%; background: var(--img) center / cover; filter: blur(34px) saturate(1.4); opacity: .55; }
+.xspot .art img, .xspot .art .ph { position: relative; width: 150px; height: 150px; border-radius: 28px; object-fit: cover; box-shadow: 0 30px 60px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 48px var(--head); background: var(--s3); color: var(--t2); }
+.xspot .info { padding: 26px 28px; display: flex; flex-direction: column; gap: 14px; min-width: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--tint, #3b82f6) 10%, transparent), transparent 60%); }
+.xspot .kick { font: 500 11.5px var(--mono); color: var(--tintl, var(--acc)); letter-spacing: .06em; text-transform: uppercase; display: flex; gap: 10px; align-items: center; }
+.xspot h3 { margin: 0; font: 500 clamp(26px, 3vw, 38px)/1.05 var(--head); letter-spacing: -.045em; } .xspot h3 small { font: 400 15px var(--mono); color: var(--t3); letter-spacing: 0; margin-left: 10px; }
+.plate { font: 500 13px var(--mono); color: var(--t3); word-break: break-all; line-height: 1.5; } .plate b { color: var(--ink); font-weight: 600; } .plate em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
+.xspot .plate { font-size: 15px; }
+.xspot .xfacts { display: flex; gap: 32px; flex-wrap: wrap; margin-top: auto; }
+.xspot .xfacts div span { display: block; font: 400 12px var(--ui); color: var(--t3); margin-bottom: 4px; } .xspot .xfacts div b { font: 500 18px var(--head); letter-spacing: -.02em; }
+.xspot .acts, .xcard .acts { display: flex; gap: 8px; flex-wrap: wrap; }
+.xgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
+.xcard { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--card); display: flex; flex-direction: column; isolation: isolate; transition: transform .35s var(--ease), border-color .3s, box-shadow .35s; animation: rise .5s var(--ease) both; }
+.xcard:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--tint, #3b82f6) 45%, transparent); box-shadow: 0 24px 60px -30px color-mix(in srgb, var(--tint, #3b82f6) 70%, transparent); }
+.xcard .art { position: relative; height: 128px; display: grid; place-items: center; overflow: hidden; }
+.xcard .art::before { content: ''; position: absolute; inset: -30%; background: var(--img, none) center / cover; filter: blur(26px) saturate(1.5); opacity: .5; transition: opacity .4s, transform .6s var(--ease); }
+.xcard:hover .art::before { opacity: .75; transform: scale(1.08); }
+.xcard .art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--card) 100%); }
+.xcard .art img, .xcard .art .ph { position: relative; z-index: 1; width: 72px; height: 72px; border-radius: 18px; object-fit: cover; box-shadow: 0 16px 34px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 26px var(--head); background: var(--s3); color: var(--t2); transition: transform .4s var(--ease); }
+.xcard:hover .art img { transform: scale(1.06) rotate(-2deg); }
+.xcard .tag-v { position: absolute; z-index: 2; left: 12px; top: 12px; font: 500 10.5px var(--mono); padding: 3px 7px; border-radius: 6px; background: rgba(0,0,0,.45); color: #e6e9f2; backdrop-filter: blur(6px); }
+.xcard .tag-a { position: absolute; z-index: 2; right: 12px; top: 12px; font: 400 10.5px var(--mono); color: rgba(230,233,242,.75); }
+.xcard .body { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
+.xcard .nm { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+.xcard .nm b { font: 500 16px var(--head); letter-spacing: -.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .xcard .nm small { font: 400 12px var(--mono); color: var(--t3); margin-left: 6px; }
+.xcard .nm .mc { font: 500 13px var(--mono); color: var(--ink); flex: none; }
+.xcard .end { font: 500 22px/1 var(--mono); letter-spacing: -.02em; color: var(--t3); }
+.xcard .end em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
+.xcard .acts { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); align-items: center; }
+.xcard .acts { gap: 6px; } .xcard .acts .iconbtn.sm { width: 30px; height: 30px; border-radius: 8px; } .xcard .acts .iconbtn .ic { width: 15px; height: 15px; }
+.xcard .ca { height: 30px; margin-right: auto; min-width: 0; } .xcard .ca code { font-size: 11.5px; }
+@media (max-width: 760px) { .xspot { grid-template-columns: 1fr; } .xspot .art { min-height: 180px; } }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
@@ -283,7 +322,7 @@ button.pav.editable:hover::after { opacity: 1; }
     <div class="tools">
       <button class="iconbtn" id="snd" title="Sound"><svg class="ic on-i"><use href="/assets/icons.svg#sound"/></svg><svg class="ic off-i"><use href="/assets/icons.svg#mute"/></svg></button>
       <button class="iconbtn" data-theme-picker title="Theme"><svg class="ic"><use href="/assets/icons.svg#theme"/></svg></button>
-      <button class="iconbtn" id="setBtn" title="Settings"><svg class="ic"><use href="/assets/icons.svg#sliders"/></svg></button>
+      <button class="iconbtn" id="setBtn" title="Settings" hidden><svg class="ic"><use href="/assets/icons.svg#sliders"/></svg></button>
     </div>
   </aside>
 
@@ -415,8 +454,14 @@ button.pav.editable:hover::after { opacity: 1; }
 
     <!-- EXPLORE -->
     <section class="view" data-view="explore" hidden>
-      <div class="vh"><div><h2>Launched with dzz</h2><p>Every coin launched with dzz, checked on Solana before it is listed. <span id="pubN" class="muted"></span></p></div></div>
-      <div class="card" id="pubCard"><div id="pub"><div class="lempty">loading…</div></div></div>
+      <div class="vh"><div><h2>Launched with <span class="grad">dzz</span></h2><p>Every coin here was launched at an address its creator chose, and checked on Solana before it was listed. <span id="pubN" class="muted"></span></p></div></div>
+      <div class="xbar">
+        <label class="xsearch"><svg class="ic sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="xq" placeholder="Search name, ticker or address" spellcheck="false" autocomplete="off"></label>
+        <div class="seg" id="xven"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="pump">pump.fun</button><button data-v="meteora">Meteora</button></div>
+        <div class="seg" id="xsort"><span class="thumb"></span><button data-v="new" class="on">Newest</button><button data-v="mc">Market cap</button></div>
+      </div>
+      <div id="xspot"></div>
+      <div class="xgrid" id="pub"><div class="lempty">loading…</div></div>
     </section>
 
     <!-- ACCOUNT -->
@@ -756,11 +801,11 @@ function stats() {
   const j = st?.job, running = j && !j.done, rate = (running && j.rate) || lastRate || (st ? st.settings.threads * (st.settings.engine === 'native' ? 500000 : st.settings.engine === 'browser' ? 600000 : 4000) : 60000)
   if (running) {
     const exp = j.count / j.p, chance = 1 - Math.exp(-j.tried * j.p / j.count)
-    $('prog').style.width = Math.min(100, (j.tried / exp) * 100) + '%'; document.documentElement.style.setProperty('--head', 1)
+    $('prog').style.width = Math.min(100, (j.tried / exp) * 100) + '%'; document.documentElement.style.setProperty('--track-head', 1)
     $('stats').innerHTML = `<span><b>${big(j.tried)}</b> checked</span><span><b>${big(j.rate)}</b> / s</span><span>found <b>${j.found.length}</b> of ${j.count}</span><span><b>${Math.round(chance * 100)}%</b> odds by now</span><span>~<b>${dur(Math.max(0, exp - j.tried) / (j.rate || 1))}</b> left</span>`
     return
   }
-  document.documentElement.style.setProperty('--head', 0)
+  document.documentElement.style.setProperty('--track-head', 0)
   if (!(j && j.done && j.found.length) || pre() || suf()) $('prog').style.width = '0%'
   if (!pre() && !suf()) { $('stats').innerHTML = '<span>type how it starts, ends, or both · up to 9 characters</span>'; return }
   const p = odds()
@@ -953,24 +998,67 @@ $('sSave').onclick = async () => { const r = await post('settings', { rpc: $('sR
 const DZZ_API = 'https://dzzdeploy.vercel.app/api/launched'
 const ago = (t) => { const s = Math.max(1, (Date.now() - t) / 1000); return s < 60 ? Math.round(s) + 's' : s < 3600 ? Math.round(s / 60) + 'm' : s < 86400 ? Math.round(s / 3600) + 'h' : Math.round(s / 86400) + 'd' }
 const usd = (v) => (v == null ? '–' : '$' + (v >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(1) + 'K' : Math.round(v)))
+// the coin's own colour, from its picture (images are served with open CORS); remembered per address
+const tints = (() => { try { return JSON.parse(localStorage.getItem('dzz-tints') || '{}') } catch { return {} } })()
+function tintOf(c) {
+  if (tints[c.mint] || !c.image) return Promise.resolve(tints[c.mint])
+  return new Promise((ok) => {
+    const im = new Image(); im.crossOrigin = 'anonymous'
+    im.onload = () => { try { const cv = document.createElement('canvas'); cv.width = cv.height = 16; const x = cv.getContext('2d'); x.drawImage(im, 0, 0, 16, 16); const d = x.getImageData(0, 0, 16, 16).data; let r = 0, g = 0, b = 0, n = 0
+        for (let i = 0; i < d.length; i += 4) { const mx = Math.max(d[i], d[i + 1], d[i + 2]), mn = Math.min(d[i], d[i + 1], d[i + 2]); if (mx - mn < 28 || mx < 50) continue; r += d[i]; g += d[i + 1]; b += d[i + 2]; n++ }
+        let t = n ? [r / n, g / n, b / n].map(Math.round) : null; if (t && Math.max(...t) - Math.min(...t) < 36) t = null; tints[c.mint] = t; try { localStorage.setItem('dzz-tints', JSON.stringify(tints)) } catch {} ok(t) } catch { ok(null) } }
+    im.onerror = () => ok(null); im.src = c.image
+  })
+}
+const tintVars = (t) => (t ? `--tint: rgb(${t}); --tintl: rgb(${t.map((v) => Math.round(v + (255 - v) * .62))});` : '')
+// the address, with the part its creator chose picked out: the ending (pump.fun's own "pump" counts as plain)
+function plate(k, c = {}) {
+  const lk = k.toLowerCase(), words = [c.symbol, ...(String(c.name || '').split(/\s+/))].filter(Boolean).map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ''))
+  let pre = 0, suf = 0
+  for (const w of words) for (let n = Math.min(9, w.length); n >= 2; n--) { if (n > pre && lk.startsWith(w.slice(0, n))) pre = n; if (n >= 3 && n > suf && (lk.endsWith(w.slice(0, n)) || lk.endsWith(w.slice(-n)))) suf = n }
+  if (!suf && /pump$/.test(k)) suf = 4
+  if (!suf && !pre) suf = 4
+  return { pre: k.slice(0, pre), mid: k.slice(pre, k.length - suf), tail: k.slice(k.length - suf) }
+}
+let pubCoins = [], pubMcs = {}, xq = '', xven = 'all', xsort = 'new'
 async function loadPublic() {
   let coins = []
   try { coins = (await (await fetch(DZZ_API, { cache: 'no-store' })).json()).coins || [] } catch { $('pub').innerHTML = '<div class="lempty">could not load the list right now</div>'; return }
   $('pubN').textContent = coins.length ? coins.length + ' listed.' : ''; $('navPub').textContent = coins.length || ''
-  if (!coins.length) { $('pub').innerHTML = '<div class="lempty">no coins yet · yours can be the first</div>'; return }
-  const mcs = {}
+  pubCoins = coins; drawPublic()
   for (let i = 0; i < Math.min(coins.length, 90); i += 30) {
-    try { const pairs = await (await fetch('https://api.dexscreener.com/tokens/v1/solana/' + coins.slice(i, i + 30).map((c) => c.mint).join(','))).json(); for (const p of pairs || []) { const m = p.baseToken?.address; if (m && (mcs[m] == null || (p.marketCap || 0) > mcs[m])) mcs[m] = p.marketCap || p.fdv } } catch {}
+    try { const pairs = await (await fetch('https://api.dexscreener.com/tokens/v1/solana/' + coins.slice(i, i + 30).map((c) => c.mint).join(','))).json(); for (const p of pairs || []) { const m = p.baseToken?.address; if (m && (pubMcs[m] == null || (p.marketCap || 0) > pubMcs[m])) pubMcs[m] = p.marketCap || p.fdv } } catch {}
   }
-  $('pub').innerHTML = coins.slice(0, 60).map((c) => {
-    const k = c.mint, tail = k.slice(-4)
-    return `<div class="lrow">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}
-      <b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b>
-      <button class="ca" data-ca="${esc(k)}" title="Copy CA"><code>${esc(k.slice(0, 6))}…${esc(k.slice(-12, -4))}<em>${esc(tail)}</em></code><span>Copy CA</span></button>
-      <span class="mc">${usd(mcs[k])}</span><span class="age">${ago(c.at)}</span>
-      <span class="lk">${c.venue === 'meteora' ? `<button class="fees" data-pool="${esc(c.pool)}">fees</button><a href="https://jup.ag/tokens/${esc(k)}" target="_blank" rel="noopener">jupiter</a>` : `<a href="https://pump.fun/coin/${esc(k)}" target="_blank" rel="noopener">pump</a>`}<a href="https://axiom.trade/meme/${esc(c.pool || k)}" target="_blank" rel="noopener">axiom</a><a href="https://dexscreener.com/solana/${esc(k)}" target="_blank" rel="noopener">dex</a></span></div>`
-  }).join('')
+  drawPublic()
 }
+function drawPublic() {
+  const q = xq.trim().toLowerCase()
+  let list = pubCoins.filter((c) => (xven === 'all' || (xven === 'meteora' ? c.venue === 'meteora' : c.venue !== 'meteora')) && (!q || `${c.name} ${c.symbol} ${c.mint}`.toLowerCase().includes(q)))
+  list = [...list].sort(xsort === 'mc' ? (a, b) => (pubMcs[b.mint] || 0) - (pubMcs[a.mint] || 0) : (a, b) => (b.at || 0) - (a.at || 0))
+  const pic = (c, cls = '') => (c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy"${cls}>` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`)
+  const trade = (c) => (c.venue === 'meteora' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/') + c.mint
+  const spot = !q && xven === 'all' && xsort === 'new' ? list[0] : null
+  $('xspot').innerHTML = spot ? (() => { const pl = plate(spot.mint, spot), t = tints[spot.mint]
+    return `<div class="xspot" style="${tintVars(t)}${spot.image ? `--img:url('${esc(spot.image)}')` : ''}"><div class="art">${pic(spot)}</div>
+      <div class="info"><span class="kick">Latest launch · ${spot.venue === 'meteora' ? 'Meteora' : 'pump.fun'} · ${ago(spot.at)} ago</span>
+        <h3>${esc(spot.name)}<small>$${esc(spot.symbol)}</small></h3>
+        <div class="plate"><em>${esc(pl.pre)}</em>${esc(pl.mid)}<em>${esc(pl.tail)}</em></div>
+        <div class="xfacts"><div><span>Market cap</span><b>${usd(pubMcs[spot.mint])}</b></div><div><span>Launched</span><b>${new Date(spot.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</b></div><div><span>Venue</span><b>${spot.venue === 'meteora' ? 'Meteora' : 'pump.fun'}</b></div></div>
+        <div class="acts"><button class="ca" data-ca="${esc(spot.mint)}"><code>${esc(spot.mint.slice(0, 6))}…${esc(spot.mint.slice(-6))}</code><span>Copy CA</span></button><a class="btn sm" href="${trade(spot)}" target="_blank" rel="noopener">Trade ↗</a><a class="btn sm ghost" href="https://dexscreener.com/solana/${esc(spot.mint)}" target="_blank" rel="noopener">Chart ↗</a></div></div></div>` })() : ''
+  const rest = spot ? list.slice(1) : list
+  $('pub').innerHTML = rest.length ? rest.slice(0, 90).map((c, i) => { const pl = plate(c.mint, c), t = tints[c.mint]
+    return `<div class="xcard" style="animation-delay:${Math.min(i, 12) * 40}ms;${tintVars(t)}${c.image ? `--img:url('${esc(c.image)}')` : ''}" data-m="${esc(c.mint)}">
+      <div class="art">${pic(c)}<span class="tag-v">${c.venue === 'meteora' ? 'Meteora' : 'pump.fun'}</span><span class="tag-a">${ago(c.at)}</span></div>
+      <div class="body"><div class="nm"><b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b><span class="mc">${usd(pubMcs[c.mint])}</span></div>
+        <div class="end">${pl.pre ? `<em>${esc(pl.pre)}</em>…` : '…'}<em>${esc(pl.tail)}</em></div>
+        <div class="acts"><button class="ca" data-ca="${esc(c.mint)}"><code>${esc(c.mint.slice(0, 5))}…${esc(c.mint.slice(-4))}</code><span>Copy</span></button><a class="iconbtn sm" href="${trade(c)}" target="_blank" rel="noopener" title="Trade"><svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a><a class="iconbtn sm" href="https://dexscreener.com/solana/${esc(c.mint)}" target="_blank" rel="noopener" title="Chart"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg></a></div></div></div>` }).join('')
+    : (spot ? '' : '<div class="lempty">No coins match.</div>')
+  // tint each card from its picture, once
+  list.forEach((c) => { if (tints[c.mint] === undefined && c.image) tintOf(c).then((t) => { if (!t) return; document.querySelectorAll(`[data-m="${c.mint}"]`).forEach((el) => el.setAttribute('style', el.getAttribute('style') + tintVars(t))); if (spot?.mint === c.mint) drawPublic() }) })
+}
+$('xq').addEventListener('input', (e) => { xq = e.target.value; drawPublic() })
+seg('xven', (v) => { xven = v; drawPublic() }); seg('xsort', (v) => { xsort = v; drawPublic() })
+$('xspot').addEventListener('click', (e) => { const b = e.target.closest('.ca'); if (b) copyCa(b) })
 $('pub').addEventListener('click', async (e) => {
   const f = e.target.closest('.fees')
   if (f) {
@@ -986,11 +1074,14 @@ $('pub').addEventListener('click', async (e) => {
     } catch (x) { f.textContent = 'fees'; delete f.dataset.ready; if (!/rejected/i.test(x.message)) window.dzzToast?.(String(x.message).slice(0, 200), true) }
     f.disabled = false; return
   }
-  const b = e.target.closest('.ca'); if (!b) return
+  const b = e.target.closest('.ca'); if (b) copyCa(b)
+})
+async function copyCa(b) {
+  const was = b.querySelector('span').textContent
   try { await navigator.clipboard.writeText(b.dataset.ca) } catch { const t = document.createElement('textarea'); t.value = b.dataset.ca; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove() }
   b.classList.add('ok'); b.querySelector('span').textContent = 'Copied'; S.click()
-  setTimeout(() => { b.classList.remove('ok'); b.querySelector('span').textContent = 'Copy CA' }, 1400)
-})
+  setTimeout(() => { b.classList.remove('ok'); b.querySelector('span').textContent = was }, 1400)
+}
 // after a launch: hand the coin to the public list (the server checks it on chain before listing it)
 async function registerLaunch(mint, signature) {
   for (let i = 0; i < 3; i++) {
@@ -1013,6 +1104,7 @@ summary(); stats()
     document.querySelectorAll('.view').forEach((s) => (s.hidden = s.dataset.view !== id))
     document.querySelectorAll('.nv').forEach((a) => a.classList.toggle('on', a.dataset.view === id))
     $('viewTitle').textContent = TITLES[id]; document.title = `dzz · ${TITLES[id].toLowerCase()}`
+    document.querySelector('.topbar .crumb').hidden = id !== 'launch'   // the address search state only means something on Launch
     dispatchEvent(new Event('resize'))                     // segmented controls measure themselves when shown
     if (id === 'account' || id === 'dashboard') account()
     if (id === 'fees') window.DzzFeesTotal?.refresh()
@@ -1230,7 +1322,7 @@ summary(); stats()
     $('claimRows').innerHTML = list.length ? list.map((c, i) => {
       const w = c.fee?.waiting, amt = w == null ? '—' : (w / 1e9).toFixed(w < 1e8 ? 4 : 3)
       return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">launched from ${short(c.dev)}</span></div></div>
-        <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'SOL waiting'}</small></div><button class="btn acc" type="button" data-i="${i}">Claim</button></div>`
+        <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'SOL waiting'}</small></div>${w === 0 ? '<span class="nothing">Nothing to claim</span>' : `<button class="btn acc" type="button" data-i="${i}">Claim</button>`}</div>`
     }).join('') : '<div class="lempty">No Meteora coins found for this browser or your account. Paste a contract address below.</div>'
   }
   async function claim(b) {
@@ -1251,7 +1343,7 @@ summary(); stats()
       // done: say so at once, zero the row, then re-read the real figures
       label('Claimed ✓'); b.classList.remove('acc'); $('claimMsg').innerHTML = `Claimed ${esc(amt)} from ${esc(c.symbol)}. <a class="link" href="https://solscan.io/tx/${esc(sig)}" target="_blank" rel="noopener">view ↗</a>`; $('claimMsg').style.color = 'var(--ok)'
       window.dzzToast?.(`Claimed ${amt} from ${c.symbol}`)
-      const row = b.closest('.crow'); if (row) row.querySelector('.amt').innerHTML = `0<small>SOL waiting</small>`
+      const row = b.closest('.crow'); if (row) { row.querySelector('.amt').innerHTML = `0<small>SOL waiting</small>`; setTimeout(() => b.replaceWith(Object.assign(document.createElement('span'), { className: 'nothing', textContent: 'Claimed ✓' })), 1500) }
       S.click(); balance()
       fetch('/api/fees?fresh=1').then(() => { window.DzzFeesTotal?.refresh(); setTimeout(() => { b.disabled = false; b.classList.add('acc'); label('Claim'); load() }, 2500) }).catch(() => {})
     } catch (x) { const m = String(x?.message || x); say(/reject/i.test(m) ? 'Cancelled in the wallet. Nothing was sent.' : m.slice(0, 220), !/reject/i.test(m)); label('Claim'); b.disabled = false }
