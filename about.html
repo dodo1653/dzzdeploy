@@ -46,7 +46,7 @@ main, header, footer { position: relative; z-index: 2; }
 @media (max-width: 900px) { .hd nav, .hd .ico, .hd .div { display: none; } }
 
 /* type */
-.h1 { font: 500 clamp(46px, 6.4vw, 92px)/.96 var(--head); letter-spacing: -.055em; margin: 0; }
+.h1 { font: 500 min(6.2vw, 9.4vh, 90px)/.96 var(--head); letter-spacing: -.055em; margin: 0; }
 .h2 { font: 500 clamp(32px, 4vw, 54px)/1.02 var(--head); letter-spacing: -.05em; margin: 0; }
 .h3 { font: 500 22px/1.2 var(--head); letter-spacing: -.03em; margin: 0; }
 .p { color: rgba(225,229,240,.68); font-size: 16.5px; line-height: 1.65; margin: 0; }
@@ -61,7 +61,7 @@ main, header, footer { position: relative; z-index: 2; }
 [data-rv].seen { opacity: 1; transform: none; filter: none; }
 
 /* hero */
-.hero { min-height: calc(100vh - 64px - 32px); display: grid; align-content: center; padding: 40px 0 56px; }
+.hero { display: grid; align-content: center; }
 .hero-in { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, .95fr); gap: 64px; align-items: center; transform-origin: 50% 30%; will-change: transform, opacity, filter; }
 .hero .p { max-width: 470px; margin-top: 26px; }
 .hero .cta { display: flex; gap: 10px; margin-top: 34px; align-items: center; flex-wrap: wrap; }
@@ -93,7 +93,7 @@ main, header, footer { position: relative; z-index: 2; }
 .log .empty { display: block; border: 0; padding: 14px 0; }
 
 /* numbers under the hero */
-.nums { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: 64px; }
+.nums { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: min(56px, 5vh); padding-top: min(26px, 3vh); border-top: 1px solid rgba(255,255,255,.07); }
 .nums div { padding: 0 0 0 0; } .nums span { display: block; font-size: 13.5px; color: rgba(210,216,236,.55); }
 .nums b { display: block; margin-top: 10px; font: 500 clamp(26px, 2.8vw, 36px)/1 var(--head); letter-spacing: -.045em; font-variant-numeric: tabular-nums; }
 .nums b small { font-size: 15px; color: rgba(210,216,236,.5); margin-left: 5px; letter-spacing: 0; }
@@ -106,8 +106,6 @@ main, header, footer { position: relative; z-index: 2; }
 @keyframes slide { to { transform: translateX(-50%) } }
 
 /* how it works: pinned */
-.how { position: relative; height: 340vh; }
-.how .pin { position: sticky; top: 64px; height: calc(100vh - 64px - 32px); display: grid; align-content: center; }
 .how .grid2 { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 72px; align-items: center; }
 .how .count { font: 500 13px var(--mono); color: rgba(210,216,236,.5); display: flex; align-items: center; gap: 14px; margin-bottom: 26px; }
 .how .count .bar { position: relative; width: 120px; height: 1px; background: rgba(255,255,255,.12); } .how .count .bar i { position: absolute; left: 0; top: 0; bottom: 0; width: var(--pg, 0%); background: #b9c7ff; }
@@ -136,10 +134,9 @@ main, header, footer { position: relative; z-index: 2; }
 .chain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 16px; }
 .chain span { font: 400 11.5px var(--mono); color: rgba(210,216,236,.4); padding-top: 10px; border-top: 2px solid rgba(255,255,255,.08); transition: color .3s, border-color .3s; }
 .chain span.on { color: #fff; border-color: #8fa6ff; }
-@media (max-width: 900px) {
-  .how { height: auto; } .how .pin { position: static; height: auto; padding: 80px 0; } .how .grid2 { grid-template-columns: 1fr; gap: 30px; }
-  .steps-t { min-height: 0; } .st { position: static; opacity: 1; transform: none; filter: none; margin-bottom: 40px; } .vis { height: auto; } .vc { position: static; opacity: 1; transform: none; filter: none; margin-bottom: 18px; }
-}
+html.flow .how .grid2 { grid-template-columns: 1fr; gap: 30px; }
+html.flow .steps-t { min-height: 0; } html.flow .st { position: static; opacity: 1; transform: none; filter: none; margin-bottom: 40px; } html.flow .vis { height: auto; } html.flow .vc { position: static; opacity: 1; transform: none; filter: none; margin-bottom: 18px; }
+html.flow .how .count { display: none; }
 
 /* sections */
 .sec { padding: 150px 0; }
@@ -180,7 +177,43 @@ main, header, footer { position: relative; z-index: 2; }
 .ft .about p { margin: 16px 0 0; color: rgba(210,216,236,.5); font-size: 14px; max-width: 300px; line-height: 1.6; }
 .ft .base { display: flex; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-top: 56px; padding-top: 22px; border-top: 1px solid rgba(255,255,255,.07); font-size: 13px; color: rgba(210,216,236,.4); }
 @media (max-width: 760px) { .ft .cols { grid-template-columns: 1fr 1fr; } .ft .about { grid-column: 1 / -1; } }
+
+/* ---------------------------------------------------------------- scenes: one screen at a time */
+html.paged, html.paged body { overscroll-behavior: none; }
+html.paged .stage { position: fixed; left: 0; right: 0; top: 64px; bottom: 32px; z-index: 2; }
+html.paged .scene { position: absolute; inset: 0; display: grid; grid-template-columns: minmax(0, 1fr); align-content: center; visibility: hidden; opacity: 0; will-change: opacity, transform, filter; }
+html.paged .scene.live { visibility: visible; }
+html.paged .spacer { height: calc(var(--units, 8) * 100vh); }
+html.paged .hd { position: fixed; left: 0; right: 0; top: 0; }
+html.paged .hero { grid-template-rows: 1fr auto; align-content: stretch; padding: min(5vh, 44px) 0 min(3vh, 26px); }
+html.paged .hero .hero-in { align-self: center; }
+html.paged .sec { padding: 0; }
+html.paged .last { padding: 0; grid-template-rows: 1fr auto; align-content: stretch; }
+html.paged .last .cta-box { align-self: center; }
+html.paged .ft { padding: 34px 0 20px; }
+html.paged .ft .base { margin-top: 26px; }
+html.paged [data-rv], html.paged .ww .w { transition-duration: .8s; }
+html.flow .stage { position: relative; z-index: 2; }
+html.flow .scene { position: relative; padding: 110px 0; display: grid; grid-template-columns: minmax(0, 1fr); }
+html.flow .scene.hero { padding: 70px 0 40px; }
+html.flow .scene.last { padding: 140px 0 0; }
+html.flow .spacer, html.flow .pager { display: none; }
+html.flow .h1 { font-size: clamp(40px, 11vw, 64px); }
+html.flow .last .h1 { font-size: clamp(40px, 12vw, 72px); }
+/* the scene index on the right edge */
+.pager { position: fixed; right: max(14px, calc(50% - 680px)); top: 50%; transform: translateY(-50%); z-index: 25; display: grid; gap: 4px; }
+.pager button { all: unset; cursor: pointer; display: flex; align-items: center; justify-content: flex-end; gap: 10px; height: 22px; font: 500 11px var(--mono); color: rgba(210,216,236,.0); transition: color .3s; }
+.pager button i { width: 14px; height: 1px; background: rgba(255,255,255,.25); transition: width .35s var(--ease), background .3s; }
+.pager button:hover { color: rgba(210,216,236,.6); }
+.pager button.on i { width: 26px; background: #b9c7ff; }
+.pager:hover button { color: rgba(210,216,236,.45); } .pager:hover button.on { color: #fff; }
+.hint { position: fixed; left: 50%; bottom: 46px; transform: translateX(-50%); z-index: 25; display: flex; flex-direction: column; align-items: center; gap: 8px; font: 500 10.5px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(210,216,236,.45); transition: opacity .5s; pointer-events: none; }
+.hint i { width: 1px; height: 26px; background: linear-gradient(to bottom, rgba(185,199,255,.8), transparent); animation: cue 1.8s var(--ease) infinite; transform-origin: top; }
+@keyframes cue { 0% { transform: scaleY(0); opacity: 1 } 70% { transform: scaleY(1); opacity: 1 } 100% { transform: scaleY(1); opacity: 0 } }
+html.flow .hint { display: none; }
+@media (max-height: 760px) { html.paged .hero .p { font-size: 15px; margin-top: 18px; } html.paged .hero .cta { margin-top: 22px; } html.paged .own { margin-top: 18px; } html.paged .board { padding: 24px 18px 18px; } html.paged .log { min-height: 80px; } }
 </style>
+
 </head>
 <body>
 <div class="frame" aria-hidden="true"></div>
@@ -199,8 +232,8 @@ main, header, footer { position: relative; z-index: 2; }
   </div>
 </header>
 
-<main>
-  <section class="hero" data-scene="hero">
+<div class="stage" id="stage">
+  <section class="scene hero" data-scene="hero" data-len="1" data-name="Welcome">
     <div class="W hero-in" id="heroIn">
       <div>
         <span class="tag ww" id="t0"><span id="rateTop">measuring this device</span></span>
@@ -224,20 +257,18 @@ main, header, footer { position: relative; z-index: 2; }
         </div>
       </div>
     </div>
-    <div class="W nums" data-rv style="--d:900ms">
+    <div><div class="W nums" data-rv style="--d:900ms">
       <div><span>Coins launched</span><b id="sCoins">–</b></div>
       <div><span>Creator fees earned</span><b id="sFees">–</b></div>
       <div><span>Addresses a second here</span><b id="sSpeed">–</b></div>
       <div><span>Platform fee</span><b>0<small>%</small></b></div>
     </div>
+      <div class="with" aria-label="Works with"><div class="track" id="with"></div></div>
+    </div>
   </section>
 
-  <div class="W"><div class="rule"></div></div>
-  <div class="with" aria-label="Works with"><div class="track" id="with"></div></div>
-  <div class="W"><div class="rule"></div></div>
-
-  <section class="how" id="how" data-scene="how">
-    <div class="pin">
+  <section class="scene how" id="how" data-scene="how" data-len="3" data-name="How it works">
+    <div>
       <div class="W grid2">
         <div>
           <div class="count"><span id="stepN">01</span><span class="bar"><i id="stepBar"></i></span><span>03</span></div>
@@ -256,18 +287,14 @@ main, header, footer { position: relative; z-index: 2; }
     </div>
   </section>
 
-  <div class="W"><div class="rule"></div></div>
-
-  <section class="sec" id="launched" data-scene="launched">
+  <section class="scene sec" id="launched" data-scene="launched" data-len="1" data-name="Launched">
     <div class="W">
       <div class="sec-h"><div><span class="tag" data-rv>Launched with dzz</span><h2 class="h2 ww" style="margin-top:18px">Every coin, <span class="grad">checked on chain.</span></h2><p class="p" data-rv style="--d:200ms">Each launch is verified on Solana before it is listed. Copy a contract address in one click.</p></div><a class="out-btn" href="/app#explore" data-rv style="--d:300ms">See all<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
       <div class="coins" id="coins"></div>
     </div>
   </section>
 
-  <div class="W"><div class="rule"></div></div>
-
-  <section class="sec" id="accounts" data-scene="accounts">
+  <section class="scene sec" id="accounts" data-scene="accounts" data-len="1" data-name="Accounts">
     <div class="W acct">
       <div>
         <span class="tag" data-rv>Accounts</span>
@@ -284,9 +311,7 @@ main, header, footer { position: relative; z-index: 2; }
     </div>
   </section>
 
-  <div class="W"><div class="rule"></div></div>
-
-  <section class="sec spec" id="spec" data-scene="spec">
+  <section class="scene sec spec" id="spec" data-scene="spec" data-len="1" data-name="Specification">
     <div class="W">
       <div class="sec-h"><div><span class="tag" data-rv>Specification</span><h2 class="h2 ww" style="margin-top:18px">Everything a <span class="grad">launch needs.</span></h2></div></div>
       <dl>
@@ -302,16 +327,13 @@ main, header, footer { position: relative; z-index: 2; }
     </div>
   </section>
 
-  <section class="last" data-scene="last">
-    <div class="W">
+  <section class="scene last" id="last" data-scene="last" data-len="1" data-name="Launch">
+    <div class="W cta-box">
       <h2 class="h1 ww">Your coin. <span class="grad">Your address.</span></h2>
       <p class="p" data-rv style="--d:300ms">Free to use. Type your pattern, find it on this device, and launch in a few minutes.</p>
       <div class="cta" data-rv style="--d:420ms"><a class="btn-w" href="/app"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a><a class="out-btn" style="height:44px" href="/login">Sign in</a></div>
     </div>
-  </section>
-</main>
-
-<footer class="ft">
+    <footer class="ft">
   <div class="W">
     <div class="cols">
       <div class="about"><a class="brand" href="/about"><span class="g">dz</span><b>dzz</b></a><p>Custom contract addresses for coins on pump.fun and Meteora. Found in your browser, launched from your wallet.</p></div>
@@ -322,6 +344,11 @@ main, header, footer { position: relative; z-index: 2; }
     <div class="base"><span>© dzz, an independent tool · <a href="/privacy" style="color:inherit">Privacy</a> · <a href="/terms" style="color:inherit">Terms</a></span><span>Not affiliated with pump.fun or Meteora</span></div>
   </div>
 </footer>
+  </section>
+</div>
+<div class="spacer" id="spacer"></div>
+<nav class="pager" id="pager" aria-label="Sections"></nav>
+
 <div class="toast" id="toast"></div>
 
 <script src="/assets/bars.js"></script>
@@ -339,7 +366,7 @@ const toast = (t) => { const el = $('toast'); el.textContent = t; el.className =
 const still = matchMedia('(prefers-reduced-motion: reduce)').matches
 DzzAuth.me().then((p) => { if (p) { $('signLink').textContent = p.name; $('signLink').href = '/app' } })
 
-// ---------------------------------------------------------------- words: split headings so they arrive word by word
+// ---------------------------------------------------------------- words arrive one by one
 document.querySelectorAll('.ww').forEach((el) => {
   let i = 0
   const walk = (node) => [...node.childNodes].forEach((n) => {
@@ -348,43 +375,127 @@ document.querySelectorAll('.ww').forEach((el) => {
   })
   walk(el)
 })
-// reveal on entering the view
-// (checked from the scroll handler: works the same under smooth scrolling, in frames and in every browser)
-let pending = [...document.querySelectorAll('[data-rv], .ww')]
-const io = { observe: (el) => { pending.push(el); reveal() } }
+
+// ---------------------------------------------------------------- scenes
+// Wide screens: the page never scrolls. Each scene fills the screen and stays put; a wheel flick, a swipe, an arrow key
+// or a click moves to the next one, the old scene lifting away blurred while the next rises into focus. "How it works"
+// holds three steps. Small screens fall back to an ordinary, smooth scroll.
+const scenes = [...document.querySelectorAll('.scene')], starts = []; let U = 0
+scenes.forEach((s) => { starts.push(U); U += +s.dataset.len || 1 })
+const sceneAt = (i) => { let k = 0; scenes.forEach((s, j) => { if (starts[j] <= i) k = j }); return k }
+const LOOK = { hero: { amp: 1, glow: 1, shift: 0 }, how: { amp: .6, glow: .62 }, launched: { amp: .48, glow: .5, shift: -.3 }, accounts: { amp: .8, glow: .85, shift: .35 }, spec: { amp: .42, glow: .45, shift: 0 }, last: { amp: 1.18, glow: 1.25, shift: 0 } }
+const sts = [...document.querySelectorAll('.st')], vcs = [...document.querySelectorAll('.vc')]
+let paged = false, pending = [], step = -1, cur = -1, lenis = null
+const AT = new URLSearchParams(location.search).has('at') ? +new URLSearchParams(location.search).get('at') : null   // ?at=N shows stop N without scrolling (for checking layouts)
+
+const watch = (el) => { if (paged) { if (el.closest('.scene')?.dataset.entered) el.classList.add('seen') } else { pending.push(el); reveal() } }
 function reveal() {
+  if (paged) return
   const vh = innerHeight
   pending = pending.filter((el) => { const r = el.getBoundingClientRect(); if (r.top < vh * .92 && r.bottom > 0) { el.classList.add('seen'); return false } return true })
 }
-requestAnimationFrame(() => { $('t0').classList.add('seen'); $('h0').style.setProperty('--d', '120ms'); $('h0').classList.add('seen') })
+function enter(k) {                                   // a scene arrives: its headings and blocks play in
+  if (!paged) return
+  scenes[k].dataset.entered = 1
+  scenes[k].querySelectorAll('[data-rv], .ww').forEach((el) => el.classList.add('seen'))
+}
 
-// ---------------------------------------------------------------- cinematic scroll: smooth, and the page answers it
-let lenis = null
-if (!still && window.Lenis) { lenis = new Lenis({ lerp: 0.075, wheelMultiplier: 0.9, smoothWheel: true }); const raf = (t) => { lenis.raf(t); requestAnimationFrame(raf) }; requestAnimationFrame(raf) }
-document.querySelectorAll('[data-go]').forEach((a) => a.addEventListener('click', (e) => { const id = a.getAttribute('href'); if (!id?.startsWith('#')) return; e.preventDefault(); const t = document.querySelector(id); if (!t) return; lenis ? lenis.scrollTo(t, { offset: -64, duration: 1.6 }) : t.scrollIntoView({ behavior: 'smooth' }) }))
+// pager
+const pager = $('pager')
+pager.innerHTML = scenes.map((s, j) => `<button type="button" data-k="${j}" aria-label="${s.dataset.name}">${s.dataset.name}<i></i></button>`).join('')
+pager.onclick = (e) => { const b = e.target.closest('button'); if (b) go(starts[+b.dataset.k]) }
 
-const heroIn = $('heroIn'), how = $('how'), sts = [...document.querySelectorAll('.st')], vcs = [...document.querySelectorAll('.vc')]
-const scenes = [...document.querySelectorAll('[data-scene]')]
-const LOOK = { hero: { amp: 1, glow: 1, shift: 0 }, how: { amp: .6, glow: .62 }, launched: { amp: .48, glow: .5, shift: -.3 }, accounts: { amp: .78, glow: .82, shift: .35 }, spec: { amp: .42, glow: .45, shift: 0 }, last: { amp: 1.18, glow: 1.25, shift: 0 } }
-let step = -1
-function onScroll() {
-  reveal()
-  const y = scrollY, vh = innerHeight
-  // the hero sinks back as the page moves on
-  const h = Math.min(1, y / (vh * .9))
-  if (!still) { heroIn.style.transform = `translate3d(0, ${h * -40}px, 0) scale(${1 - h * .06})`; heroIn.style.opacity = String(1 - h * .75); heroIn.style.filter = h > .01 ? `blur(${h * 6}px)` : 'none' }
-  // how it works: three steps pinned while the page scrolls past
-  const r = how.getBoundingClientRect(), span = how.offsetHeight - vh, p = Math.max(0, Math.min(1, -r.top / Math.max(1, span)))
-  const k = Math.min(2, Math.floor(p * 3))
-  if (k !== step && innerWidth > 900) { step = k; sts.forEach((s) => s.classList.toggle('on', +s.dataset.k === k)); vcs.forEach((s) => s.classList.toggle('on', +s.dataset.k === k)); $('stepN').textContent = '0' + (k + 1) }
-  $('stepBar').style.setProperty('--pg', (p * 100).toFixed(1) + '%')
-  // the columns follow the scene in view
-  let cur = scenes[0]; for (const s of scenes) { const b = s.getBoundingClientRect(); if (b.top < vh * .55 && b.bottom > vh * .45) { cur = s; break } }
-  const look = { ...LOOK[cur.dataset.scene] }
-  if (cur.dataset.scene === 'how') look.shift = [-.5, 0, .5][Math.max(0, step)]
+function render() {
+  const vh = innerHeight
+  if (!paged) { reveal(); bars(); return }
+  const p = AT != null ? AT : scrollY / vh
+  scenes.forEach((s, j) => {
+    const L = +s.dataset.len || 1, local = p - starts[j]
+    let o = 0, y = 0, sc = 1, bl = 0
+    if (local >= -1 && local <= 0) { const e = Math.max(0, Math.min(1, (local + 1 - .35) / .65)), q = 1 - Math.pow(1 - e, 3); o = q; y = (1 - q) * 56; sc = .965 + .035 * q; bl = (1 - q) * 12 }
+    else if (local > 0 && local < L - 1) { o = 1 }
+    else if (local >= L - 1 && local <= L) { const x = Math.max(0, Math.min(1, (local - (L - 1)) / .65)), q = x * x; o = 1 - q; y = -q * 56; sc = 1 - .03 * q; bl = q * 12 }
+    if (j === 0 && local < 0) o = 1
+    if (j === scenes.length - 1 && local > 0) o = 1
+    s.classList.toggle('live', o > .001)
+    s.style.opacity = o.toFixed(3)
+    s.style.transform = o >= .999 ? 'none' : `translate3d(0, ${y.toFixed(1)}px, 0) scale(${sc.toFixed(4)})`
+    s.style.filter = bl > .05 ? `blur(${bl.toFixed(1)}px)` : 'none'
+    s.style.pointerEvents = o > .6 ? 'auto' : 'none'
+  })
+  const k = sceneAt(Math.round(p))
+  if (k !== cur) { cur = k; enter(k); [...pager.children].forEach((b, j) => b.classList.toggle('on', j === k)); heroState(k === 0) }
+  // how it works: which step
+  const hi = scenes.findIndex((s) => s.dataset.scene === 'how'), hk = Math.max(0, Math.min(2, Math.round(p - starts[hi])))
+  if (hk !== step) { step = hk; sts.forEach((s) => s.classList.toggle('on', +s.dataset.k === hk)); vcs.forEach((s) => s.classList.toggle('on', +s.dataset.k === hk)); $('stepN').textContent = '0' + (hk + 1) }
+  $('stepBar').style.setProperty('--pg', (Math.max(0, Math.min(1, (p - starts[hi]) / 2)) * 100).toFixed(1) + '%')
+  bars()
+}
+function bars() {
+  let k = cur
+  if (!paged) { const vh = innerHeight; k = 0; scenes.forEach((s, j) => { const b = s.getBoundingClientRect(); if (b.top < vh * .55 && b.bottom > vh * .45) k = j }) }
+  const name = scenes[Math.max(0, k)].dataset.scene, look = { ...LOOK[name] }
+  if (name === 'how') look.shift = [-.5, 0, .5][Math.max(0, step)]
   window.DZZBARS?.set(look)
 }
-addEventListener('scroll', onScroll, { passive: true }); lenis?.on('scroll', onScroll); addEventListener('resize', onScroll); onScroll(); setTimeout(onScroll, 400)
+
+// moving between stops: an eased glide of the page position (the page itself never shows scrolling)
+let anim = null, lockUntil = 0
+const ease = (t) => (t < .5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2)
+function go(i) {
+  i = Math.max(0, Math.min(U - 1, i))
+  if (!paged) { const s = scenes[sceneAt(i)]; lenis ? lenis.scrollTo(s, { offset: -64, duration: 1.4 }) : s.scrollIntoView({ behavior: 'smooth' }); return }
+  const from = scrollY, to = i * innerHeight, d = Math.abs(to - from) / innerHeight
+  if (Math.abs(to - from) < 2) return
+  const T = still ? 1 : Math.min(1700, 950 + d * 220), t0 = performance.now()
+  cancelAnimationFrame(anim); lockUntil = performance.now() + T + 160
+  const tick = (now) => { const t = Math.min(1, (now - t0) / T); scrollTo(0, from + (to - from) * ease(t)); render(); if (t < 1) anim = requestAnimationFrame(tick); else anim = null }
+  anim = requestAnimationFrame(tick)
+}
+const here = () => Math.round(scrollY / innerHeight)
+const busyNow = () => anim || performance.now() < lockUntil
+let acc = 0, accT = 0
+addEventListener('wheel', (e) => {
+  if (!paged || e.ctrlKey) return
+  e.preventDefault()
+  if (busyNow()) { acc = 0; return }
+  const now = performance.now(); if (now - accT > 220) acc = 0; accT = now
+  acc += e.deltaY
+  if (Math.abs(acc) > 28) { go(here() + Math.sign(acc)); acc = 0 }
+}, { passive: false })
+let ty = null
+addEventListener('touchstart', (e) => { if (paged) ty = e.touches[0].clientY }, { passive: true })
+addEventListener('touchmove', (e) => { if (paged) e.preventDefault() }, { passive: false })
+addEventListener('touchend', (e) => { if (!paged || ty == null) return; const dy = ty - e.changedTouches[0].clientY; ty = null; if (Math.abs(dy) > 40 && !busyNow()) go(here() + Math.sign(dy)) })
+addEventListener('keydown', (e) => {
+  if (!paged || e.target.closest?.('input, textarea')) return
+  const k = e.key, n = ['ArrowDown', 'PageDown', ' '].includes(k) ? 1 : ['ArrowUp', 'PageUp'].includes(k) ? -1 : 0
+  if (k === 'Home') { e.preventDefault(); go(0) } else if (k === 'End') { e.preventDefault(); go(U - 1) }
+  else if (n) { e.preventDefault(); if (!busyNow()) go(here() + n) }
+})
+// dragging the scrollbar: follow, then settle on the nearest stop
+let idle = 0
+addEventListener('scroll', () => { if (!paged) return render(); if (anim) return; render(); clearTimeout(idle); idle = setTimeout(() => { if (!anim && Math.abs(scrollY / innerHeight - here()) > .01) go(here()) }, 160) }, { passive: true })
+document.querySelectorAll('[data-go]').forEach((a) => a.addEventListener('click', (e) => { const id = a.getAttribute('href'); if (!id?.startsWith('#')) return; e.preventDefault(); const j = scenes.findIndex((s) => '#' + s.id === id || s.querySelector(id)); if (j >= 0) go(starts[j]) }))
+
+function mode() {
+  const want = innerWidth >= 900 && innerHeight >= 600
+  if (want !== paged || cur === -1) {
+    paged = want
+    document.documentElement.classList.toggle('paged', paged); document.documentElement.classList.toggle('flow', !paged)
+    document.documentElement.style.setProperty('--units', U)
+    if (paged) { lenis?.destroy(); lenis = null; scenes.forEach((s) => { s.style.cssText = '' }); cur = -1; step = -1 }
+    else {
+      scenes.forEach((s) => { s.style.cssText = ''; s.classList.add('live') })
+      pending = [...document.querySelectorAll('[data-rv], .ww')].filter((el) => !el.classList.contains('seen'))
+      if (!still && window.Lenis && !lenis) { lenis = new Lenis({ lerp: .075, wheelMultiplier: .9 }); const raf = (t) => { if (!lenis) return; lenis.raf(t); requestAnimationFrame(raf) }; requestAnimationFrame(raf); lenis.on('scroll', render) }
+      heroState(true)
+    }
+  }
+  if (paged) scrollTo(0, here() * innerHeight)
+  render()
+}
+addEventListener('resize', mode)
 
 // works with
 ;(() => { const L = [['pump.fun', 'p'], ['Meteora', 'M'], ['Jupiter', 'J'], ['Solana', 'S'], ['Phantom', 'P'], ['Solflare', 'S'], ['Backpack', 'B'], ['Helius', 'H']]; const one = L.map(([n, c]) => `<span><i>${c}</i>${n}</span>`).join(''); $('with').innerHTML = one + one })()
@@ -463,8 +574,8 @@ function next() {
   })
 }
 let heroOn = true
-new IntersectionObserver(([e]) => { heroOn = e.isIntersecting; if (!eng) return; if (!heroOn || document.hidden) { eng.stop(); busy = false } else if (!busy) next() }).observe($('heroCells'))
-document.addEventListener('visibilitychange', () => { if (!eng) return; if (document.hidden) { eng.stop(); busy = false } else if (!busy && heroOn) next() })
+function heroState(on) { heroOn = on; if (!eng) return; if (!heroOn || document.hidden) { eng.stop(); busy = false } else if (!busy) next() }
+document.addEventListener('visibilitychange', () => heroState(heroOn))
 DZZ.engine({ threads: 2 }).then((e) => { eng = e; t0 = performance.now(); next() }).catch(() => { $('sought').textContent = 'this browser cannot run the engine'; $('rateTop').textContent = 'engine unavailable in this browser' })
 
 // ---------------------------------------------------------------- live numbers
@@ -476,7 +587,7 @@ async function numbers() {
     $('coins').innerHTML = coins.slice(0, 6).map((c, i) => `<div class="coin" data-rv style="--d:${i * 70}ms"><div class="row1">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b></div></div>
       <button class="ca" data-ca="${esc(c.mint)}"><code>${esc(c.mint.slice(0, 6))}…${esc(c.mint.slice(-12, -4))}<em>${esc(c.mint.slice(-4))}</em></code><span>Copy CA</span></button>
       <div class="meta"><span>${c.venue === 'meteora' ? 'Meteora' : 'pump.fun'}</span><span>${ago(c.at)} ago</span><span class="v"><a href="${c.venue === 'meteora' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/'}${esc(c.mint)}" target="_blank" rel="noopener">trade ↗</a><a href="https://dexscreener.com/solana/${esc(c.mint)}" target="_blank" rel="noopener">chart ↗</a></span></div></div>`).join('')
-    $('coins').querySelectorAll('[data-rv]').forEach((el) => io.observe(el))
+    $('coins').querySelectorAll('[data-rv]').forEach((el) => watch(el))
   } catch {}
   try {
     const [f, px] = await Promise.all([fetch('/api/fees').then((r) => r.json()), fetch('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => j.So11111111111111111111111111111111111111112?.usdPrice).catch(() => 0)])
@@ -486,6 +597,10 @@ async function numbers() {
   } catch {}
 }
 numbers(); setInterval(numbers, 60000)
+
+history.scrollRestoration = 'manual'
+mode()
+requestAnimationFrame(() => { $('t0').classList.add('seen'); $('h0').style.setProperty('--d', '120ms'); $('h0').classList.add('seen'); scenes[0].querySelectorAll('[data-rv]').forEach((el) => el.classList.add('seen')) })
 </script>
 </body>
 </html>

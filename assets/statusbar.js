@@ -29,7 +29,7 @@ body.has-sbar { padding-bottom: 32px; }
   const bar = document.createElement('div'); bar.className = 'sbar'; bar.setAttribute('role', 'contentinfo')
   const inApp = location.pathname.startsWith('/app')
   bar.innerHTML = `<div class="grp">
-      <a class="it" id="sbAcct" href="${inApp ? '#account' : '/app'}"><span class="dot" id="sbDot"></span><span id="sbStatus">Signed out</span></a>
+      <a class="it" id="sbAcct" href="${inApp ? '#account' : '/app'}"><span class="dot" id="sbDot"></span><span id="sbStatus" class="hide-m">Signed out</span></a>
       <a class="it hide-m" href="${inApp ? '#coins' : '/app#coins'}">${ic('<path d="M3.5 12a8.5 8.5 0 1 0 2.5-6M3.5 4v4h4"/><path d="M12 8v4l3 2"/>')}My coins</a>
       <button class="it hide-m" type="button" data-theme-picker>${ic('<circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/>')}Theme</button>
     </div>
