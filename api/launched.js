@@ -10,7 +10,7 @@ import { put, getJson, STORE } from './_store.js'
 const PUMP = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
 const DBC = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'                  // Meteora's bonding curve program
 const DBC_CREATE = [[140, 85, 215, 176, 102, 54, 104, 79], [169, 118, 51, 78, 145, 110, 220, 155]].map((d) => Buffer.from(d))   // initialize_virtual_pool_with_spl_token / _token2022: accounts 3 = mint, 5 = pool
-const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean)
+const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean)   // a null transaction falls through to the next
 const OURS = new RegExp('^(https://([a-z0-9]+\.public\.blob\.vercel-storage\.com|cdn\.jsdelivr\.net/gh/dodo1653/dzzdeploy@)|' + STORE.replace(/[.*+?^${}()|[\]\/]/g, '\$&') + '/s/m/)', 'i')
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const b58dec = (s) => { let n = 0n; for (const c of s) { const i = B58.indexOf(c); if (i < 0) throw new Error('bad base58'); n = n * 58n + BigInt(i) } let h = n.toString(16); if (h.length % 2) h = '0' + h; const out = Buffer.from(h === '0' ? '' : h, 'hex'); let z = 0; for (const c of s) { if (c !== '1') break; z++ } return Buffer.concat([Buffer.alloc(z), out]) }
@@ -20,7 +20,9 @@ async function rpc(method, params) {
   for (const url of RPCS) {
     try {
       const r = await (await fetch(url, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) })).json()
-      if (r.error) throw new Error(r.error.message); return r.result
+      if (r.error) throw new Error(r.error.message)
+      if (r.result == null && method === 'getTransaction') { last = new Error('not on this node'); continue }   // publicnode keeps only recent history: ask the next node
+      return r.result
     } catch (e) { last = e }
   }
   throw last
