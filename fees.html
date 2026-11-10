@@ -19,7 +19,7 @@ th { text-align: right; font: 500 11.5px var(--mono); color: var(--t3); padding:
 td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: right; font: 400 13.5px var(--mono); vertical-align: middle; } td:first-child, td:nth-child(2) { text-align: left; } td:first-child { padding-left: 0; } td:last-child, th:last-child { padding-right: 0; }
 tr:last-child td { border-bottom: 0; }
 .coin { display: flex; align-items: center; gap: 11px; font: 500 14.5px var(--ui); min-width: 0; text-decoration: none; } .coin img, .coin i { width: 32px; height: 32px; border-radius: 9px; object-fit: cover; flex: none; background: var(--s2); }
-.dev { color: var(--t2); text-decoration: none; } .dev:hover { color: var(--acc); } .wait { color: var(--acc); } .zero { color: var(--t3); } .solic { width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-left: 6px; display: inline-block; } .sum3 b .solic { width: 18px; height: 18px; vertical-align: -1px; margin-left: 8px; }
+.dev { color: var(--t2); text-decoration: none; } .dev:hover { color: var(--acc); } .wait { color: var(--acc); } .zero { color: var(--t3); } .coin .vlogo { width: 16px; height: 16px; border-radius: 50%; margin-left: 8px; } .solic { width: 13px; height: 11px; vertical-align: -1px; margin-left: 6px; display: inline-block; } .sum3 b .solic { width: 18px; height: 15px; vertical-align: 1px; margin-left: 8px; }
 .note { margin: 18px 0 0; font-size: 13px; color: var(--t3); max-width: 760px; } #state { min-height: 22px; font: 400 12.5px var(--mono); color: var(--t3); margin: 14px 0 0; }
 @media (max-width: 720px) {
   .sum3 { grid-template-columns: 1fr; } .sum3 div { border-left: 0; border-top: 1px solid var(--line); } .sum3 div:first-child { border-top: 0; }
@@ -47,13 +47,13 @@ tr:last-child td { border-bottom: 0; }
 <script>addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 8), { passive: true })</script>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-const SOLI = '<img class="solic" src="/assets/venues/sol.png" alt="SOL" title="SOL">', sol = (l) => (l == null ? '—' : (l === 0 ? '0' : (l / 1e9).toFixed(l < 1e7 ? 6 : 4)) + SOLI), short = (a) => (a ? `${a.slice(0, 4)}…${a.slice(-4)}` : '—'), sum = (r, k) => r.reduce((n, x) => n + (x[k] || 0), 0)
+const SOLI = '<img class="solic" src="/assets/venues/sol.svg" alt="SOL" title="SOL">', sol = (l) => (l == null ? '—' : (l === 0 ? '0' : (l / 1e9).toFixed(l < 1e7 ? 6 : 4)) + SOLI), short = (a) => (a ? `${a.slice(0, 4)}…${a.slice(-4)}` : '—'), sum = (r, k) => r.reduce((n, x) => n + (x[k] || 0), 0)
 async function load() {
   try {
     const d = await (await fetch('/api/fees')).json(); if (d.error) throw new Error(d.error)
     const r = d.coins || [], done = r, cell = (c, k) => (c.reading && k !== 'waiting' ? `at least ${sol(c[k])}` : sol(c[k]))
     $('tg').innerHTML = sol(sum(done, 'generated')); $('tc').innerHTML = sol(sum(done, 'claimed')); $('tw').innerHTML = sol(sum(done, 'waiting'))
-    $('rows').innerHTML = r.map((c) => `<tr><td><a class="coin" href="https://solscan.io/token/${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : '<i></i>'}<span>$${esc(c.symbol)}<small>${c.venue === 'pump' ? 'pump.fun' : 'Meteora'}</small></span></a></td>
+    $('rows').innerHTML = r.map((c) => `<tr><td><a class="coin" href="https://solscan.io/token/${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : '<i></i>'}<span>$${esc(c.symbol)}<img class="vlogo" src="/assets/venues/${c.venue === 'pump' ? 'pump.png' : 'meteora.svg'}" alt="${c.venue === 'pump' ? 'pump.fun' : 'Meteora'}" title="${c.venue === 'pump' ? 'pump.fun' : 'Meteora'}"></span></a></td>
       <td data-l="Dev">${c.dev ? `<a class="dev" href="https://solscan.io/account/${esc(c.dev)}" target="_blank" rel="noopener">${short(c.dev)}</a>` : '—'}</td>
       <td data-l="Generated">${cell(c, 'generated')}</td><td data-l="Claimed">${cell(c, 'claimed')}</td><td data-l="Waiting" class="${c.waiting ? 'wait' : 'zero'}">${cell(c, 'waiting')}</td></tr>${c.venue !== 'pump' && c.note ? `<tr><td colspan="5" style="text-align:left;color:var(--t3);font-size:12.5px;padding-top:0">${esc(c.note)}</td></tr>` : ''}`).join('')
     $('state').textContent = d.reading ? 'Still reading the pump.fun vaults. Those rows will fill in shortly.' : `Read ${new Date(d.at).toLocaleTimeString()}`

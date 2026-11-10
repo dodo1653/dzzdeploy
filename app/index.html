@@ -277,7 +277,7 @@ button.pav.editable:hover::after { opacity: 1; }
 .xcard .acts .iconbtn.sm { width: 28px; height: 28px; border-radius: 7px; } .xcard .acts .iconbtn .ic { width: 14px; height: 14px; }
 .xcard .ca { height: 28px; margin-right: auto; min-width: 0; flex: 1 1 auto; } .xcard .ca code { overflow: hidden; text-overflow: ellipsis; } .xcard .ca code { font-size: 11px; } .xcard .ca span { height: 20px; font-size: 11px; }
 @media (max-width: 760px) { .xspot { grid-template-columns: 1fr; } .xspot .art { min-height: 120px; } .xspot .acts { margin-left: 0; } }
-.solic { width: 14px; height: 14px; border-radius: 50%; vertical-align: -2px; margin-left: 6px; display: inline-block; }
+.solic { width: 13px; height: 11px; vertical-align: -1px; margin-left: 6px; display: inline-block; }
 .tbl .amt { display: inline-flex; align-items: center; justify-content: flex-end; }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
@@ -1312,7 +1312,7 @@ summary(); stats()
       $('aWaiting').innerHTML = `${sol(waiting)}<small>SOL</small>`; $('aWaitingUsd').textContent = usd(waiting)
       $('aGen').innerHTML = `${sol(claimed + waiting)}<small>SOL</small>`; $('aGenUsd').textContent = usd(claimed + waiting)
       $('accRows').innerHTML = list.length ? list.map((c) => {
-        const x = fees.get(c.mint) || {}, pump = c.venue !== 'meteora', solic = '<img class="solic" src="/assets/venues/sol.png" alt="SOL" title="SOL">'
+        const x = fees.get(c.mint) || {}, pump = c.venue !== 'meteora', solic = '<img class="solic" src="/assets/venues/sol.svg" alt="SOL" title="SOL">'
         return `<tr><td><a class="coinc" href="${pump ? 'https://pump.fun/coin/' : 'https://jup.ag/tokens/'}${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}</b><small>$${esc(c.symbol)}</small></div></a></td>
           <td class="dim">${pump ? 'pump.fun' : 'Meteora'}</td><td class="num muted">${short(c.dev)}</td>
           <td class="r num">${x.generated == null ? '—' : `<span class="amt">${sol(x.claimed)}${solic}</span>`}</td><td class="r num" style="color:${x.waiting ? 'var(--acc)' : 'var(--t3)'}">${x.generated == null ? '—' : `<span class="amt">${sol(x.waiting)}${solic}</span>`}</td></tr>`
