@@ -4,7 +4,7 @@
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Sign in · dzz</title>
 <link rel="icon" href="/assets/icon.png">
-<meta name="description" content="Sign in to dzz with Google, Discord, X or a Solana wallet. Your launches and creator fees from every wallet, in one place.">
+<meta name="description" content="Sign in to dzz with Discord, X or a Solana wallet. Your launches and creator fees from every wallet, in one place.">
 <script>
 // already signed in (and not just back from a provider with an error): straight to the dashboard
 ;(() => { let t = null; try { t = localStorage.getItem('dzz.profile') } catch {}; if (t && !/dzz_(token|error)=/.test(location.hash)) location.replace(new URLSearchParams(location.search).get('next') || '/app') })()
@@ -55,7 +55,6 @@ h1 { margin: 0; font: 500 clamp(30px, 3.4vw, 36px)/1.1 var(--ui); letter-spacing
     <h1 class="in-2">Sign in to <span class="grad">dzz</span></h1>
     <p class="sub in-2">Launch at the address you choose.</p>
     <div class="opts in-3">
-      <button class="opt" data-p="google"><svg class="ic brand"><use href="/assets/icons.svg#google"/></svg><span>Continue with Google</span><em></em></button>
       <button class="opt" data-p="discord"><svg class="ic brand"><use href="/assets/icons.svg#discord"/></svg><span>Continue with Discord</span><em></em></button>
       <button class="opt" data-p="x"><svg class="ic brand"><use href="/assets/icons.svg#x"/></svg><span>Continue with X</span><em></em></button>
     </div>
@@ -78,7 +77,7 @@ const next = new URLSearchParams(location.search).get('next') || '/app'
 const go = () => location.replace(next)
 ;(async () => {
   if (DzzAuth.lastError) say(DzzAuth.lastError, true)
-  else if (DzzAuth.token()) return go()                 // back from Google / Discord / X, signed in
+  else if (DzzAuth.token()) return go()                 // back from Discord / X, signed in
   const on = await DzzAuth.providers()
   document.querySelectorAll('.opt[data-p]').forEach((b) => { if (!on[b.dataset.p]) { b.disabled = true; b.querySelector('em').textContent = 'soon' } })
 })()

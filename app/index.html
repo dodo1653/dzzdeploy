@@ -318,7 +318,7 @@ button.pav.editable:hover::after { opacity: 1; }
     <a class="nv" href="#explore" data-view="explore"><svg class="ic"><use href="/assets/icons.svg#explore"/></svg>Explore<span class="cnt" id="navPub"></span></a>
     <a class="nv" href="#account" data-view="account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Account</a>
     <div class="fill"></div>
-    <a class="me" href="#account" id="meCard"><span class="av" id="meAv"><svg class="ic sm"><use href="/assets/icons.svg#user"/></svg></span><div><b id="meName">Sign in</b><small id="meSub">Google, Discord, X or wallet</small></div></a>
+    <a class="me" href="#account" id="meCard"><span class="av" id="meAv"><svg class="ic sm"><use href="/assets/icons.svg#user"/></svg></span><div><b id="meName">Sign in</b><small id="meSub">Discord, X or wallet</small></div></a>
     <div class="tools">
       <button class="iconbtn" id="snd" title="Sound"><svg class="ic on-i"><use href="/assets/icons.svg#sound"/></svg><svg class="ic off-i"><use href="/assets/icons.svg#mute"/></svg></button>
       <button class="iconbtn" data-theme-picker title="Theme"><svg class="ic"><use href="/assets/icons.svg#theme"/></svg></button>
@@ -436,7 +436,7 @@ button.pav.editable:hover::after { opacity: 1; }
 
     <!-- MY COINS -->
     <section class="view" data-view="coins" hidden>
-      <div class="vh"><div><h2>My coins</h2><p>Coins launched from this browser. To claim fees, open <a class="link" href="#fees">Creator fees</a>.</p></div><a class="btn" href="#account">All my wallets<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
+      <div class="vh"><div><h2>My coins</h2><p>Every coin launched from the wallets on your account, and from this browser. To claim fees, open <a class="link" href="#fees">Creator fees</a>.</p></div><a class="btn" href="#account">All my wallets<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
       <div class="card" id="histCard"><div id="hist"><div class="lempty">No coins launched from this browser yet.</div></div><p class="hint" id="histN" hidden></p></div>
     </section>
 
@@ -471,7 +471,6 @@ button.pav.editable:hover::after { opacity: 1; }
           <h2>Sign in to dzz</h2>
           <p>See your launches and creator fees from every wallet, from the website and the desktop app, in one place.</p>
           <div class="opts">
-            <button class="opt" data-p="google"><svg class="ic brand"><use href="/assets/icons.svg#google"/></svg><span>Continue with Google</span><small></small></button>
             <button class="opt" data-p="discord"><svg class="ic brand"><use href="/assets/icons.svg#discord"/></svg><span>Continue with Discord</span><small></small></button>
             <button class="opt" data-p="x"><svg class="ic brand"><use href="/assets/icons.svg#x"/></svg><span>Continue with X</span><small></small></button>
             <button class="opt" id="accWallet"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg><span>Sign in with a Solana wallet</span><small></small></button>
@@ -855,10 +854,10 @@ function render(v) {
   const prev = new Set([...$('found').children].map((c) => c.dataset.m))
   $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>${venue === 'meteora' ? 'random address' : 'normal · …<b>pump</b>'}</code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
   // history
-  $('navCoins').textContent = v.history.length || ''
+  window.dzzLocalHist = v.history
   { const ms = v.history.map((h) => h.mint).join(','); if (ms !== window.DZZ_MY_MINTS_KEY) { window.DZZ_MY_MINTS_KEY = ms; window.DZZ_MY_MINTS = v.history.map((h) => h.mint); window.DzzFeesTotal?.refresh() } }
-  $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="#fees" style="color:var(--acc)">Claim fees</a><a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
-  if (!v.history.length) $('hist').innerHTML = '<div class="lempty">No coins launched from this browser yet.</div>'
+  drawHist()
+
   stats(); summary()
 }
 $('found').onclick = async (e) => {
@@ -989,6 +988,16 @@ async function launch() {
   render(await getState())
 }
 
+// my coins: launched from this browser, plus every coin from the wallets on your account
+var histRow = (h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="#fees" style="color:var(--acc)">Claim fees</a><a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`
+function drawHist() {
+  if (!histRow) return                       // called by the first render before this part of the script has run: the next render draws it
+  const seen = new Set(), list = []
+  for (const h of [...(window.dzzLocalHist || []), ...(window.dzzAccountCoins || []).map((c) => ({ mint: c.mint, signature: c.sig, at: c.at, name: c.name, symbol: c.symbol, image: c.image, venue: c.venue, pool: c.pool }))]) { if (!seen.has(h.mint)) { seen.add(h.mint); list.push(h) } }
+  list.sort((a, b) => (b.at || 0) - (a.at || 0))
+  $('navCoins').textContent = list.length || ''
+  $('hist').innerHTML = list.length ? list.map(histRow).join('') : '<div class="lempty">No coins yet. Launch one, or sign in to see the coins from all your wallets.</div>'
+}
 // ---------------------------------------------------------------- settings
 $('setBtn').onclick = (e) => { e.stopPropagation(); $('settings').classList.toggle('on'); S.soft() }
 addEventListener('click', (e) => { if (!e.target.closest('#settings') && !e.target.closest('#setBtn')) $('settings').classList.remove('on') })
@@ -1124,9 +1133,15 @@ summary(); stats()
   function meCard(p) {
     $('meAv').innerHTML = p ? avatar(p) : '<svg class="ic sm"><use href="/assets/icons.svg#user"/></svg>'
     $('meName').textContent = p ? p.name : 'Sign in'
-    $('meSub').textContent = p ? `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'}${p.identities?.length ? ' · ' + p.identities.map((i) => NAMES[i.provider]).join(', ') : ''}` : 'Google, Discord, X or wallet'
+    $('meSub').textContent = p ? `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'}${p.identities?.length ? ' · ' + p.identities.map((i) => NAMES[i.provider]).join(', ') : ''}` : 'Discord, X or wallet'
   }
-  addEventListener('dzz-auth', (e) => { if (!e.detail) return location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); meCard(e.detail); const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'account' || v === 'dashboard') account(); window.DzzFeesTotal?.refresh() })
+  // the coins of every wallet on the account, for My coins
+  async function accountCoins(p) {
+    if (!p) return
+    try { const l = await (await fetch('/api/launched')).json(), w = new Set(p.wallets); window.dzzAccountCoins = (l.coins || []).filter((c) => w.has(c.dev)); drawHist() } catch {}
+  }
+  DzzAuth.me().then(accountCoins)
+  addEventListener('dzz-auth', (e) => { if (!e.detail) return location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); meCard(e.detail); accountCoins(e.detail); const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'account' || v === 'dashboard') account(); window.DzzFeesTotal?.refresh() })
   DzzAuth.me().then(meCard)
   DzzAuth.providers().then((p) => { providers = p; document.querySelectorAll('.gate .opt[data-p]').forEach((b) => { if (!p[b.dataset.p]) { b.disabled = true; b.querySelector('small').textContent = 'soon' } }) })
   if (DzzAuth.lastError) { location.hash = 'account'; setTimeout(() => toast(DzzAuth.lastError, true), 300) }
@@ -1253,7 +1268,7 @@ summary(); stats()
     paint(p); $('accName').textContent = p.name
     $('accSub').textContent = `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'} · ${p.identities?.length || 0} sign-in account${p.identities?.length === 1 ? '' : 's'}`
     const ids = p.identities || [], canDrop = ids.length + p.wallets.length > 1
-    $('accIds').innerHTML = ['google', 'discord', 'x'].map((k) => {
+    $('accIds').innerHTML = ['discord', 'x'].map((k) => {
       const mine = ids.filter((i) => i.provider === k)
       const icon = `<svg class="ic brand"><use href="/assets/icons.svg#${k}"/></svg>`
       if (mine.length) return mine.map((i) => `<div class="idrow">${icon}<div><b>${esc(NAMES[k])}</b><small>${esc(i.handle ? (k === 'x' ? '@' : '') + i.handle : i.name || 'connected')}</small></div><span class="end">${canDrop ? `<button class="btn sm ghost" data-unid="${k}" data-sub="${esc(i.sub || '')}">Remove</button>` : '<span class="tag ok">connected</span>'}</span></div>`).join('')
