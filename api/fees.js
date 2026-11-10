@@ -6,6 +6,7 @@
 // transaction as the claim, so a claim is read from pump.fun's own CollectCreatorFee event (the vault's net change misses the sweep),
 // and fees not swept yet count as waiting.
 import { put, getJson } from './_store.js'
+import { waitUntil } from '@vercel/functions'
 import { ed25519 } from '@noble/curves/ed25519'
 import crypto from 'node:crypto'
 
@@ -23,7 +24,7 @@ export function pda(seeds, program) {
   throw new Error('no address')
 }
 // publicnode only keeps recent history, so anything that reads the past has to ask a full node first or it undercounts
-const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), HISTORY = [process.env.RPC_URL, 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 40
+const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean), HISTORY = [process.env.RPC_URL, 'https://api.mainnet-beta.solana.com'].filter(Boolean), PER_RUN = +process.env.FEES_PER_RUN || 120
 const sleep = (ms) => new Promise((f) => setTimeout(f, ms))
 const BUDGET = +process.env.FEES_BUDGET || 28000; let stopAt = Date.now() + BUDGET   // stop reading in time to save progress and answer
 
@@ -142,13 +143,30 @@ async function pumpRows(coins) {
   return { rows, reading }
 }
 
+// One read of everything, saved as a snapshot. Requests answer from the snapshot at once (reading the chain on public RPC takes
+// 30 s or more), and a stale snapshot is refreshed in the background after the answer has gone out.
+const SNAP = 'fees/snapshot.json'
+async function readAll(budget) {
+  stopAt = Date.now() + budget
+  const coins = (await load('launched.json'))?.coins || (await (await fetch('https://dzzdeploy.vercel.app/api/launched')).json()).coins || []
+  const met = coins.filter((c) => c.venue === 'meteora' && c.pool), pump = coins.filter((c) => c.venue !== 'meteora')
+  const [m, p] = await Promise.all([met.length ? meteoraRows(met) : [], pump.length ? pumpRows(pump) : { rows: [], reading: false }])
+  const snap = { coins: [...m, ...p.rows].sort((a, b) => b.at - a.at), reading: p.reading, at: Date.now() }
+  await save(SNAP, snap); return snap
+}
+
 export default async function handler(req, res) {
-  res.setHeader('access-control-allow-origin', '*'); stopAt = Date.now() + BUDGET
+  res.setHeader('access-control-allow-origin', '*')
   try {
-    const coins = (await load('launched.json'))?.coins || (await (await fetch('https://dzzdeploy.vercel.app/api/launched')).json()).coins || []
-    const met = coins.filter((c) => c.venue === 'meteora' && c.pool), pump = coins.filter((c) => c.venue !== 'meteora')
-    const [m, p] = await Promise.all([met.length ? meteoraRows(met) : [], pump.length ? pumpRows(pump) : { rows: [], reading: false }])
-    res.setHeader('cache-control', p.reading ? 'public, s-maxage=20' : 'public, s-maxage=120, stale-while-revalidate=600')
-    return res.status(200).json({ coins: [...m, ...p.rows].sort((a, b) => b.at - a.at), reading: p.reading, at: Date.now() })
+    const snap = await load(SNAP), age = snap ? Date.now() - snap.at : Infinity
+    if (!snap) { const s = await readAll(BUDGET); res.setHeader('cache-control', 'public, s-maxage=10'); return res.status(200).json(s) }
+    // stale: one refresh at a time (busy marks one in flight), up to ~50 s after the answer
+    if (age > (snap.reading ? 15000 : 90000) && !(snap.busy && Date.now() - snap.busy < 65000)) {
+      await save(SNAP, { ...snap, busy: Date.now() })
+      waitUntil(readAll(48000).catch(() => save(SNAP, { ...snap, busy: 0 })))
+    }
+    res.setHeader('cache-control', 'public, s-maxage=10, stale-while-revalidate=60')
+    const { busy, ...out } = snap
+    return res.status(200).json(out)
   } catch (e) { return res.status(500).json({ error: String(e.message || e).slice(0, 200) }) }
 }

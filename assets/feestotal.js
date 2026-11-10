@@ -46,6 +46,15 @@
         fetch(SITE + '/api/fees').then((r) => r.json()),
         fetch('https://lite-api.jup.ag/price/v3?ids=' + WSOL).then((r) => r.json()).then((j) => j[WSOL]?.usdPrice).catch(() => 0),
       ])
+      if (!f.coins) throw new Error('no fees')
+      last.set({ f, px, wallets, name }); render(f, px, wallets, name)
+      if (f.reading) setTimeout(draw, 20000)
+    } catch { if (!root.querySelector('.ft')) root.innerHTML = '<div class="fx"><span>Could not read your fees just now.</span></div>' }
+    finally { busy = false; if (again) { again = false; draw() } }
+  }
+  // the last figures this browser saw, shown at once while fresh ones load
+  const last = { get: () => { try { return JSON.parse(localStorage.getItem('dzz.fees.last')) } catch { return null } }, set: (v) => { try { localStorage.setItem('dzz.fees.last', JSON.stringify(v)) } catch {} } }
+  function render(f, px, wallets, name) {
       const rows = f.coins || [], mints = new Set(window.DZZ_MY_MINTS || [])
       const mine = new Set(wallets); for (const r of rows) if (mints.has(r.mint) && r.dev) mine.add(r.dev)
       let claimed = 0, waiting = 0, coins = 0, other = 0; const pumpSeen = new Set()
@@ -61,12 +70,10 @@
   <div><b>${sol(claimed)}<small>SOL</small></b><span>collected <i>${usd(claimed, px)}</i></span></div>
   <div><b>${sol(waiting)}<small>SOL</small></b><span>waiting to collect <i>${usd(waiting, px)}</i></span></div>
   <div><b>${sol(claimed + waiting)}<small>SOL</small></b><span>earned in total, ${coins} coin${coins === 1 ? '' : 's'} <i>${usd(claimed + waiting, px)}</i></span></div>
-</div><div class="fx"><span>${who}${other ? ` · ${other} coin${other > 1 ? 's' : ''} not priced` : ''}${f.reading ? ' · still reading some wallets' : ''}</span>${act}</div>`
+</div><div class="fx"><span>${who}${other ? ` · ${other} coin${other > 1 ? 's' : ''} not priced` : ''}${f.reading ? ' · still reading some wallets, updates by itself' : ''}</span>${act}</div>`
       root.querySelector('[data-signin]')?.addEventListener('click', signIn)
-      if (f.reading) setTimeout(draw, 25000)
-    } catch { root.innerHTML = '<div class="fx"><span>Could not read your fees just now.</span></div>' }
-    finally { busy = false; if (again) { again = false; draw() } }
   }
   window.DzzFeesTotal = { refresh: draw }
+  { const c = last.get(); if (c?.f?.coins && (c.name ? token.get() : true)) render(c.f, c.px, c.wallets || [], c.name || '') }
   draw()
 })()

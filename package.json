@@ -3,7 +3,8 @@
   "private": true,
   "type": "module",
   "dependencies": {
+    "@noble/curves": "1.9.7",
     "@vercel/blob": "2.8.2",
-    "@noble/curves": "1.9.7"
+    "@vercel/functions": "3.10.6"
   }
 }
