@@ -1,43 +1,48 @@
 <!doctype html>
 <html lang="en"><head>
 <meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<title>dzz fees</title><link rel="icon" href="/assets/icon.png">
+<title>dzz · creator fees</title><link rel="icon" href="/assets/icon.png">
 <meta name="description" content="What every coin launched with dzz has generated in fees, and what its dev has claimed. Read live from Solana.">
 <script src="/assets/theme.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
 <style>
-:root { --ui: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace; }
-* { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; background: var(--bg, #07080f); color: var(--ink, #eef0f4); font: 400 15px/1.5 var(--ui); -webkit-font-smoothing: antialiased; }
-a { color: inherit; }
-main { width: min(1040px, 100% - 32px); margin: 0 auto; padding: 28px 0 56px; }
-.top { display: flex; justify-content: space-between; align-items: center; gap: 16px; font: 500 14px var(--mono); } .top a { text-decoration: none; color: var(--t2, #a7abb5); } .top a:hover { color: var(--ink, #eef0f4); } .top b { font-weight: 600; color: var(--ink, #eef0f4); font-size: 17px; }
-h1 { margin: 44px 0 8px; font-size: clamp(32px, 5vw, 52px); line-height: 1.05; letter-spacing: -.035em; font-weight: 600; }
-.sub { margin: 0 0 28px; color: var(--t2, #a7abb5); max-width: 620px; font-size: 16.5px; }
-.sum { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line, rgba(255,255,255,.08)); border: 1px solid var(--line, rgba(255,255,255,.08)); margin-bottom: 22px; }
-.sum div { background: var(--bg, #07080f); padding: 16px 18px; } .sum b { display: block; font: 500 clamp(19px, 3vw, 26px) var(--mono); } .sum span { font-size: 13px; color: var(--t3, #6c707b); }
-table { width: 100%; border-collapse: collapse; } th { text-align: right; font: 500 12px var(--mono); color: var(--t3, #6c707b); padding: 0 12px 10px; border-bottom: 1px solid var(--line, rgba(255,255,255,.08)); } th:first-child, th:nth-child(2) { text-align: left; }
-td { padding: 13px 12px; border-bottom: 1px solid var(--line, rgba(255,255,255,.08)); text-align: right; font: 400 14px var(--mono); vertical-align: middle; } td:first-child, td:nth-child(2) { text-align: left; }
-.coin { display: flex; align-items: center; gap: 11px; font: 500 15px var(--ui); min-width: 0; text-decoration: none; } .coin img, .coin i { width: 32px; height: 32px; border-radius: 50%; object-fit: cover; flex: none; background: var(--panel2, rgba(255,255,255,.05)); } .coin small { display: block; font: 400 12px var(--mono); color: var(--t3, #6c707b); }
-.dev { color: var(--t2, #a7abb5); text-decoration: none; } .dev:hover { color: var(--acc, #6ea8ff); } .wait { color: var(--acc, #6ea8ff); } .zero { color: var(--t3, #6c707b); }
-.star { color: var(--t3, #6c707b); }
-.note { margin: 18px 0 0; font-size: 13.5px; color: var(--t3, #6c707b); max-width: 720px; } #state { min-height: 22px; font: 400 13px var(--mono); color: var(--t3, #6c707b); margin: 12px 0 0; }
+main { position: relative; z-index: 2; padding-top: 48px; }
+h1 { margin: 0; font: 600 clamp(32px, 4.4vw, 52px)/1.04 var(--ui); letter-spacing: -.045em; }
+.sub { margin: 12px 0 28px; color: var(--t2); max-width: 620px; font-size: 16px; }
+.sum3 { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid var(--line); border-radius: var(--r3); background: var(--card); overflow: hidden; margin-bottom: 16px; }
+.sum3 div { padding: 18px 20px; border-left: 1px solid var(--line); } .sum3 div:first-child { border-left: 0; }
+.sum3 b { display: block; font: 500 clamp(20px, 2.4vw, 26px) var(--mono); letter-spacing: -.03em; } .sum3 span { font-size: 12.5px; color: var(--t3); }
+table { width: 100%; border-collapse: collapse; }
+th { text-align: right; font: 500 11.5px var(--mono); color: var(--t3); padding: 0 12px 10px; border-bottom: 1px solid var(--line); } th:first-child, th:nth-child(2) { text-align: left; padding-left: 0; }
+td { padding: 13px 12px; border-bottom: 1px solid var(--line); text-align: right; font: 400 13.5px var(--mono); vertical-align: middle; } td:first-child, td:nth-child(2) { text-align: left; } td:first-child { padding-left: 0; } td:last-child, th:last-child { padding-right: 0; }
+tr:last-child td { border-bottom: 0; }
+.coin { display: flex; align-items: center; gap: 11px; font: 500 14.5px var(--ui); min-width: 0; text-decoration: none; } .coin img, .coin i { width: 32px; height: 32px; border-radius: 9px; object-fit: cover; flex: none; background: var(--s2); }
+.dev { color: var(--t2); text-decoration: none; } .dev:hover { color: var(--acc); } .wait { color: var(--acc); } .zero { color: var(--t3); } .star { color: var(--t3); }
+.note { margin: 18px 0 0; font-size: 13px; color: var(--t3); max-width: 760px; } #state { min-height: 22px; font: 400 12.5px var(--mono); color: var(--t3); margin: 14px 0 0; }
 @media (max-width: 720px) {
-  .sum { grid-template-columns: 1fr; }
-  table, tbody, tr, td { display: block; width: 100%; } thead { display: none; } tr { padding: 12px 0; border-bottom: 1px solid var(--line, rgba(255,255,255,.08)); }
-  td { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border: 0; text-align: right; } td::before { content: attr(data-l); color: var(--t3, #6c707b); font-size: 13px; } td:first-child::before { content: none; }
+  .sum3 { grid-template-columns: 1fr; } .sum3 div { border-left: 0; border-top: 1px solid var(--line); } .sum3 div:first-child { border-top: 0; }
+  table, tbody, tr, td { display: block; width: 100%; } thead { display: none; } tr { padding: 12px 0; border-bottom: 1px solid var(--line); }
+  td { display: flex; justify-content: space-between; gap: 12px; padding: 4px 0; border: 0; text-align: right; } td::before { content: attr(data-l); color: var(--t3); font-size: 12.5px; } td:first-child::before { content: none; }
 }
 </style></head><body>
-<main>
-  <div class="top"><b>dzz</b><a href="/app">Launch a coin</a></div>
+<header class="nav" id="nav"><div class="wrap">
+  <a class="mark" href="/"><b>dz<i>z</i></b></a>
+  <nav class="links"><a href="/#how">How it works</a><a href="/app#explore">Launched</a><a href="/fees" style="color:var(--ink)">Creator fees</a></nav>
+  <div class="right"><a class="btn ghost" href="/app#account">Your fees</a><a class="btn primary" href="/app">Launch app<svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a></div>
+</div></header>
+<main class="wrap">
   <h1>Creator fees.</h1>
   <p class="sub">What every coin launched with dzz made in creator fees, and how much its dev has claimed. Read live from Solana.</p>
-  <div class="sum"><div><b id="tg">…</b><span>SOL generated</span></div><div><b id="tc">…</b><span>SOL claimed</span></div><div><b id="tw">…</b><span>SOL waiting to be claimed</span></div></div>
-  <table><thead><tr><th>Coin</th><th>Dev</th><th>Generated</th><th>Claimed</th><th>Waiting</th></tr></thead><tbody id="rows"></tbody></table>
+  <div class="sum3"><div><b id="tg">…</b><span>SOL generated</span></div><div><b id="tc">…</b><span>SOL claimed</span></div><div><b id="tw">…</b><span>SOL waiting to be claimed</span></div></div>
+  <div class="card"><table><thead><tr><th>Coin</th><th>Dev</th><th>Generated</th><th>Claimed</th><th>Waiting</th></tr></thead><tbody id="rows"></tbody></table></div>
   <p id="state" role="status">Reading Solana…</p>
-  <p class="note">Generated is the dev's share of trading fees, after the platform's cut. Amounts are in SOL. <span class="star">*</span> pump.fun keeps fees per wallet, not per coin, so those rows cover everything that dev wallet launched. Only coins registered as launched with dzz appear here.</p>
+  <p class="note">Generated is the dev's share of trading fees, after the platform's cut, in SOL. Coins paired with another token are shown in SOL at today's price. <span class="star">*</span> pump.fun keeps fees per wallet, not per coin, so those rows cover everything that dev wallet launched.</p>
 </main>
+<footer class="foot"><div class="wrap"><div class="base" style="margin-top:0;padding-top:0;border:0"><span>© dzz · independent tool</span><span>Not affiliated with pump.fun or Meteora</span></div></div></footer>
+<script src="/assets/bg.js"></script>
+<script>addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 8), { passive: true })</script>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const sol = (l) => (l == null ? '—' : l === 0 ? '0' : (l / 1e9).toFixed(l < 1e7 ? 6 : 4)), short = (a) => (a ? `${a.slice(0, 4)}…${a.slice(-4)}` : '—'), sum = (r, k) => r.reduce((n, x) => n + (x[k] || 0), 0)

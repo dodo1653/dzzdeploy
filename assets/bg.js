@@ -1,88 +1,66 @@
-// dzz background: fluted (reeded) glass in front of a slow, living light. A WebGL fragment shader: each flute is a
-// half-cylinder lens that bends the light behind it, darkens toward its edges, carries a thin highlight and a seam;
-// the light rises from the bottom in a soft V, drifts, gathers under the cursor and swells while dzz is searching.
-// Film grain and a vignette finish it. Colours follow the theme (assets/theme.js). Rendered at reduced resolution,
-// paused in hidden tabs, and replaced by a plain gradient where WebGL is missing or motion is reduced.
-//   DZZBG.activity(0..1)   how busy the search is      DZZBG.flash()   a found address
+// dzz background: columns of light. A row of crisp vertical bars rises from the bottom of the page in a soft V (tall at
+// the sides, low in the middle, where the content sits), each bar a gradient from the theme's light up into the dark.
+// The bars breathe on their own, surge while dzz is searching (DZZBG.activity), send a wave out from the centre when an
+// address is found (DZZBG.flash), and lean toward the cursor. Canvas 2D, about 30 bars, paused in hidden tabs, still
+// when motion is reduced. <body data-bg="soft"> draws it quieter (the app); "full" is the default (landing, login).
+//   DZZBG.activity(0..1)   DZZBG.flash()
 ;(() => {
   const still = matchMedia('(prefers-reduced-motion: reduce)').matches
-  const cv = document.createElement('canvas'); cv.id = 'dzz-bg'
+  const cv = document.createElement('canvas'); cv.id = 'dzz-bg'; cv.setAttribute('aria-hidden', 'true')
   cv.style.cssText = 'position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;display:block'
   const mount = () => document.body.prepend(cv)
   document.body ? mount() : addEventListener('DOMContentLoaded', mount)
-  const gl = cv.getContext('webgl', { antialias: false, alpha: false, premultipliedAlpha: false, powerPreference: 'low-power' })
-  const hex = (h) => { const n = parseInt(String(h).trim().slice(1), 16); return [(n >> 16 & 255) / 255, (n >> 8 & 255) / 255, (n & 255) / 255] }
-  let theme = window.DZZTheme?.get() || { g1: '#1f4fd6', g2: '#5f9bff', bg: '#07080f', dark: true }
-  let act = 0, actT = 0, flash = 0, mx = .5, my = .3, smx = .5, smy = .3
-  window.DZZBG = { activity: (v) => (actT = Math.max(0, Math.min(1, v))), flash: () => (flash = 1) }
-  addEventListener('dzz-theme', (e) => { theme = e.detail; if (!gl) fallback() })
-  addEventListener('pointermove', (e) => { mx = e.clientX / innerWidth; my = 1 - e.clientY / innerHeight }, { passive: true })
-  function fallback() { cv.style.background = theme.dark ? `radial-gradient(120% 90% at 50% 120%, ${theme.g2}55, transparent 60%), ${theme.bg}` : `radial-gradient(120% 90% at 50% 120%, ${theme.g2}, transparent 60%), ${theme.bg}` }
-  if (!gl) return fallback()
+  const ctx = cv.getContext('2d', { alpha: false })
+  const hex = (h, d = [8, 9, 11]) => { const m = /^#?([0-9a-f]{6})$/i.exec(String(h || '').trim()); if (!m) return d; const n = parseInt(m[1], 16); return [n >> 16 & 255, n >> 8 & 255, n & 255] }
+  const read = () => { const t = window.DZZTheme?.get?.(); const cs = getComputedStyle(document.documentElement); return { g1: t?.g1 || cs.getPropertyValue('--g1') || '#1f4fd6', g2: t?.g2 || cs.getPropertyValue('--g2') || '#5f9bff', bg: t?.bg || cs.getPropertyValue('--bg') || '#08090b', dark: t ? t.dark : true } }
+  let theme = read(), act = 0, actT = 0, wave = -1, mx = .5, smx = .5, W = 0, H = 0, dpr = 1, t0 = performance.now(), raf = 0
+  window.DZZBG = { activity: (v) => (actT = Math.max(0, Math.min(1, +v || 0))), flash: () => (wave = 0) }
+  addEventListener('dzz-theme', () => { theme = read(); if (still) draw(performance.now()) })
+  addEventListener('pointermove', (e) => { mx = e.clientX / Math.max(1, innerWidth) }, { passive: true })
+  const soft = () => (document.body?.dataset.bg === 'soft' ? 0.55 : 1)
 
-  const VS = 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}'
-  const FS = `precision highp float;
-uniform vec2 uRes;uniform float uTime,uAct,uDark,uFlash,uScale;uniform vec3 uG1,uG2,uBg;uniform vec2 uMouse;
-float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
-float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
-float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<4;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}
-vec4 light(vec2 uv){
-  float x=uv.x,y=uv.y;
-  float v=pow(abs(x-.5)*2.,1.35);
-  float h=.06+v*.42+.08*fbm(vec2(x*3.1,uTime*.06))+uAct*.10+uFlash*.10;
-  float body=smoothstep(h+.16,h-.24,y);
-  float rim=exp(-pow(max(y-h,0.)*5.,2.))*.22;
-  float drift=fbm(vec2(x*2.2+uTime*.025,y*1.6-uTime*.045));
-  float m=exp(-dot((uv-uMouse)*vec2(1.6,1.),(uv-uMouse)*vec2(1.6,1.))*7.);
-  vec3 c=mix(uG1,uG2,clamp(drift*1.25-y*.35+.25+m*.4,0.,1.));
-  float I=(body*.85+rim)*(.65+.55*drift)+m*.07+uAct*.10*body*(.6+.4*sin(uTime*5.));
-  return vec4(c,I);
-}
-void main(){
-  vec2 f=gl_FragCoord.xy,uv=f/uRes;
-  float W=56.*uScale;
-  float col=floor(f.x/W),fx=fract(f.x/W),b=fx-.5;
-  float lens=b*(.6+.25*sin(col*1.7+.5));
-  vec2 suv=vec2((col+.5+lens)*W/uRes.x,uv.y+.018*sin(col*2.3+uTime*.18));
-  vec4 L=light(suv);
-  float shade=.5+.5*cos(b*3.14159);
-  float spec=smoothstep(.07,0.,abs(fx-.2))*.55+smoothstep(.05,0.,abs(fx-.8))*.15;
-  float seam=smoothstep(0.,.03,fx)*smoothstep(1.,.97,fx);
-  float I=L.a*shade*seam;
-  vec3 c;
-  if(uDark>.5){
-    c=uBg+L.rgb*I*.62+L.rgb*spec*L.a*.22;
-    float vg=length((uv-vec2(.5,.45))*vec2(1.,1.2));
-    c*=1.-.55*smoothstep(.35,1.05,vg);
-    c=mix(c,uBg,smoothstep(.45,.95,uv.y)*.7);
-    c=mix(c,uBg,exp(-(pow(uv.x-.5,2.)*5.+pow(uv.y-.62,2.)*5.))*.55);   // a calm, darker field behind the content
-  }else{
-    c=mix(uBg,mix(uBg,L.rgb,.85),clamp(I*.55,0.,1.))+spec*L.a*.06;
-    c-=(1.-seam)*.025;
+  function size() { dpr = Math.min(1.5, devicePixelRatio || 1); W = innerWidth; H = innerHeight; cv.width = Math.round(W * dpr); cv.height = Math.round(H * dpr); ctx.setTransform(dpr, 0, 0, dpr, 0, 0) }
+  addEventListener('resize', () => { size(); if (still) draw(performance.now()) })
+
+  function draw(now) {
+    const t = (now - t0) / 1000, k = soft()
+    act += (actT - act) * 0.04; smx += (mx - smx) * 0.05
+    if (wave >= 0) { wave += 0.016; if (wave > 1.6) wave = -1 }
+    const [br, bgc, bb] = hex(theme.bg), [r1, g1, b1] = hex(theme.g1, [31, 79, 214]), [r2, g2, b2] = hex(theme.g2, [95, 155, 255])
+    ctx.fillStyle = `rgb(${br},${bgc},${bb})`; ctx.fillRect(0, 0, W, H)
+    const n = Math.max(14, Math.round(W / 44)), bw = W / n, light = theme.dark !== false
+    for (let i = 0; i < n; i++) {
+      const x = (i + 0.5) / n, d = Math.abs(x - 0.5) * 2                        // 0 centre .. 1 edge
+      let h = 0.30 + 0.52 * Math.pow(d, 1.35)                                    // the V
+      h += Math.sin(t * 0.55 + i * 0.47) * 0.035 + Math.sin(t * 0.23 - i * 0.21) * 0.03
+      h += act * (0.07 + 0.05 * Math.sin(t * 2.2 + i * 0.9))                     // searching
+      h += Math.exp(-Math.pow((x - smx) * 7, 2)) * 0.05                          // cursor
+      if (wave >= 0) h += Math.exp(-Math.pow((d - wave) * 6, 2)) * 0.16          // found
+      h = Math.max(0.12, Math.min(0.98, h)) * (0.82 + 0.18 * k)
+      const top = H * (1 - h), a = (light ? 0.95 : 0.55) * (0.55 + 0.45 * k) * (0.86 + 0.14 * Math.sin(t * 0.8 + i * 1.7))
+      const gr = ctx.createLinearGradient(0, top, 0, H)
+      gr.addColorStop(0, `rgba(${r1},${g1},${b1},0)`)
+      gr.addColorStop(0.55, `rgba(${r1},${g1},${b1},${0.38 * a})`)
+      gr.addColorStop(1, `rgba(${r2},${g2},${b2},${0.92 * a})`)
+      ctx.fillStyle = gr
+      ctx.fillRect(Math.floor(i * bw), top, Math.ceil(bw) - (i % 2 ? 0 : 0), H - top)
+      // a hairline seam between bars, and every other bar a touch darker, so the columns read crisp
+      if (i % 2) { ctx.fillStyle = `rgba(${br},${bgc},${bb},0.16)`; ctx.fillRect(Math.floor(i * bw), top, Math.ceil(bw), H - top) }
+      ctx.fillStyle = `rgba(${br},${bgc},${bb},0.35)`; ctx.fillRect(Math.floor(i * bw), top, 1, H - top)
+    }
+    // a low glow along the floor, and a dark pool at the top centre where headlines sit
+    const fl = ctx.createLinearGradient(0, H * 0.72, 0, H)
+    fl.addColorStop(0, `rgba(${r2},${g2},${b2},0)`); fl.addColorStop(1, `rgba(${r2},${g2},${b2},${(light ? 0.22 : 0.12) * k})`)
+    ctx.fillStyle = fl; ctx.fillRect(0, H * 0.72, W, H * 0.28)
+    const pool = ctx.createRadialGradient(W / 2, H * 0.08, 0, W / 2, H * 0.08, Math.max(W, H) * 0.62)
+    pool.addColorStop(0, `rgba(${r1},${g1},${b1},${0.16 * k})`); pool.addColorStop(0.35, `rgba(${br},${bgc},${bb},0.0)`); pool.addColorStop(1, `rgba(${br},${bgc},${bb},0)`)
+    ctx.fillStyle = pool; ctx.fillRect(0, 0, W, H)
+    const top = ctx.createLinearGradient(0, 0, 0, H * 0.45)
+    top.addColorStop(0, `rgba(${br},${bgc},${bb},0.85)`); top.addColorStop(1, `rgba(${br},${bgc},${bb},0)`)
+    ctx.fillStyle = top; ctx.fillRect(0, 0, W, H * 0.45)
   }
-  c+=(hash(f+fract(uTime*7.)*100.)-.5)*(uDark>.5?.045:.03);
-  gl_FragColor=vec4(c,1.);
-}`
-  const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); if (!gl.getShaderParameter(o, gl.COMPILE_STATUS)) console.warn(gl.getShaderInfoLog(o)); return o }
-  const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, VS)); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr)
-  if (!gl.getProgramParameter(pr, gl.LINK_STATUS)) return fallback()
-  gl.useProgram(pr)
-  gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
-  const ap = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(ap); gl.vertexAttribPointer(ap, 2, gl.FLOAT, false, 0, 0)
-  const U = {}; for (const n of ['uRes', 'uTime', 'uAct', 'uDark', 'uFlash', 'uScale', 'uG1', 'uG2', 'uBg', 'uMouse']) U[n] = gl.getUniformLocation(pr, n)
-  const SCALE = Math.min(1, 0.6 * (devicePixelRatio || 1))   // the glass is soft: fewer pixels look the same and cost far less
-  const size = () => { cv.width = Math.round(innerWidth * SCALE); cv.height = Math.round(innerHeight * SCALE); gl.viewport(0, 0, cv.width, cv.height) }
-  size(); addEventListener('resize', size)
-  const t0 = performance.now(); let last = 0
-  function frame(now) {
-    requestAnimationFrame(frame)
-    if (document.hidden || now - last < 1000 / 48) return
-    last = now
-    act += (actT - act) * 0.04; flash *= 0.94; smx += (mx - smx) * 0.05; smy += (my - smy) * 0.05
-    gl.uniform2f(U.uRes, cv.width, cv.height); gl.uniform1f(U.uTime, still ? 0 : (now - t0) / 1000); gl.uniform1f(U.uAct, act); gl.uniform1f(U.uFlash, flash)
-    gl.uniform1f(U.uDark, theme.dark ? 1 : 0); gl.uniform1f(U.uScale, SCALE); gl.uniform2f(U.uMouse, smx, smy)
-    gl.uniform3fv(U.uG1, hex(theme.g1)); gl.uniform3fv(U.uG2, hex(theme.g2)); gl.uniform3fv(U.uBg, hex(theme.bg))
-    gl.drawArrays(gl.TRIANGLES, 0, 3)
-  }
-  requestAnimationFrame(frame)
+  function loop(now) { draw(now); raf = requestAnimationFrame(loop) }
+  const start = () => { size(); if (still) draw(performance.now()); else raf = requestAnimationFrame(loop) }
+  document.addEventListener('visibilitychange', () => { if (still) return; if (document.hidden) cancelAnimationFrame(raf); else raf = requestAnimationFrame(loop) })
+  document.readyState === 'loading' ? addEventListener('DOMContentLoaded', start) : start()
 })()

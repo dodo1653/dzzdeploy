@@ -3,322 +3,299 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>dzz</title>
+<title>dzz · launch at the address you choose</title>
 <meta name="description" content="Launch coins on pump.fun or Meteora at the contract address you choose. Found in your browser, signed in your browser, launched from your wallet.">
 <meta property="og:title" content="dzz">
 <meta property="og:description" content="Launch coins on pump.fun or Meteora at the contract address you choose.">
 <link rel="icon" href="/assets/icon.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Doto:wght@600;800;900&family=Fragment+Mono&display=swap" rel="stylesheet">
-<link href="https://api.fontshare.com/v2/css?f[]=switzer@300,400,500,600&display=swap" rel="stylesheet">
 <script src="/assets/theme.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
 <style>
-:root { --ui: 'Switzer', 'Helvetica Neue', Arial, sans-serif; --mono: 'Fragment Mono', ui-monospace, monospace; --dot: 'Doto', ui-monospace, monospace; --ease: cubic-bezier(.2, .8, .2, 1);
-  --bg: #07080f; --ink: #eef0f4; --t2: #a7abb5; --t3: #9298a3; --t4: #3b3e46; --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.14); --panel: rgba(14,15,20,.72); --panel2: rgba(255,255,255,.05);
-  --acc: #6ea8ff; --acc-rgb: 110, 168, 255; --acc-ink: #041434; --card-a: rgba(22,24,32,.78); --card-b: rgba(10,11,16,.82); --shadow: rgba(0,0,0,.6); }
-* { box-sizing: border-box; }
-html { scroll-snap-type: y mandatory; }
-html, body { margin: 0; background: var(--bg); color: var(--ink); font: 400 15px/1.55 var(--ui); -webkit-font-smoothing: antialiased; }
-a { color: inherit; text-decoration: none; } ::selection { background: var(--acc); color: var(--acc-ink); }
-/* five snap points; the page itself never moves: the stage is fixed and scroll only drives the scene */
-.snap { height: 100vh; height: 100svh; scroll-snap-align: start; }
+section { position: relative; z-index: 2; }
+h1, h2 { font-family: var(--ui); letter-spacing: -.04em; margin: 0; }
+.sec-h { display: flex; align-items: flex-end; justify-content: space-between; gap: 24px; margin-bottom: 26px; flex-wrap: wrap; }
+.sec-h h2 { font: 600 clamp(26px, 3.2vw, 38px)/1.08 var(--ui); letter-spacing: -.035em; }
+.sec-h h2 span { color: var(--t3); }
+.sec-h p { margin: 10px 0 0; color: var(--t2); max-width: 520px; font-size: 15px; }
+.kick { font: 500 12px var(--mono); color: var(--acc); letter-spacing: .04em; margin-bottom: 12px; display: block; }
 
-/* ---------------------------------------------------------------- chrome */
-.bar { position: fixed; z-index: 30; top: 0; left: 0; right: 0; display: flex; align-items: center; gap: 16px; padding: 22px 34px; }
-.word { font: 900 28px/1 var(--dot); letter-spacing: .02em; margin-right: auto; text-shadow: none; }
-.word i { font-style: normal; color: var(--acc); }
-.rate { display: inline-flex; align-items: center; gap: 10px; height: 34px; padding: 0 14px; border-radius: 999px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); font: 400 12.5px var(--mono); color: var(--t3); letter-spacing: .02em; }
-.rate i { width: 6px; height: 6px; border-radius: 50%; background: var(--acc);  } .rate b { color: var(--ink); font-weight: 400; }
-@keyframes blink { 50% { opacity: .3 } }
-.round { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); display: grid; place-items: center; cursor: pointer; color: var(--t2); transition: color .2s, border-color .2s; }
-.round:hover { color: var(--ink); border-color: var(--line2); } .round svg { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.6; }
+/* hero */
+.hero { padding: 72px 0 40px; }
+.hero .wrap { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 56px; align-items: center; }
+.hero h1 { margin: 22px 0 0; font: 600 clamp(40px, 5.6vw, 72px)/.98 var(--ui); letter-spacing: -.05em; }
+.hero h1 em { font-style: normal; color: var(--acc); }
+.hero .lede { margin: 22px 0 0; max-width: 500px; color: var(--t2); font-size: 16.5px; line-height: 1.6; }
+.hero .cta { display: flex; gap: 10px; margin-top: 30px; flex-wrap: wrap; }
+.hero .own { margin-top: 30px; display: flex; align-items: center; gap: 12px; flex-wrap: wrap; font: 400 12.5px var(--mono); color: var(--t3); }
+.hero .own a { color: var(--t2); text-decoration: none; } .hero .own a:hover { color: var(--ink); }
 
-/* keys: buttons that feel like hardware */
-.key { position: relative; display: inline-flex; align-items: center; gap: 14px; height: 46px; padding: 0 8px 0 20px; border-radius: 14px; cursor: pointer; border: 0;
-  font: 500 14px var(--ui); letter-spacing: .01em; color: var(--acc-ink);
-  background: linear-gradient(180deg, color-mix(in srgb, var(--acc) 82%, #fff), var(--acc) 55%, color-mix(in srgb, var(--acc) 85%, #000));
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.55), inset 0 -2px 0 rgba(0,0,0,.18), 0 1px 0 rgba(0,0,0,.35), 0 10px 24px -12px rgba(0,0,0,.55);
-  transition: transform .12s, box-shadow .2s; }
-.key:hover { transform: translateY(-1px); } .key:active { transform: translateY(1px); box-shadow: inset 0 1px 0 rgba(255,255,255,.35), inset 0 -1px 0 rgba(0,0,0,.18), 0 0 0 rgba(0,0,0,0), 0 4px 12px -8px rgba(0,0,0,.5); }
-.key .arw { width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center; background: rgba(0,0,0,.14); box-shadow: inset 0 1px 0 rgba(255,255,255,.18); }
-.key .arw svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 2; stroke-linecap: round; }
-.key.sm { height: 36px; padding: 0 6px 0 14px; font-size: 13px; border-radius: 11px; gap: 10px; } .key.sm .arw { width: 24px; height: 24px; border-radius: 8px; }
-.tline { font: 400 12px var(--mono); color: var(--t2); letter-spacing: .06em; text-transform: uppercase; display: inline-flex; gap: 10px; align-items: center; cursor: pointer; padding: 6px 0; }
-.tline::after { content: ''; width: 26px; height: 1px; background: currentColor; opacity: .5; transition: width .3s var(--ease); } .tline:hover { color: var(--ink); } .tline:hover::after { width: 40px; }
+/* the live search: the product itself, running */
+.live { padding: 0; overflow: hidden; }
+.live .lh { display: flex; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--line); font: 500 12.5px var(--mono); color: var(--t2); }
+.live .lh .end { margin-left: auto; display: flex; gap: 6px; }
+.live .lh .end i { width: 9px; height: 9px; border-radius: 50%; background: var(--s3); }
+.board { padding: 30px 22px 22px; }
+.cells { display: flex; flex-wrap: wrap; justify-content: center; font: 500 clamp(13px, 1.32vw, 17.5px)/1.25 var(--mono); }
+.cells span { width: .64em; text-align: center; color: var(--t4); transition: color .25s; position: relative; }
+.cells span.set { color: var(--t2); } .cells span.pat { color: var(--acc); } .cells span.lock { color: var(--ink); } .cells span.lock.pat { color: var(--acc); }
+.cells span.pat::after { content: ''; position: absolute; left: 10%; right: 10%; bottom: -5px; height: 2px; border-radius: 2px; background: var(--acc); opacity: .5; }
+.sought { text-align: center; margin-top: 16px; font: 400 12px var(--mono); color: var(--t3); }
+.sought b { color: var(--acc); font-weight: 500; }
+.lstats { display: grid; grid-template-columns: repeat(3, 1fr); border-top: 1px solid var(--line); }
+.lstats div { padding: 14px 18px; border-left: 1px solid var(--line); } .lstats div:first-child { border-left: 0; }
+.lstats b { display: block; font: 500 18px var(--mono); letter-spacing: -.02em; } .lstats span { font-size: 12px; color: var(--t3); }
+.log { border-top: 1px solid var(--line); padding: 6px 18px 10px; min-height: 118px; }
+.log div { display: grid; grid-template-columns: 64px minmax(0, 1fr) 52px; gap: 12px; padding: 7px 0; font: 400 12px var(--mono); color: var(--t3); border-bottom: 1px dashed var(--line); animation: rise .6s var(--ease) both; }
+.log div:last-child { border-bottom: 0; }
+.log code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--t2); } .log code b { color: var(--acc); font-weight: 500; } .log div span:last-child { text-align: right; }
+.log .empty { display: block; border: 0; padding: 12px 0; }
 
-/* the rail: where you are */
-.rail { position: fixed; z-index: 30; right: 30px; top: 50%; translate: 0 -50%; display: grid; gap: 14px; }
-.rail button { all: unset; cursor: pointer; display: flex; align-items: center; gap: 10px; justify-content: flex-end; font: 400 12px var(--mono); color: var(--t3); letter-spacing: .08em; text-transform: uppercase; }
-.rail button span { opacity: 0; transform: translateX(6px); transition: all .35s var(--ease); }
-.rail button i { width: 18px; height: 2px; border-radius: 1px; background: var(--t4); transition: all .35s var(--ease); }
-.rail button.on { color: var(--ink); } .rail:hover button span { opacity: 1; transform: none; }
-.rail:hover { background: var(--panel); backdrop-filter: blur(14px); padding: 12px 14px; margin: -12px -14px; border-radius: 12px; } .rail button.on i { width: 34px; background: var(--acc);  }
+/* stats strip */
+.strip { padding: 40px 0 0; }
 
-.foot { position: fixed; z-index: 30; left: 34px; right: 34px; bottom: 22px; display: flex; justify-content: space-between; font: 400 12px var(--mono); color: var(--t3); letter-spacing: .06em; text-transform: uppercase; pointer-events: none; }
-.foot b { color: var(--t2); font-weight: 400; }
+/* how it works */
+.how { padding-top: 110px; }
+.steps { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.stepc { display: flex; flex-direction: column; min-height: 330px; }
+.stepc .n { font: 500 12px var(--mono); color: var(--t3); }
+.stepc h3 { margin: 10px 0 8px; font: 600 19px/1.25 var(--ui); letter-spacing: -.02em; }
+.stepc p { margin: 0; color: var(--t2); font-size: 14px; }
+.stepc .vis { margin-top: auto; padding-top: 24px; }
+.mini { border: 1px solid var(--line); border-radius: 12px; background: var(--s1); padding: 16px; }
+.mini .cells { font-size: 13px; justify-content: flex-start; }
+.mini .lbl { font: 400 11.5px var(--mono); color: var(--t3); margin-bottom: 10px; display: flex; justify-content: space-between; }
+.est { display: grid; gap: 8px; font: 400 12.5px var(--mono); color: var(--t3); }
+.est div { display: grid; grid-template-columns: 70px 1fr auto; gap: 10px; align-items: center; }
+.est i { height: 4px; border-radius: 4px; background: var(--s3); position: relative; overflow: hidden; } .est i::after { content: ''; position: absolute; inset: 0; width: var(--w, 10%); background: var(--acc); border-radius: 4px; transition: width .8s var(--ease); }
+.est b { color: var(--ink); font-weight: 500; }
+.holdd { position: relative; height: 44px; border-radius: 10px; overflow: hidden; border: 1px solid var(--line2); display: grid; place-items: center; font: 600 13.5px var(--ui); background: var(--s1); }
+.holdd::before { content: ''; position: absolute; inset: 0; background: var(--acc); transform-origin: left; transform: scaleX(var(--h, 0)); }
+.holdd span { position: relative; z-index: 1; color: var(--ink); text-shadow: 0 1px 2px rgba(0,0,0,.25); }
+.chain { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 12px; }
+.chain span { font: 400 11px var(--mono); color: var(--t3); padding-top: 8px; border-top: 2px solid var(--s3); transition: color .3s, border-color .3s; }
+.chain span.on { color: var(--ink); border-color: var(--acc); }
 
-/* ---------------------------------------------------------------- the stage */
-.stage { position: fixed; inset: 0; z-index: 2; display: grid; place-items: center; padding: 90px 110px 70px 60px; pointer-events: none; }
-.scene { position: absolute; inset: 90px 110px 70px 60px; display: grid; align-content: center; will-change: opacity, transform, filter; }
-.scene.live { pointer-events: auto; }
-.label { font: 400 12.5px var(--mono); color: var(--t3); letter-spacing: .08em; text-transform: uppercase; display: flex; gap: 14px; align-items: center; }
-.label b { color: var(--acc); font-weight: 400; } .label::before { content: ''; width: 22px; height: 1px; background: var(--t4); }
+/* launched */
+.launched { padding-top: 110px; }
+.coins { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.coin { display: grid; grid-template-columns: 44px minmax(0, 1fr); gap: 14px; align-items: center; padding: 16px; }
+.coin img, .coin .ph { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; background: var(--s2); display: grid; place-items: center; font: 600 15px var(--mono); color: var(--t3); }
+.coin b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .coin b small { font: 400 12px var(--mono); color: var(--t3); margin-left: 6px; }
+.coin .ca { margin-top: 8px; height: 30px; width: 100%; justify-content: space-between; }
+.coin .meta { grid-column: 1 / -1; display: flex; gap: 12px; font: 400 12px var(--mono); color: var(--t3); padding-top: 12px; border-top: 1px solid var(--line); }
+.coin .meta a { color: var(--t2); text-decoration: none; } .coin .meta a:hover { color: var(--acc); } .coin .meta .v { margin-left: auto; }
 
-/* the LED board: a real dot-matrix face over a dot grid */
-.board { position: relative; display: inline-flex; padding: 22px 26px; border-radius: 18px; background: linear-gradient(180deg, var(--card-a), var(--card-b)); border: 1px solid var(--line);
-  backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); box-shadow: inset 0 1px 0 rgba(255,255,255,.05), 0 40px 120px -50px var(--shadow); }
-.board::before { content: ''; position: absolute; inset: 12px; border-radius: 10px; pointer-events: none; opacity: .5;
-  background-image: radial-gradient(rgba(255,255,255,.07) .9px, transparent 1.1px); background-size: 6px 6px; }
-.cells { position: relative; display: flex; font: 800 var(--fs, 30px)/1 var(--dot); }
-.cells span { width: .64em; text-align: center; color: color-mix(in srgb, var(--ink) 22%, transparent); transition: color .25s; }
-.cells span.set { color: color-mix(in srgb, var(--ink) 62%, transparent); }
-.cells span.pat { color: var(--acc); text-shadow: none; }
-.cells span.lock { color: var(--ink); text-shadow: none; }
-.cells span.lock.pat { color: var(--acc); text-shadow: none; }
+/* accounts */
+.acct { padding-top: 110px; }
+.acct .card { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px; align-items: center; padding: 40px; }
+.acct h2 { font: 600 clamp(26px, 3vw, 36px)/1.1 var(--ui); letter-spacing: -.035em; }
+.acct p { color: var(--t2); margin: 14px 0 24px; font-size: 15px; max-width: 460px; }
+.acct .ways { display: grid; gap: 10px; }
+.acct .way { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: 11px; border: 1px solid var(--line); background: var(--s1); font-size: 14px; }
+.acct .way .ic { width: 19px; height: 19px; } .acct .way span { margin-left: auto; font: 400 12px var(--mono); color: var(--t3); }
+.acct .merge { margin-top: 6px; display: flex; align-items: center; gap: 10px; font: 400 12.5px var(--mono); color: var(--t3); }
 
-/* scene 0: hero */
-.s0 { justify-items: center; text-align: center; }
-.h { margin: 22px 0 0; font: 900 clamp(38px, 6.3vw, 92px)/.92 var(--dot); letter-spacing: .01em; text-transform: uppercase; }
-.h em { font-style: normal; color: var(--acc); text-shadow: none; }
-.lede { margin: 26px 0 0; max-width: 560px; font: 400 16.5px/1.6 var(--ui); color: var(--t2); }
-.cta { display: flex; gap: 26px; align-items: center; margin-top: 30px; justify-content: center; flex-wrap: wrap; }
-.s0 .board { margin-top: 40px; }
-.s0 .sub { margin-top: 14px; font: 400 12.5px var(--mono); color: var(--t3); letter-spacing: .02em; }
+/* spec */
+.spec { padding-top: 110px; }
+.spec dl { margin: 0; display: grid; grid-template-columns: 1fr 1fr; gap: 0 40px; }
+.spec .row { display: grid; grid-template-columns: 150px 1fr; gap: 16px; padding: 15px 0; border-bottom: 1px solid var(--line); }
+.spec dt { font: 400 12.5px var(--mono); color: var(--t3); }
+.spec dd { margin: 0; font-size: 14px; } .spec dd small { display: block; color: var(--t3); font-size: 12.5px; }
 
-/* scenes 1-3: steps */
-.step { grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: 60px; align-items: center; }
-.num { font: 900 clamp(70px, 9vw, 130px)/.8 var(--dot); color: transparent; -webkit-text-stroke: 1px var(--line2); text-shadow: none; }
-.step .num b { color: var(--acc); -webkit-text-stroke: 0; text-shadow: none; font-weight: 900; }
-.step h2 { margin: 26px 0 0; font: 500 clamp(30px, 3.4vw, 46px)/1.05 var(--ui); letter-spacing: -.035em; }
-.step h2 span { color: var(--t3); }
-.step p { margin: 18px 0 0; max-width: 440px; color: var(--t2); font-size: 16px; }
-.step .facts { margin-top: 28px; display: grid; gap: 10px; max-width: 440px; }
-.fact { display: flex; gap: 12px; align-items: baseline; font: 400 12.5px var(--mono); color: var(--t3); }
-.fact::after { content: ''; flex: 1; order: 1; border-bottom: 1px dotted var(--t4); transform: translateY(-3px); } .fact b { order: 2; color: var(--ink); font-weight: 400; }
-.vis { display: grid; gap: 16px; justify-items: start; }
-.typing { --fs: clamp(18px, 2vw, 28px); }
-.big { font: 900 clamp(56px, 7vw, 104px)/.9 var(--dot); color: var(--ink); text-shadow: none; font-variant-numeric: tabular-nums; }
-.big small { font: 400 13px var(--mono); color: var(--t3); letter-spacing: .08em; margin-left: 10px; text-transform: uppercase; text-shadow: none; }
-.mini { --fs: clamp(13px, 1.3vw, 18px); }
-.log { width: 100%; max-width: 560px; display: grid; gap: 2px; font: 400 12px var(--mono); }
-.log div { display: grid; grid-template-columns: 54px 1fr 50px; gap: 12px; padding: 7px 0; border-bottom: 1px solid var(--line); color: var(--t3); animation: rowIn .6s var(--ease) both; }
-.log code { color: var(--t2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .log code b { color: var(--acc); font-weight: 400; } .log span:last-child { text-align: right; }
-@keyframes rowIn { from { opacity: 0; transform: translateY(-6px); filter: blur(4px) } }
-.coin { display: grid; grid-template-columns: 64px 1fr; gap: 16px; align-items: center; padding: 18px; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(180deg, var(--card-a), var(--card-b)); backdrop-filter: blur(18px); min-width: 380px; }
-.coin .pic { width: 64px; height: 64px; border-radius: 14px; background: radial-gradient(circle at 35% 30%, var(--g2), var(--g1) 72%); box-shadow: inset 0 1px 0 rgba(255,255,255,.3); display: grid; place-items: center; font: 900 22px var(--dot); color: #fff; }
-.coin b { font: 500 18px var(--ui); letter-spacing: -.02em; } .coin b span { color: var(--t3); font: 400 13px var(--mono); margin-left: 6px; }
-.coin code { display: block; margin-top: 4px; font: 400 12px var(--mono); color: var(--t3); } .coin code em { color: var(--acc); font-style: normal; }
-.holddemo { position: relative; width: 380px; height: 54px; border-radius: 14px; overflow: hidden; background: var(--panel2); box-shadow: 0 0 0 1px var(--line2); }
-.holddemo::before { content: ''; position: absolute; inset: 0; background: var(--acc); transform-origin: left; transform: scaleX(var(--h, 0)); }
-.holddemo span { position: absolute; inset: 0; display: grid; place-items: center; font: 500 14px var(--ui); color: var(--ink); }
-.holddemo span.top { color: var(--acc-ink); clip-path: inset(0 calc(100% - var(--h, 0) * 100%) 0 0); }
-.chain { display: flex; gap: 8px; flex-wrap: wrap; } .chain span { font: 400 12px var(--mono); color: var(--t3); padding: 6px 10px; border-radius: 8px; border: 1px solid var(--line); transition: all .4s var(--ease); }
-.chain span.on { color: var(--acc-ink); background: var(--acc); border-color: var(--acc); }
+/* last call */
+.last { padding-top: 120px; text-align: center; }
+.last h2 { font: 600 clamp(32px, 4.4vw, 56px)/1 var(--ui); letter-spacing: -.045em; }
+.last p { color: var(--t2); margin: 16px auto 28px; max-width: 460px; font-size: 15.5px; }
+.last .cta { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
 
-/* the launched list */
-.pubgrid { display: grid; gap: 8px; width: 100%; max-width: 640px; }
-.prow { display: grid; grid-template-columns: 44px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--panel); backdrop-filter: blur(14px); }
-.prow img, .prow .ph { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; background: var(--panel2); display: grid; place-items: center; font: 900 16px var(--dot); color: var(--t3); }
-.prow b { display: block; font: 500 15px var(--ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .prow b small { color: var(--t3); font: 400 12px var(--mono); margin-left: 6px; }
-.prow code { display: block; font: 400 12px var(--mono); color: var(--t3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .prow code em { color: var(--acc); font-style: normal; }
-.cp { all: unset; cursor: pointer; font: 400 12px var(--mono); letter-spacing: .06em; text-transform: uppercase; padding: 8px 12px; border-radius: 10px; border: 1px solid var(--line2); color: var(--t2); transition: all .2s; }
-.cp:hover { color: var(--ink); border-color: rgba(var(--acc-rgb), .6); } .cp.ok { background: var(--acc); color: var(--acc-ink); border-color: var(--acc); }
-.pubempty { font: 400 13px var(--mono); color: var(--t3); padding: 20px 0; }
-/* scene 4: spec sheet */
-.spec { grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: 60px; align-items: center; }
-.spec h2 { margin: 22px 0 0; font: 900 clamp(34px, 4.4vw, 64px)/.95 var(--dot); text-transform: uppercase; }
-.spec h2 em { font-style: normal; color: var(--acc); text-shadow: none; }
-.spec p { margin: 18px 0 30px; color: var(--t2); max-width: 400px; }
-.sheet { border-top: 1px solid var(--line2); }
-.row { display: grid; grid-template-columns: 170px 1fr; gap: 20px; padding: 13px 0; border-bottom: 1px solid var(--line); align-items: baseline; }
-.row dt { font: 400 12px var(--mono); color: var(--t3); letter-spacing: .1em; text-transform: uppercase; }
-.row dd { margin: 0; font: 400 15px var(--ui); color: var(--ink); } .row dd small { color: var(--t3); font: 400 12px var(--mono); margin-left: 8px; }
-.speed { display: flex; gap: 18px; flex-wrap: wrap; font: 400 12.5px var(--mono); color: var(--t3); } .speed b { color: var(--ink); font-weight: 400; }
-
-.cue { position: fixed; z-index: 30; left: 50%; bottom: 22px; translate: -50% 0; font: 400 12px var(--mono); color: var(--t3); letter-spacing: .08em; text-transform: uppercase; display: grid; justify-items: center; gap: 8px; transition: opacity .4s; }
-.cue i { width: 1px; height: 26px; background: linear-gradient(var(--t3), transparent); animation: drip 2s ease-in-out infinite; transform-origin: top; } @keyframes drip { 0% { scale: 1 0 } 50% { scale: 1 1 } 100% { scale: 1 1; opacity: 0 } }
-
-/* the official coin: $dzz, launched with dzz at a Dzz…dzz address */
-.tok { all: unset; cursor: pointer; display: inline-flex; align-items: center; gap: 10px; height: 34px; padding: 0 6px 0 14px; border-radius: 12px; border: 1px solid var(--line2); background: var(--panel); backdrop-filter: blur(14px); font: 400 13px var(--mono); color: var(--t2); transition: border-color .2s, color .2s; }
-.tok:hover { border-color: rgba(var(--acc-rgb), .5); color: var(--ink); } .tok b { color: var(--ink); font-weight: 500; } .tok em { font-style: normal; color: var(--acc); }
-.tok span { font: 500 12px var(--ui); padding: 4px 9px; border-radius: 8px; background: var(--panel2); color: var(--t2); } .tok.ok span { background: var(--acc); color: var(--acc-ink); }
-.official { margin-top: 22px; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 10px 16px; font: 400 13px var(--mono); color: var(--t3); }
-.official a { color: var(--t2); text-decoration: none; border-bottom: 1px solid var(--line2); } .official a:hover { color: var(--ink); border-color: var(--acc); }
-.official code { color: var(--ink); font: 500 13px var(--mono); } .official code em { font-style: normal; color: var(--acc); }
 @media (max-width: 980px) {
-  .stage, .scene { padding: 0; inset: 80px 20px 60px 20px; } .step, .spec { grid-template-columns: 1fr; gap: 26px; } .rail, .foot { display: none; }
-  .num { font-size: 64px; } .coin, .holddemo { min-width: 0; width: 100%; } .rate { display: none; } .bar { padding: 16px 18px; } .tok code { display: none; } .official code { font-size: 11.5px; }
+  .hero .wrap { grid-template-columns: 1fr; gap: 40px; } .hero { padding-top: 40px; }
+  .steps, .coins { grid-template-columns: 1fr; } .stepc { min-height: 0; }
+  .acct .card { grid-template-columns: 1fr; padding: 26px; } .spec dl { grid-template-columns: 1fr; }
 }
-@media (max-width: 600px) {
-  .h { font-size: 7.1vw; } .s0 .board { padding: 14px 14px; } .s0 .board .cells { font-size: 2.55vw !important; } .lede { font-size: 15px; }
-  .bar { gap: 10px; } .tok, .key.sm { white-space: nowrap; } .bar .tok { padding-left: 12px; } .bar .round { display: none; }
-}
-@media (prefers-reduced-motion: reduce) { .scene { transition: none !important; } }
+@media (max-width: 560px) { .spec .row { grid-template-columns: 1fr; gap: 4px; } .lstats b { font-size: 15px; } }
 </style>
 </head>
 <body>
-<header class="bar">
-  <a class="word" href="/">dz<i>z</i></a>
-  <span class="rate"><i></i><span id="rateTop">warming up</span></span>
-  <button class="tok" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" title="Copy the $dzz contract address"><b>$dzz</b><code><em>Dzz</em>pJ3W…QC<em>dzz</em></code><span>Copy CA</span></button>
-  <button class="round" data-theme-picker title="Theme" aria-label="Theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg></button>
-  <a class="key sm" href="/me">Profile</a><a class="key sm" href="/fees">Creator fees</a><a class="key sm" href="/app">Launch app<span class="arw"><svg viewBox="0 0 24 24"><path d="M7 17 17 7M9 7h8v8"/></svg></span></a>
+
+<header class="nav" id="nav">
+  <div class="wrap">
+    <a class="mark" href="/"><b>dz<i>z</i></b></a>
+    <nav class="links"><a href="#how">How it works</a><a href="#launched">Launched</a><a href="#accounts">Accounts</a><a href="#spec">Spec</a><a href="/fees">Creator fees</a></nav>
+    <div class="right">
+      <button class="iconbtn hide-s" data-theme-picker title="Theme" aria-label="Theme"><svg class="ic"><use href="/assets/icons.svg#theme"/></svg></button>
+      <a class="btn ghost" href="/login" id="signLink">Sign in</a>
+      <a class="btn primary" href="/app">Launch app<svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a>
+    </div>
+  </div>
 </header>
 
-<nav class="rail" id="rail"></nav>
-<div class="foot"><span>dzz <b>· custom-CA launches on pump.fun and Meteora</b></span><span>independent · not affiliated with pump.fun or Meteora</span></div>
-<div class="cue" id="cue">scroll<i></i></div>
-
-<div class="stage">
-  <!-- 0 -->
-  <section class="scene s0" data-name="Intro">
-    <h1 class="h">Launch at the<br>address <em>you choose</em></h1>
-    <div class="board" style="--fs:clamp(14px, 2.1vw, 30px)"><div class="cells" id="heroCells"></div></div>
-    <div class="sub" id="heroSub">searching on this device</div>
-    <p class="lede">dzz finds a contract address that starts or ends exactly how you want, inside your browser, then launches your coin on pump.fun or Meteora with it. No platform fee. The keys never leave your device.</p>
-    <div class="cta"><a class="key" href="/app">Open dzz<span class="arw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a><a class="tline" data-go="1">How it works</a></div>
-    <div class="official">$dzz, launched with dzz:<code><em>Dzz</em>pJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QC<em>dzz</em></code><button class="tok" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz"><span>Copy CA</span></button><a href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">pump.fun</a><a href="https://dexscreener.com/solana/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">chart</a></div>
-  </section>
-
-  <!-- 1 -->
-  <section class="scene step" data-name="Choose">
+<section class="hero">
+  <div class="wrap">
     <div>
-      <div class="num"><b>0</b>1</div>
-      <h2>Choose how it <span>starts and ends.</span></h2>
-      <p>Type the start, the ending, or both, up to 9 characters. Exact case, or any case for speed. Pick nothing and dzz uses pump.fun's own …pump format.</p>
-      <div class="facts"><div class="fact">characters<b>base58 · no 0 O I l</b></div><div class="fact">matching<b>exact or any case</b></div><div class="fact">default<b>…pump</b></div></div>
+      <span class="eyebrow rise"><i class="dot live"></i><span id="rateTop">measuring this device…</span></span>
+      <h1 class="rise" style="animation-delay:.06s">Launch at the address <em>you choose.</em></h1>
+      <p class="lede rise" style="animation-delay:.12s">dzz finds a contract address that starts or ends the way you want, right in your browser, then launches your coin on pump.fun or Meteora with it. No platform fee. Your keys never leave your device.</p>
+      <div class="cta rise" style="animation-delay:.18s">
+        <a class="btn acc lg" href="/app"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a>
+        <a class="btn lg" href="#how">How it works</a>
+      </div>
+      <div class="own rise" style="animation-delay:.24s">
+        <span>$dzz, launched with dzz</span>
+        <button class="ca" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz"><code><em>Dzz</em>pJ3W…J43QC<em>dzz</em></code><span>Copy CA</span></button>
+        <a href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">pump.fun ↗</a>
+      </div>
     </div>
-    <div class="vis"><div class="label">your pattern</div><div class="board typing"><div class="cells" id="typeCells"></div></div></div>
-  </section>
 
-  <!-- 2 -->
-  <section class="scene step" data-name="Find">
-    <div>
-      <div class="num"><b>0</b>2</div>
-      <h2>dzz finds it, <span>on your device.</span></h2>
-      <p>WebAssembly on every core walks through millions of addresses a second. A match locks into place, and its key stays in your browser.</p>
-      <div class="facts"><div class="fact">engine<b>WebAssembly · every core</b></div><div class="fact">keys<b>this browser only</b></div><div class="fact">signature<b>checked before sending</b></div></div>
+    <div class="card live rise" style="animation-delay:.2s">
+      <div class="lh"><i class="dot acc"></i>Live search, on this device<span class="end"><i></i><i></i><i></i></span></div>
+      <div class="board"><div class="cells" id="heroCells"></div><div class="sought" id="sought">starting the engine…</div></div>
+      <div class="lstats"><div><b id="lRate">–</b><span>addresses / s</span></div><div><b id="lTried">–</b><span>checked</span></div><div><b id="lFound">0</b><span>found</span></div></div>
+      <div class="log" id="log"><span class="empty muted">Finds show up here.</span></div>
     </div>
-    <div class="vis"><div class="big" id="bigRate">0<small>/ s</small></div><div class="label" id="findLabel">2 threads · demo</div><div class="log" id="log"></div></div>
-  </section>
+  </div>
+</section>
 
-  <!-- 3 -->
-  <section class="scene step" data-name="Launch">
-    <div>
-      <div class="num"><b>0</b>3</div>
-      <h2>Hold to launch. <span>Approve once.</span></h2>
-      <p>Picture, name, ticker, pair and creator fee. Hold the key, approve in your wallet, and the coin is live on pump.fun at your address.</p>
-      <div class="facts"><div class="fact">cost<b>~0.0055 SOL rent · no fee</b></div><div class="fact">wallets<b>Phantom · Solflare · Backpack</b></div></div>
+<section class="strip">
+  <div class="wrap">
+    <div class="stats4">
+      <div><b id="sCoins">–</b><span>coins launched with dzz</span></div>
+      <div><b id="sFees">–<small>SOL</small></b><span>creator fees earned <i id="sFeesUsd"></i></span></div>
+      <div><b id="sSpeed">–</b><span>addresses a second here</span></div>
+      <div><b>0<small>%</small></b><span>platform fee, only network rent</span></div>
     </div>
-    <div class="vis">
-      <div class="coin"><div class="pic">dz</div><div><b>Your coin<span>$YOURS</span></b><code id="coinCa">7xKp…Vq<em>moon</em></code></div></div>
-      <div class="holddemo" id="hold"><span>Hold to launch</span><span class="top">Hold to launch</span></div>
-      <div class="chain" id="chain"><span>details saved</span><span>approved</span><span>live on pump.fun</span></div>
-    </div>
-  </section>
+  </div>
+</section>
 
-  <!-- live -->
-  <section class="scene step" data-name="Launched">
-    <div>
-      <div class="label">live list</div>
-      <h2 style="font:900 clamp(34px,4.4vw,64px)/.95 var(--dot);text-transform:uppercase;margin-top:22px">Launched with <span style="color:var(--acc);text-shadow: none">dzz</span></h2>
-      <p>Every coin here was launched with dzz and checked on Solana before it was listed. Copy a CA in one click.</p>
-      <div class="facts"><div class="fact">listed<b id="pubCount">–</b></div><div class="fact">verified<b>on chain, per launch</b></div></div>
+<section class="how" id="how">
+  <div class="wrap">
+    <div class="sec-h"><div><span class="kick">How it works</span><h2>Three steps. <span>One approval.</span></h2></div></div>
+    <div class="steps">
+      <div class="card stepc">
+        <span class="n">01</span><h3>Choose how it starts and ends</h3>
+        <p>Type the start, the ending, or both, up to 9 characters. Exact case, or any case for speed. Leave it empty and dzz uses pump.fun's own …pump.</p>
+        <div class="vis"><div class="mini"><div class="lbl"><span>your pattern</span><span id="patLbl">…moon</span></div><div class="cells" id="typeCells"></div></div></div>
+      </div>
+      <div class="card stepc">
+        <span class="n">02</span><h3>dzz finds it on your device</h3>
+        <p>WebAssembly on every core checks millions of addresses. A match locks in, and its key is kept in your browser only.</p>
+        <div class="vis"><div class="mini"><div class="lbl"><span>time to find, here</span><span>any case</span></div><div class="est" id="est"></div></div></div>
+      </div>
+      <div class="card stepc">
+        <span class="n">03</span><h3>Hold to launch</h3>
+        <p>Add a picture, name, ticker, pair and creator fee. Hold the button, approve once in your wallet, and the coin is live at your address.</p>
+        <div class="vis"><div class="mini"><div class="holdd" id="holdd"><span>Hold to launch</span></div><div class="chain" id="chain"><span>details saved</span><span>approved</span><span>live</span></div></div></div>
+      </div>
     </div>
-    <div class="vis"><div class="pubgrid" id="pubList"><div class="pubempty">loading…</div></div></div>
-  </section>
+  </div>
+</section>
 
-  <!-- 4 -->
-  <section class="scene spec" data-name="Spec">
-    <div>
-      <div class="label">specification</div>
-      <h2>Built for <em>launches</em></h2>
-      <p>Everything a launch needs, nothing it doesn't. Free to use; network rent is the only cost.</p>
-      <a class="key" href="/app">Open dzz<span class="arw"><svg viewBox="0 0 24 24"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></a>
+<section class="launched" id="launched">
+  <div class="wrap">
+    <div class="sec-h"><div><span class="kick">Launched with dzz</span><h2>Every coin, checked on chain.</h2><p>Each launch is verified on Solana before it is listed here. Copy a CA in one click.</p></div><a class="btn" href="/app#explore">See all<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
+    <div class="coins" id="coins"><div class="muted">Loading…</div></div>
+  </div>
+</section>
+
+<section class="acct" id="accounts">
+  <div class="wrap">
+    <div class="card">
+      <div>
+        <span class="kick">Accounts</span>
+        <h2>One account for every wallet you launch from.</h2>
+        <p>Sign in with Google, Discord or X and link your wallets. Your launches and creator fees from all of them, from the website and the desktop app, add up on one dashboard.</p>
+        <a class="btn primary lg" href="/login">Sign in<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a>
+      </div>
+      <div class="ways">
+        <div class="way"><svg class="ic brand"><use href="/assets/icons.svg#google"/></svg>Google</div>
+        <div class="way"><svg class="ic brand"><use href="/assets/icons.svg#discord"/></svg>Discord</div>
+        <div class="way"><svg class="ic brand"><use href="/assets/icons.svg#x"/></svg>X</div>
+        <div class="way"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg>Solana wallet<span>Phantom · Solflare · Backpack</span></div>
+        <div class="merge"><svg class="ic sm"><use href="/assets/icons.svg#check"/></svg>Signing in with a wallet that already has launches brings them along.</div>
+      </div>
     </div>
-    <dl class="sheet">
-      <div class="row"><dt>Address</dt><dd>start, end or both <small>up to 9 characters</small></dd></div>
-      <div class="row"><dt>Speed here</dt><dd><span class="speed" id="specSpeed">measuring…</span></dd></div>
-      <div class="row"><dt>Default</dt><dd>pump.fun's own format <small>…pump</small></dd></div>
+  </div>
+</section>
+
+<section class="spec" id="spec">
+  <div class="wrap">
+    <div class="sec-h"><div><span class="kick">Specification</span><h2>Everything a launch needs.</h2></div></div>
+    <dl>
+      <div class="row"><dt>Address</dt><dd>start, end or both <small>up to 9 characters, base58 (no 0, O, I or l)</small></dd></div>
       <div class="row"><dt>Launch on</dt><dd>pump.fun or Meteora <small>your own curve, fee and anti-snipe on Meteora</small></dd></div>
-      <div class="row"><dt>Pair</dt><dd>SOL, HYPE, stocks, pre-IPO, any token pump.fun lists</dd></div>
-      <div class="row"><dt>Creator fee</dt><dd>default, or 0.5 – 3 % <small>fixed at launch</small></dd></div>
-      <div class="row"><dt>Fee split</dt><dd>up to 3 wallets <small>on chain</small></dd></div>
-      <div class="row"><dt>Dev buy</dt><dd>optional, same approval</dd></div>
-      <div class="row"><dt>Metadata</dt><dd>permanent, CDN-served</dd></div>
+      <div class="row"><dt>Pair</dt><dd>SOL, HYPE, Take-Two, or any token <small>any token Jupiter can trade, on Meteora</small></dd></div>
+      <div class="row"><dt>Creator fee</dt><dd>default, or 0.5 to 3% <small>fixed at launch</small></dd></div>
+      <div class="row"><dt>Fee split</dt><dd>up to 3 wallets <small>written on chain</small></dd></div>
+      <div class="row"><dt>Dev buy</dt><dd>optional <small>in the same approval</small></dd></div>
+      <div class="row"><dt>Metadata</dt><dd>permanent, served from a CDN</dd></div>
       <div class="row"><dt>Keys</dt><dd>found, kept and signed in your browser</dd></div>
-      <div class="row"><dt>Cost</dt><dd>~0.0055 SOL on pump.fun, ~0.009 SOL on Meteora <small>network rent · no platform fee</small></dd></div>
+      <div class="row"><dt>Cost</dt><dd>~0.0055 SOL on pump.fun, ~0.009 SOL on Meteora <small>network rent, no platform fee</small></dd></div>
+      <div class="row"><dt>Wallets</dt><dd>Phantom, Solflare, Backpack</dd></div>
     </dl>
-  </section>
-</div>
+  </div>
+</section>
 
-<div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div><div class="snap"></div>
+<section class="last">
+  <div class="wrap">
+    <h2>Your coin. Your address.</h2>
+    <p>Free to use. Open it, type your pattern, and launch in a few minutes.</p>
+    <div class="cta"><a class="btn acc lg" href="/app"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a><a class="btn lg" href="/login">Sign in</a></div>
+  </div>
+</section>
 
-<script>
-// copy the official CA (any .tok button)
-document.addEventListener('click', async (e) => {
-  const b = e.target.closest('.tok'); if (!b) return
-  const ca = b.dataset.ca
-  try { await navigator.clipboard.writeText(ca) } catch { const t = document.createElement('textarea'); t.value = ca; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove() }
-  const sp = b.querySelector('span'); b.classList.add('ok'); sp.textContent = 'Copied'; window.dzzClick?.()
-  setTimeout(() => { b.classList.remove('ok'); sp.textContent = 'Copy CA' }, 1400)
-})
-</script>
+<footer class="foot">
+  <div class="wrap">
+    <div class="cols">
+      <div class="about"><a class="mark" href="/"><b>dz<i>z</i></b></a><p>Custom contract addresses for coins on pump.fun and Meteora. Found in your browser, launched from your wallet.</p>
+        <div class="soc"><a class="iconbtn" href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener" title="$dzz on pump.fun"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg></a><a class="iconbtn" href="https://github.com/dodo1653/dzzdeploy" target="_blank" rel="noopener" title="Metadata repo"><svg class="ic"><use href="/assets/icons.svg#key"/></svg></a></div></div>
+      <div><h4>Product</h4><ul><li><a href="/app">Launch a coin</a></li><li><a href="/app#explore">Launched coins</a></li><li><a href="/fees">Creator fees</a></li><li><a href="/app#account">Your account</a></li></ul></div>
+      <div><h4>Learn</h4><ul><li><a href="#how">How it works</a></li><li><a href="#spec">Specification</a></li><li><a href="#accounts">Accounts</a></li></ul></div>
+      <div><h4>$dzz</h4><ul><li><a href="https://pump.fun/coin/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">pump.fun</a></li><li><a href="https://dexscreener.com/solana/DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz" target="_blank" rel="noopener">Chart</a></li><li><a href="#" class="cpy" data-ca="DzzpJ3WfZunQqwmUM9Q9YVSdekKGzSpAMCTFJ43QCdzz">Copy CA</a></li></ul></div>
+    </div>
+    <div class="base"><span>© dzz · independent tool</span><span>Not affiliated with pump.fun or Meteora</span></div>
+  </div>
+</footer>
+<div class="toast" id="toast"></div>
+
 <script src="/assets/bg.js"></script>
 <script src="/assets/engine.js"></script>
+<script src="/assets/account.js"></script>
 <script>
 const $ = (id) => document.getElementById(id), LEN = 44, A = DZZ.ALPHA
+const esc = (x) => String(x ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
 const rnd = () => A[(Math.random() * 58) | 0]
 const big = (n) => (n >= 1e9 ? (n / 1e9).toFixed(2) + 'B' : n >= 1e6 ? (n / 1e6).toFixed(2) + 'M' : n >= 1e3 ? (n / 1e3).toFixed(1) + 'k' : String(Math.round(n)))
-const dur = (s) => (!isFinite(s) ? '–' : s < 1 ? '<1 s' : s < 90 ? Math.round(s) + ' s' : s < 5400 ? Math.round(s / 60) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : Math.round(s / 86400) + ' d')
+const dur = (s) => (!isFinite(s) ? '–' : s < 1 ? 'under 1 s' : s < 90 ? Math.round(s) + ' s' : s < 5400 ? Math.round(s / 60) + ' min' : s < 172800 ? (s / 3600).toFixed(1) + ' h' : Math.round(s / 86400) + ' days')
+const toast = (t, err) => { const el = $('toast'); el.textContent = t; el.className = 'toast on' + (err ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => (el.className = 'toast'), 1600) }
 
-// ---------------------------------------------------------------- scenes driven by scroll: nothing moves on the page,
-// each scene sinks back and blurs out while the next rises into focus
-const scenes = [...document.querySelectorAll('.scene')], rail = $('rail')
-scenes.forEach((s, i) => { const b = document.createElement('button'); b.innerHTML = `<span>${String(i).padStart(2, '0')} ${s.dataset.name}</span><i></i>`; b.onclick = () => go(i); rail.appendChild(b) })
-const go = (i) => scrollTo({ top: i * innerHeight, behavior: 'smooth' })
-document.querySelectorAll('[data-go]').forEach((a) => (a.onclick = () => go(+a.dataset.go)))
-let p = 0, sp = 0
-function stage() {
-  p = scrollY / innerHeight
-  sp += (p - sp) * 0.14
-  scenes.forEach((s, i) => {
-    const d = sp - i, a = Math.max(0, 1 - Math.abs(d) * 1.35)
-    s.style.opacity = a
-    s.style.transform = `translate3d(0, ${-d * 70}px, 0) scale(${1 - Math.min(Math.abs(d), 1) * 0.06})`
-    s.style.filter = `blur(${Math.min(Math.abs(d), 1) * 14}px)`
-    s.classList.toggle('live', a > 0.6)
-  })
-  const cur = Math.round(p)
-  ;[...rail.children].forEach((b, i) => b.classList.toggle('on', i === cur))
-  $('cue').style.opacity = p < 0.3 ? 1 : 0
-  window.DZZBG?.activity(cur === 2 ? 1 : cur === 0 ? .35 : 0)
-  requestAnimationFrame(stage)
-}
-requestAnimationFrame(stage)
-addEventListener('keydown', (e) => { if (['ArrowDown', 'PageDown', ' '].includes(e.key)) { e.preventDefault(); go(Math.min(scenes.length - 1, Math.round(p) + 1)) } if (['ArrowUp', 'PageUp'].includes(e.key)) { e.preventDefault(); go(Math.max(0, Math.round(p) - 1)) } })
+// nav background once scrolled, and the account link
+addEventListener('scroll', () => $('nav').classList.toggle('scrolled', scrollY > 8), { passive: true })
+DzzAuth.me().then((p) => { if (p) { $('signLink').textContent = p.name; $('signLink').href = '/app#account' } })
 
-// ---------------------------------------------------------------- LED boards
-function board(el, n) {
-  const cells = []
-  for (let i = 0; i < n; i++) { const s = document.createElement('span'); s.textContent = rnd(); el.appendChild(s); cells.push({ el: s, target: s.textContent, rolls: 0, next: 0 }) }
-  return cells
-}
+// copy a CA from any [data-ca]
+document.addEventListener('click', async (e) => {
+  const b = e.target.closest('[data-ca]'); if (!b) return; e.preventDefault()
+  try { await navigator.clipboard.writeText(b.dataset.ca) } catch {}
+  const sp = b.querySelector('span'); b.classList.add('ok'); if (sp) sp.textContent = 'Copied'; toast('Contract address copied')
+  setTimeout(() => { b.classList.remove('ok'); if (sp) sp.textContent = 'Copy CA' }, 1400)
+})
+
+// ---------------------------------------------------------------- character boards
+function board(el, n) { const cells = []; for (let i = 0; i < n; i++) { const s = document.createElement('span'); s.textContent = rnd(); el.appendChild(s); cells.push({ el: s, target: s.textContent, rolls: 0, next: 0 }) } return cells }
 const boards = []
 ;(function tick(now) { for (const cs of boards) for (const c of cs) if (c.rolls > 0 && now >= c.next) { c.rolls--; c.el.textContent = c.rolls ? rnd() : c.target; c.next = now + 42; c.el.classList.toggle('set', !c.rolls) } requestAnimationFrame(tick) })(0)
 const rollTo = (cs, str, { stagger = 3, rolls = 2, upto = cs.length, lock = false } = {}) => { const now = performance.now(); for (let i = 0; i < upto; i++) { const c = cs[i]; c.target = str[i] || ' '; c.rolls = rolls + ((Math.random() * 2) | 0); c.next = now + i * stagger; c.el.classList.toggle('lock', lock) } }
 const hero = board($('heroCells'), LEN); boards.push(hero)
 const typed = board($('typeCells'), 30); boards.push(typed)
 
-// scene 1: a pattern typed into the ends of an address
+// step 1: a pattern typed into the ends of an address
 ;(() => {
   const words = [['', 'moon'], ['dz', ''], ['', 'pump'], ['ape', 'gm'], ['', 'send']]; let w = 0, k = 0
-  const base = () => Array.from({ length: 30 }, rnd).join('')
-  let addr = base()
   setInterval(() => {
     const [pre, suf] = words[w], total = pre.length + suf.length
-    if (k === 0) { addr = base(); rollTo(typed, addr, { stagger: 6, rolls: 3 }) }
+    if (k === 0) { rollTo(typed, Array.from({ length: 30 }, rnd).join(''), { stagger: 6, rolls: 3 }); $('patLbl').textContent = (pre ? pre + '…' : '…') + (suf || '') }
     k++
     const shown = Math.min(k - 3, total)
     typed.forEach((c, i) => {
@@ -331,64 +308,69 @@ const typed = board($('typeCells'), 30); boards.push(typed)
   }, 170)
 })()
 
-// scene 3: the launch chain on a loop
+// step 3: hold, approve, live, on a loop
 ;(() => {
-  let t = 0; const h = $('hold'), ch = [...$('chain').children]
-  setInterval(() => {
-    t = (t + 1) % 70
-    const v = t < 18 ? t / 18 : 1; h.style.setProperty('--h', t < 18 ? v : t > 62 ? 0 : 1)
-    ch.forEach((c, i) => c.classList.toggle('on', t > 22 + i * 12 && t < 64))
-  }, 60)
+  let t = 0; const h = $('holdd'), ch = [...$('chain').children]
+  setInterval(() => { t = (t + 1) % 70; h.style.setProperty('--h', t < 18 ? t / 18 : t > 62 ? 0 : 1); ch.forEach((c, i) => c.classList.toggle('on', t > 22 + i * 12 && t < 64)) }, 60)
 })()
 
 // ---------------------------------------------------------------- the real engine: 2 threads, any case, a rotating word
 const WORDS = ['dzz', 'moon', 'cook', 'send', 'pump', 'gm', 'based', 'ape']
-let eng = null, tried = 0, t0 = 0, rate = 0, word = '', since = 0, busy = false
+let eng = null, tried = 0, t0 = 0, rate = 0, word = '', since = 0, busy = false, found = 0
 function lockEnd(cs, wd) { cs.forEach((c, i) => { const j = i - (cs.length - wd.length); c.el.classList.toggle('pat', j >= 0); if (j >= 0 && c.target !== wd[j]) { c.target = wd[j]; c.rolls = 4; c.next = performance.now() + j * 60 } }) }
+function speedOut(full) {
+  $('rateTop').innerHTML = `<b>${big(full)}</b> addresses/s on this device`
+  $('sSpeed').textContent = big(full)
+  const rows = [3, 4, 5, 6].map((n) => [n, Math.pow(29, n) / full]), max = Math.log(rows.at(-1)[1] + 1)
+  $('est').innerHTML = rows.map(([n, s]) => `<div><span>${n} chars</span><i style="--w:${Math.max(4, (Math.log(s + 1) / max) * 100)}%"></i><b>${dur(s)}</b></div>`).join('')
+}
 function next() {
   if (!eng) return
   word = WORDS[(WORDS.indexOf(word) + 1) % WORDS.length]; since = performance.now(); busy = true
-  $('heroSub').textContent = `searching this device for …${word}`; lockEnd(hero, word)
+  $('sought').innerHTML = `looking for an address ending in <b>…${word}</b>`; lockEnd(hero, word)
   eng.start({ suffix: word, ci: true }, {
     onTick(n, sample) {
       tried += n; rate = tried / ((performance.now() - t0) / 1000)
       rollTo(hero, sample.slice(0, LEN - word.length), { upto: LEN - word.length })
-      const full = rate / 2 * Math.max(1, (navigator.hardwareConcurrency || 4) - 1)
-      $('rateTop').innerHTML = `<b>${big(full)}</b> addr/s on this device`
-      $('bigRate').innerHTML = `${big(rate)}<small>/ s · 2 threads</small>`
-      $('findLabel').textContent = `${big(tried)} checked · looking for …${word}`
-      $('specSpeed').innerHTML = [4, 5, 6].map((n) => `<span>${n} chars <b>${dur(Math.pow(58, n) / full)}</b> · any case <b>${dur(Math.pow(29, n) / full)}</b></span>`).join('')
+      $('lRate').textContent = big(rate); $('lTried').textContent = big(tried)
+      speedOut(rate / 2 * Math.max(1, (navigator.hardwareConcurrency || 4) - 1))
+      window.DZZBG?.activity(.6)
     },
     onHit({ mint }) {
-      if (!busy) return; busy = false; eng.stop(); window.DZZBG?.flash()
+      if (!busy) return; busy = false; eng.stop(); window.DZZBG?.flash(); window.DZZBG?.activity(.15)
       rollTo(hero, mint.padEnd(LEN, ' '), { stagger: 14, rolls: 5, lock: true })
       hero.forEach((c, i) => c.el.classList.toggle('pat', i >= mint.length - word.length && i < mint.length))
-      const secs = (performance.now() - since) / 1000
-      const row = document.createElement('div'); row.innerHTML = `<span>…${word}</span><code>${mint.slice(0, -word.length)}<b>${mint.slice(-word.length)}</b></code><span>${secs < 1 ? '<1' : secs.toFixed(1)} s</span>`
-      $('log').prepend(row); while ($('log').children.length > 6) $('log').lastChild.remove()
-      $('coinCa').innerHTML = `${mint.slice(0, 4)}…${mint.slice(-10, -word.length)}<em>${mint.slice(-word.length)}</em>`
-      setTimeout(next, 2400)
+      const secs = (performance.now() - since) / 1000; $('lFound').textContent = ++found
+      const log = $('log'); log.querySelector('.empty')?.remove()
+      const row = document.createElement('div'); row.innerHTML = `<span>…${esc(word)}</span><code>${esc(mint.slice(0, -word.length))}<b>${esc(mint.slice(-word.length))}</b></code><span>${secs < 1 ? '<1' : secs.toFixed(1)} s</span>`
+      log.prepend(row); while (log.children.length > 4) log.lastChild.remove()
+      setTimeout(next, 2600)
     },
   })
 }
-document.addEventListener('visibilitychange', () => { if (!eng) return; if (document.hidden) { eng.stop(); busy = false } else if (!busy) next() })
-DZZ.engine({ threads: 2 }).then((e) => { eng = e; t0 = performance.now(); next() }).catch(() => { $('heroSub').textContent = 'this browser cannot run the engine' })
+// run the demo only while the hero is on screen
+let heroOn = true
+new IntersectionObserver(([e]) => { heroOn = e.isIntersecting; if (!eng) return; if (!heroOn || document.hidden) { eng.stop(); busy = false } else if (!busy) next() }).observe($('heroCells'))
+document.addEventListener('visibilitychange', () => { if (!eng) return; if (document.hidden) { eng.stop(); busy = false } else if (!busy && heroOn) next() })
+DZZ.engine({ threads: 2 }).then((e) => { eng = e; t0 = performance.now(); next() }).catch(() => { $('sought').textContent = 'this browser cannot run the engine'; $('rateTop').textContent = 'engine unavailable in this browser' })
 
-// the live list: coins launched with dzz (verified on chain by /api/launched), copy a CA in one click
-async function pubList() {
-  let coins = []
-  try { coins = (await (await fetch('/api/launched')).json()).coins || [] } catch {}
-  $('pubCount').textContent = coins.length ? coins.length + (coins.length === 1 ? ' coin' : ' coins') : 'none yet'
-  const esc = (x) => String(x ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]))
-  $('pubList').innerHTML = coins.length ? coins.slice(0, 6).map((c) => `<div class="prow">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b><code>${esc(c.mint.slice(0, 8))}…${esc(c.mint.slice(-10, -4))}<em>${esc(c.mint.slice(-4))}</em></code></div><button class="cp" data-ca="${esc(c.mint)}">Copy CA</button></div>`).join('')
-    : '<div class="pubempty">no coins yet · the first one launched with dzz shows up here</div>'
+// ---------------------------------------------------------------- live numbers: launched coins and the fees they earned
+const ago = (t) => { const s = (Date.now() - t) / 1000; return s < 3600 ? Math.max(1, Math.round(s / 60)) + 'm' : s < 86400 ? Math.round(s / 3600) + 'h' : Math.round(s / 86400) + 'd' }
+async function numbers() {
+  try {
+    const coins = (await (await fetch('/api/launched')).json()).coins || []
+    $('sCoins').textContent = coins.length
+    $('coins').innerHTML = coins.length ? coins.slice(0, 6).map((c) => `<div class="card coin">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b><button class="ca" data-ca="${esc(c.mint)}"><code>${esc(c.mint.slice(0, 6))}…${esc(c.mint.slice(-12, -4))}<em>${esc(c.mint.slice(-4))}</em></code><span>Copy CA</span></button></div>
+      <div class="meta"><span>${c.venue === 'meteora' ? 'Meteora' : 'pump.fun'}</span><span>${ago(c.at)} ago</span><span class="v"><a href="${c.venue === 'meteora' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/'}${esc(c.mint)}" target="_blank" rel="noopener">trade ↗</a> &nbsp;<a href="https://dexscreener.com/solana/${esc(c.mint)}" target="_blank" rel="noopener">chart ↗</a></span></div></div>`).join('') : '<div class="muted">No coins yet.</div>'
+  } catch { $('coins').innerHTML = '<div class="muted">Could not load the list just now.</div>' }
+  try {
+    const [f, px] = await Promise.all([fetch('/api/fees').then((r) => r.json()), fetch('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => j.So11111111111111111111111111111111111111112?.usdPrice).catch(() => 0)])
+    const seen = new Set(); let gen = 0
+    for (const r of f.coins || []) { if (r.generated == null) continue; if (r.venue !== 'meteora') { if (seen.has(r.dev)) continue; seen.add(r.dev) } gen += r.generated }
+    $('sFees').innerHTML = `${(gen / 1e9).toFixed(2)}<small>SOL</small>`; if (px) $('sFeesUsd').textContent = '$' + ((gen / 1e9) * px).toFixed(0)
+  } catch {}
 }
-$('pubList').addEventListener('click', async (e) => {
-  const b = e.target.closest('.cp'); if (!b) return
-  try { await navigator.clipboard.writeText(b.dataset.ca) } catch {}
-  b.classList.add('ok'); b.textContent = 'Copied'; setTimeout(() => { b.classList.remove('ok'); b.textContent = 'Copy CA' }, 1400)
-})
-pubList(); setInterval(pubList, 60000)
+numbers(); setInterval(numbers, 60000)
 </script>
 </body>
 </html>

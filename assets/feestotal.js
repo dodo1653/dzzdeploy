@@ -65,7 +65,7 @@
         claimed += r.claimed || 0; waiting += r.waiting || 0
       }
       const who = name ? `profile ${esc(name)} · ${mine.size} wallet${mine.size === 1 ? '' : 's'}` : mine.size ? `${mine.size} wallet${mine.size === 1 ? '' : 's'} from this app's launches` : 'no wallets yet'
-      const act = token.get() ? `<a href="${SITE}/me" target="_blank" rel="noopener">Profile ↗</a>` : local ? '<button type="button" data-signin>Sign in to add all your wallets</button>' : '<a href="/me">Sign in to add all your wallets</a>'
+      const act = token.get() ? `<a href="${local ? SITE + '/app' : ''}#account"${local ? ' target="_blank" rel="noopener"' : ''}>Account ↗</a>` : local ? '<button type="button" data-signin>Sign in to add all your wallets</button>' : '<a href="/app#account">Sign in to add all your wallets</a>'
       root.innerHTML = `<div class="ft">
   <div><b>${sol(claimed)}<small>SOL</small></b><span>collected <i>${usd(claimed, px)}</i></span></div>
   <div><b>${sol(waiting)}<small>SOL</small></b><span>waiting to collect <i>${usd(waiting, px)}</i></span></div>

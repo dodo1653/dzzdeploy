@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sign in · dzz</title>
+<link rel="icon" href="/assets/icon.png">
+<meta name="description" content="Sign in to dzz with Google, Discord, X or a Solana wallet. Your launches and creator fees from every wallet, in one place.">
+<script src="/assets/theme.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
+<style>
+body { min-height: 100vh; min-height: 100dvh; display: grid; grid-template-rows: auto 1fr auto; }
+.top { position: relative; z-index: 2; display: flex; align-items: center; justify-content: space-between; padding: 20px 24px; }
+.top a.back { display: inline-flex; align-items: center; gap: 6px; color: var(--t2); text-decoration: none; font-size: 13.5px; } .top a.back:hover { color: var(--ink); }
+.top a.back .ic { transform: scaleX(-1); width: 15px; height: 15px; }
+.center { position: relative; z-index: 2; display: grid; place-items: center; padding: 24px 16px 60px; }
+.box { width: min(400px, 100%); padding: 34px 30px 26px; border-radius: 20px; border: 1px solid var(--line2); background: color-mix(in srgb, var(--bg) 82%, transparent);
+  backdrop-filter: blur(22px) saturate(1.3); -webkit-backdrop-filter: blur(22px) saturate(1.3); box-shadow: 0 40px 120px -30px rgba(0,0,0,.75), 0 1px 0 rgba(255,255,255,.04) inset;
+  opacity: 0; transform: translateY(14px) scale(.985); filter: blur(6px); animation: boxIn .9s var(--ease) .15s forwards; }
+@keyframes boxIn { to { opacity: 1; transform: none; filter: none; } }
+.box .head { text-align: center; margin-bottom: 26px; }
+.box .mark { justify-content: center; margin-bottom: 18px; }
+.box .mark b { font-size: 30px; }
+.box h1 { margin: 0; font: 600 24px/1.2 var(--ui); letter-spacing: -.025em; }
+.box .head p { margin: 8px 0 0; color: var(--t2); font-size: 14px; }
+.opts { display: grid; gap: 10px; }
+.opt { height: 46px; border-radius: 11px; border: 1px solid var(--line2); background: var(--s1); color: var(--ink); display: grid; grid-template-columns: 22px 1fr 22px; align-items: center; gap: 10px; padding: 0 14px;
+  font: 500 14px var(--ui); cursor: pointer; text-align: center; transition: background .2s, border-color .2s, transform .12s; opacity: 0; transform: translateY(8px); animation: rise .7s var(--ease) forwards; }
+.opt:nth-child(1) { animation-delay: .35s } .opt:nth-child(2) { animation-delay: .42s } .opt:nth-child(3) { animation-delay: .49s }
+.opt:hover { background: var(--s2); border-color: var(--t4); } .opt:active { transform: translateY(1px); }
+.opt .ic { width: 19px; height: 19px; }
+.opt:disabled { cursor: default; color: var(--t3); } .opt:disabled:hover { background: var(--s1); border-color: var(--line2); }
+.opt:disabled .ic { filter: grayscale(1); opacity: .5; }
+.opt small { font: 400 11.5px var(--mono); color: var(--t3); }
+.or { display: flex; align-items: center; gap: 12px; margin: 18px 0; color: var(--t3); font: 400 12px var(--mono); }
+.or::before, .or::after { content: ''; flex: 1; height: 1px; background: var(--line); }
+.wal { opacity: 0; animation: rise .7s var(--ease) .56s forwards; }
+.msg { min-height: 20px; margin: 16px 0 0; text-align: center; font-size: 13px; color: var(--t2); }
+.msg.err { color: var(--bad); }
+.why { margin: 20px 0 0; padding-top: 18px; border-top: 1px solid var(--line); display: grid; gap: 8px; font-size: 12.5px; color: var(--t3); }
+.why div { display: flex; gap: 9px; align-items: flex-start; } .why .ic { width: 15px; height: 15px; margin-top: 2px; color: var(--t2); }
+.fine { position: relative; z-index: 2; text-align: center; padding: 18px; font: 400 12px var(--mono); color: var(--t3); }
+.fine a { color: var(--t2); text-decoration: none; } .fine a:hover { color: var(--ink); }
+.signed { text-align: center; }
+.signed .av { width: 54px; height: 54px; border-radius: 14px; margin: 0 auto 14px; background: var(--s3); display: grid; place-items: center; font: 600 20px var(--mono); overflow: hidden; }
+.signed .av img { width: 100%; height: 100%; object-fit: cover; }
+</style>
+</head>
+<body>
+<header class="top">
+  <a class="back" href="/"><svg class="ic"><use href="/assets/icons.svg#arrow"/></svg>dzz home</a>
+  <button class="iconbtn" data-theme-picker title="Theme" aria-label="Theme"><svg class="ic"><use href="/assets/icons.svg#theme"/></svg></button>
+</header>
+
+<div class="center">
+  <div class="box" id="box">
+    <div class="head">
+      <a class="mark" href="/"><b>dz<i>z</i></b></a>
+      <h1 id="title">Sign in to dzz</h1>
+      <p id="lede">Your launches and creator fees from every wallet, in one place.</p>
+    </div>
+
+    <div id="choose">
+      <div class="opts">
+        <button class="opt" data-p="google"><svg class="ic brand"><use href="/assets/icons.svg#google"/></svg><span>Continue with Google</span><small></small></button>
+        <button class="opt" data-p="discord"><svg class="ic brand"><use href="/assets/icons.svg#discord"/></svg><span>Continue with Discord</span><small></small></button>
+        <button class="opt" data-p="x"><svg class="ic brand"><use href="/assets/icons.svg#x"/></svg><span>Continue with X</span><small></small></button>
+      </div>
+      <div class="or">or</div>
+      <button class="btn lg block wal" id="wallet"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg>Sign in with a Solana wallet</button>
+      <div class="why">
+        <div><svg class="ic"><use href="/assets/icons.svg#check"/></svg>Every wallet you sign in with joins your account.</div>
+        <div><svg class="ic"><use href="/assets/icons.svg#check"/></svg>A wallet signs a message, not a transaction. It costs nothing.</div>
+        <div><svg class="ic"><use href="/assets/icons.svg#check"/></svg>Your coin keys stay in your browser either way.</div>
+      </div>
+    </div>
+
+    <div class="signed" id="signed" hidden>
+      <div class="av" id="av"></div>
+      <a class="btn acc lg block" href="/app"><span>Open dzz</span><svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a>
+      <button class="btn ghost block" id="out" style="margin-top:8px">Sign out</button>
+    </div>
+
+    <p class="msg" id="msg" role="status"></p>
+  </div>
+</div>
+
+<div class="fine">Independent tool · not affiliated with pump.fun or Meteora · <a href="/">dzzdeploy.vercel.app</a></div>
+
+<script src="/assets/bg.js"></script>
+<script src="/assets/account.js"></script>
+<script>
+const $ = (id) => document.getElementById(id), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+const say = (t, err) => { $('msg').textContent = t || ''; $('msg').className = 'msg' + (err ? ' err' : '') }
+const NAMES = { google: 'Google', discord: 'Discord', x: 'X' }
+const next = new URLSearchParams(location.search).get('next') || '/app'
+
+function show(p) {
+  $('choose').hidden = !!p; $('signed').hidden = !p
+  if (!p) { $('title').textContent = 'Sign in to dzz'; $('lede').textContent = 'Your launches and creator fees from every wallet, in one place.'; return }
+  $('title').textContent = p.name; $('lede').textContent = `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'}${p.identities?.length ? ' · ' + p.identities.map((i) => NAMES[i.provider] || i.provider).join(', ') : ''}`
+  $('av').innerHTML = p.avatar ? `<img src="${esc(p.avatar)}" alt="">` : esc((p.name || '?')[0].toUpperCase())
+}
+;(async () => {
+  if (DzzAuth.lastError) say(DzzAuth.lastError, true)
+  const p = await DzzAuth.me()
+  if (p && DzzAuth.lastError === '' && new URLSearchParams(location.search).has('next')) return location.replace(next)
+  show(p)
+  const on = await DzzAuth.providers()
+  document.querySelectorAll('.opt').forEach((b) => { if (!on[b.dataset.p]) { b.disabled = true; b.querySelector('small').textContent = 'soon' } })
+})()
+document.querySelectorAll('.opt').forEach((b) => (b.onclick = () => { say(`Going to ${NAMES[b.dataset.p]}…`); DzzAuth.oauth(b.dataset.p, { back: location.origin + '/login' + location.search }) }))
+$('wallet').onclick = async () => {
+  try { $('wallet').disabled = true; say('Sign the message in your wallet…'); show(await DzzAuth.signInWallet()); say(''); if (new URLSearchParams(location.search).has('next')) location.replace(next) }
+  catch (e) { say(e.message, true) } finally { $('wallet').disabled = false }
+}
+$('out').onclick = () => { DzzAuth.signOut(); show(null); say('Signed out.') }
+</script>
+</body>
+</html>

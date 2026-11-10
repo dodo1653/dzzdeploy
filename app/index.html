@@ -3,282 +3,379 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>dzz</title>
+<title>dzz · launch</title>
 <link rel="icon" href="/assets/icon.png">
 <meta name="description" content="Launch coins on pump.fun or Meteora at the contract address you choose. Found in your browser; the keys never leave it.">
 <script src="/assets/theme.js"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
 <style>
-:root {
-  /* colours come from assets/theme.js (data-theme on <html>); these are only the fallback */
-  --bg: #07080f; --bg2: rgba(255,255,255,.035); --panel: rgba(14,15,20,.72); --panel2: rgba(255,255,255,.05); --line: rgba(255,255,255,.08); --line2: rgba(255,255,255,.14);
-  --ink: #eef0f4; --t2: #a7abb5; --t3: #6c707b; --t4: #3b3e46; --card-a: rgba(22,24,32,.78); --card-b: rgba(10,11,16,.82); --c-set: #8d919c; --c-roll: #555963; --in-focus: rgba(255,255,255,.06); --shadow: var(--shadow);
-  --acc: #6ea8ff; --acc-rgb: 110, 168, 255; --acc-ink: #041434; --ok: #7fe0a8; --bad: #ff7a6b;
-  --ui: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace; --serif: 'Instrument Serif', Georgia, serif;
-  --ease: cubic-bezier(.2, .8, .2, 1); color-scheme: dark;
-}
-* { box-sizing: border-box; }
-html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--ink); font: 400 14px/1.5 var(--ui); -webkit-font-smoothing: antialiased; }
-button, input, textarea { font: inherit; color: inherit; }
-::selection { background: var(--acc); color: var(--acc-ink); }
+:root { --side: 232px; --c-set: var(--t2); --c-roll: var(--t4); }
+body { min-height: 100vh; }
 
-/* top bar */
-.bar { position: relative; z-index: 3; display: flex; align-items: center; gap: 10px; padding: 18px 28px; }
-.mark { display: flex; align-items: baseline; gap: 12px; margin-right: auto; user-select: none; }
-.mark b { font: 600 23px/1 var(--ui); letter-spacing: -.07em; }
-.mark b i { font-style: normal; color: var(--acc); }
-.mark span { font: 400 12px var(--mono); color: var(--t3); }
-.ib { width: 36px; height: 36px; border-radius: 10px; border: 1px solid var(--line); background: var(--panel); display: grid; place-items: center; cursor: pointer; color: var(--t2); transition: border-color .2s, color .2s, transform .15s; }
-.ib:hover { color: var(--ink); border-color: var(--line2); } .ib:active { transform: scale(.94); }
-.ib svg { width: 17px; height: 17px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
-.ib.off .on-i, .ib:not(.off) .off-i { display: none; }
-.pill { height: 36px; padding: 0 14px; border-radius: 10px; border: 1px solid var(--line2); background: var(--panel); display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font: 500 13px var(--ui); transition: border-color .2s, transform .15s; }
-.pill:hover { border-color: var(--t4); } .pill:active { transform: scale(.97); }
-.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--t4); } .pill.on i { background: var(--ok); box-shadow: 0 0 0 3px rgba(127,224,168,.15); }
-.pill code { font: 500 12.5px var(--mono); }
+/* ---------------------------------------------------------------- shell: sidebar + content */
+.shell { position: relative; z-index: 2; display: grid; grid-template-columns: var(--side) minmax(0, 1fr); min-height: 100vh; }
+.side { position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 6px; padding: 18px 14px; border-right: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 80%, transparent); backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+.side .mark { padding: 4px 8px 18px; } .side .mark small { font: 400 11.5px var(--mono); color: var(--t3); letter-spacing: 0; }
+.nv { display: flex; align-items: center; gap: 11px; height: 38px; padding: 0 10px; border-radius: 9px; color: var(--t2); text-decoration: none; font: 500 13.5px var(--ui); transition: background .2s, color .2s; position: relative; }
+.nv:hover { background: var(--s1); color: var(--ink); }
+.nv.on { background: var(--s2); color: var(--ink); }
+.nv.on::before { content: ''; position: absolute; left: -14px; top: 9px; bottom: 9px; width: 2px; border-radius: 2px; background: var(--acc); }
+.nv .ic { color: var(--t3); } .nv.on .ic, .nv:hover .ic { color: var(--ink); }
+.nv .cnt { margin-left: auto; font: 500 11px var(--mono); color: var(--t3); }
+.side .grp { font: 500 11px var(--mono); color: var(--t4); letter-spacing: .05em; padding: 14px 10px 6px; }
+.side .fill { flex: 1; }
+.me { display: flex; align-items: center; gap: 10px; padding: 10px; border-radius: 11px; border: 1px solid var(--line); background: var(--s1); text-decoration: none; color: var(--ink); transition: border-color .2s, background .2s; }
+.me:hover { border-color: var(--line2); background: var(--s2); }
+.av { width: 30px; height: 30px; border-radius: 8px; flex: none; background: var(--s3); display: grid; place-items: center; font: 600 13px var(--mono); color: var(--t2); overflow: hidden; }
+.av img { width: 100%; height: 100%; object-fit: cover; }
+.me b { display: block; font: 500 13px var(--ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .me small { display: block; font: 400 12px var(--ui); color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.me > div { min-width: 0; }
+.tools { display: flex; gap: 6px; padding-top: 8px; }
+.tools .iconbtn { width: 34px; height: 34px; }
+#snd.off .on-i, #snd:not(.off) .off-i { display: none; }
 
-main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; padding: 8px 28px 80px; }
-
-/* ------------------------------------------------ the stage: the address itself */
-.stage { padding: 44px 0 26px; text-align: center; }
-.kicker { font: 400 12px var(--mono); color: var(--t3); letter-spacing: .08em; text-transform: uppercase; display: inline-flex; gap: 10px; align-items: center; }
-.kicker .st { color: var(--t2); letter-spacing: .02em; text-transform: none; } .kicker .st.run { color: var(--acc); }
-.kicker .live { width: 6px; height: 6px; border-radius: 50%; background: var(--t4); } .kicker .live.run { background: var(--acc); animation: blink 1s ease-in-out infinite; }
+.main { min-width: 0; padding: 0 28px 80px; }
+.topbar { position: sticky; top: 0; z-index: 8; display: flex; align-items: center; gap: 14px; height: 64px; margin: 0 -28px; padding: 0 28px; border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 82%, transparent); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+.topbar h1 { margin: 0; font: 600 16px var(--ui); letter-spacing: -.015em; }
+.topbar .crumb { font: 400 12.5px var(--mono); color: var(--t3); display: inline-flex; gap: 8px; align-items: center; }
+.topbar .crumb .st.run { color: var(--acc); }
+.topbar .crumb .live { width: 6px; height: 6px; border-radius: 50%; background: var(--t4); } .topbar .crumb .live.run { background: var(--acc); animation: blink 1s ease-in-out infinite; }
 @keyframes blink { 50% { opacity: .25 } }
-.headline { margin: 14px 0 34px; font: 300 clamp(30px, 3.6vw, 46px)/1.06 var(--ui); letter-spacing: -.035em; color: var(--t2); }
-.headline em { font-style: normal; font-weight: 500; color: var(--ink); }
+.topbar .right { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+.topbar .tmark { display: none; }
+.pill { height: 36px; padding: 0 13px; border-radius: 9px; border: 1px solid var(--line2); background: var(--s1); display: inline-flex; align-items: center; gap: 9px; cursor: pointer; font: 500 13px var(--ui); transition: border-color .2s, background .2s; }
+.pill:hover { border-color: var(--t4); background: var(--s2); }
+.pill i { width: 7px; height: 7px; border-radius: 50%; background: var(--t4); } .pill.on i { background: var(--ok); box-shadow: 0 0 0 3px rgba(111,220,156,.15); }
+.pill code { font: 500 12.5px var(--mono); }
+.pill.low { border-color: rgba(255,122,107,.55); } .pill.low b { color: var(--bad) !important; }
 
-.addr { position: relative; display: inline-flex; padding: 22px 26px; border-radius: 18px; border: 1px solid var(--line); background: linear-gradient(180deg, var(--card-a), var(--card-b)); backdrop-filter: blur(16px) saturate(1.25); -webkit-backdrop-filter: blur(16px) saturate(1.25); cursor: text;
-  box-shadow: 0 1px 0 rgba(255,255,255,.03) inset, 0 30px 80px -40px var(--shadow); transition: border-color .3s, box-shadow .6s var(--ease); max-width: 100%; }
+.view { padding-top: 26px; animation: rise .5s var(--ease) both; }
+.vh { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
+.vh h2 { margin: 0; font: 600 26px/1.15 var(--ui); letter-spacing: -.03em; } .vh p { margin: 6px 0 0; color: var(--t2); max-width: 620px; }
+
+/* ---------------------------------------------------------------- launch: form on the left, the launch itself on the right */
+.lgrid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
+.lcol { display: grid; gap: 16px; min-width: 0; }
+.rail { position: sticky; top: 84px; display: grid; gap: 16px; }
+
+/* the address */
+.addrc { text-align: center; padding: 26px 22px 22px; overflow: hidden; }
+.addrc .card-h { text-align: left; }
+.addr { position: relative; display: inline-flex; max-width: 100%; padding: 20px 22px; border-radius: 14px; border: 1px solid var(--line); background: var(--s1); cursor: text; transition: border-color .3s, box-shadow .5s var(--ease); }
 .addr:hover { border-color: var(--line2); }
-.addr.hit { border-color: rgba(var(--acc-rgb),.55); box-shadow: 0 30px 90px -40px var(--shadow); }
-.addr .cells { display: flex; font: 500 clamp(14px, 1.95vw, 27px)/1 var(--mono); }
+.addr.hit { border-color: rgba(var(--acc-rgb), .6); box-shadow: 0 0 0 4px rgba(var(--acc-rgb), .08); }
+.addr .cells { display: flex; font: 500 clamp(12px, 1.45vw, 21px)/1 var(--mono); }
 .addr .c { width: .62em; text-align: center; color: var(--t4); transition: color .25s; position: relative; }
 .addr .c.set { color: var(--c-set); } .addr .c.roll { color: var(--c-roll); } .addr .c.sel { color: var(--ink); }
 .addr .c.pat { color: var(--acc); }
-.addr .c.pat::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: -10px; height: 2px; border-radius: 2px; background: var(--acc); opacity: .55; }
+.addr .c.pat::after { content: ''; position: absolute; left: 8%; right: 8%; bottom: -9px; height: 2px; border-radius: 2px; background: var(--acc); opacity: .55; }
 .addr .c.caret::before { content: ''; position: absolute; left: 0; top: -3px; bottom: -3px; width: 2px; border-radius: 1px; background: var(--acc); animation: caret 1s steps(2) infinite; }
 .addr .c.caret.end::before { left: auto; right: 0; }
 @keyframes caret { 50% { opacity: 0 } }
 .addr .c.flash { animation: flash .7s var(--ease); } @keyframes flash { 0% { color: var(--acc) } 100% { } }
 .addr input { position: absolute; left: 0; top: 0; opacity: 0; pointer-events: none; width: 1px; height: 1px; }
-.addr .help { position: absolute; left: 0; right: 0; top: calc(100% + 16px); font: 400 12px var(--mono); color: var(--t3); transition: opacity .3s; }
+.addr .help { position: absolute; left: 0; right: 0; top: calc(100% + 14px); font: 400 12px var(--mono); color: var(--t3); transition: opacity .3s; }
 .addr .help b { color: var(--t2); font-weight: 500; }
-
-.meter { width: min(820px, 100%); margin: 54px auto 0; }
+.meter { margin: 44px auto 0; max-width: 760px; }
 .track { position: relative; height: 2px; background: var(--line); border-radius: 2px; }
 .track i { position: absolute; left: 0; top: 0; bottom: 0; width: 0; background: linear-gradient(90deg, rgba(var(--acc-rgb),.12), var(--acc)); border-radius: 2px; transition: width .35s linear; }
 .track i::after { content: ''; position: absolute; right: -4px; top: -3px; width: 8px; height: 8px; border-radius: 50%; background: var(--acc); opacity: var(--head, 0); transition: opacity .3s; }
-.stats { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; margin-top: 16px; font: 400 12.5px var(--mono); color: var(--t3); font-variant-numeric: tabular-nums; min-height: 19px; }
-.stats b { color: var(--ink); font-weight: 500; } .stats .bad { color: var(--bad); }
-
-.controls { display: flex; justify-content: center; align-items: center; gap: 12px; margin-top: 26px; flex-wrap: wrap; }
-.seg { display: inline-flex; padding: 3px; border-radius: 11px; border: 1px solid var(--line); background: var(--panel); position: relative; }
-.seg button { position: relative; z-index: 1; border: 0; background: none; padding: 7px 13px; border-radius: 8px; font: 500 12.5px var(--ui); color: var(--t3); cursor: pointer; transition: color .25s; }
-.seg button:hover { color: var(--t2); } .seg button.on { color: var(--ink); }
-.seg .thumb { position: absolute; z-index: 0; top: 3px; bottom: 3px; left: 3px; width: 0; border-radius: 8px; background: var(--panel2); border: 1px solid var(--line2); transition: left .35s var(--ease), width .35s var(--ease); }
-.go { height: 42px; padding: 0 20px; border-radius: 12px; border: 0; background: var(--acc); color: var(--acc-ink); font: 600 14px var(--ui); letter-spacing: -.01em; cursor: pointer; display: inline-flex; align-items: center; gap: 10px;
-  box-shadow: 0 0 0 1px rgba(var(--acc-rgb),.4), 0 10px 24px -12px rgba(0,0,0,.55); transition: transform .15s, box-shadow .3s, background .3s, color .3s; }
-.go:hover { box-shadow: 0 0 0 1px rgba(var(--acc-rgb),.6), 0 10px 24px -12px rgba(0,0,0,.55); } .go:active { transform: scale(.97); }
-.go kbd { font: 500 12px var(--mono); padding: 2px 6px; border-radius: 5px; background: rgba(0,0,0,.12); }
-.go.stop { background: var(--panel2); color: var(--ink); box-shadow: 0 0 0 1px var(--line2); }
-
-/* your addresses */
-.found { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; margin-top: 30px; }
-.chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 8px 8px 14px; border-radius: 12px; border: 1px solid var(--line); background: var(--panel); cursor: pointer; transition: border-color .25s, background .25s, transform .2s; }
-.chip:hover { border-color: var(--line2); } .chip:active { transform: scale(.98); }
-.chip.on { border-color: rgba(var(--acc-rgb),.5); background: rgba(var(--acc-rgb),.05); }
+#stats { display: flex; justify-content: center; gap: 24px; flex-wrap: wrap; margin-top: 14px; font: 400 12.5px var(--mono); color: var(--t3); font-variant-numeric: tabular-nums; min-height: 19px; }
+#stats b { color: var(--ink); font-weight: 500; } #stats .bad { color: var(--bad); }
+.controls { display: flex; justify-content: center; align-items: center; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+.seg { flex-wrap: nowrap; max-width: 100%; overflow-x: auto; scrollbar-width: none; } .seg::-webkit-scrollbar { display: none; }
+.go { height: 38px; padding: 0 16px; border-radius: 9px; border: 0; background: var(--acc); color: var(--acc-ink); font: 600 13.5px var(--ui); cursor: pointer; display: inline-flex; align-items: center; gap: 10px; transition: transform .12s, background .3s, color .3s, box-shadow .3s; }
+.go:hover { background: color-mix(in srgb, var(--acc) 88%, white); } .go:active { transform: translateY(1px); }
+.go kbd { font: 500 11px var(--mono); padding: 2px 6px; border-radius: 5px; background: rgba(0,0,0,.14); }
+.go.stop { background: var(--s2); color: var(--ink); box-shadow: inset 0 0 0 1px var(--line2); }
+.found { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; margin-top: 22px; }
+.found:empty { display: none; }
+.chip { display: inline-flex; align-items: center; gap: 8px; padding: 6px 6px 6px 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--s1); cursor: pointer; transition: border-color .2s, background .2s; }
+.chip:hover { border-color: var(--line2); }
+.chip.on { border-color: rgba(var(--acc-rgb),.55); background: rgba(var(--acc-rgb),.06); }
 .chip code { font: 500 12.5px var(--mono); color: var(--t3); } .chip code b { color: var(--acc); font-weight: 600; } .chip.on code { color: var(--t2); }
-.chip .x { width: 24px; height: 24px; border-radius: 7px; border: 0; background: none; color: var(--t3); cursor: pointer; display: grid; place-items: center; font-size: 15px; }
+.chip .x { width: 24px; height: 24px; border-radius: 6px; border: 0; background: none; color: var(--t3); cursor: pointer; display: grid; place-items: center; font-size: 15px; }
 .chip .x:hover { color: var(--bad); background: rgba(255,122,107,.08); }
-.chip.new { animation: chipIn .7s var(--ease) both; } @keyframes chipIn { from { opacity: 0; transform: translateY(10px) scale(.96); filter: blur(4px) } }
+.chip.new { animation: rise .6s var(--ease) both; }
+.keynote { margin: 16px 0 0; font: 400 11.5px var(--mono); color: var(--t3); display: inline-flex; gap: 7px; align-items: center; }
 
-/* ------------------------------------------------ the composer */
-.composer { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 56px; }
-.card { border: 1px solid var(--line); background: var(--panel); border-radius: 18px; padding: 22px; backdrop-filter: blur(18px) saturate(1.25); -webkit-backdrop-filter: blur(18px) saturate(1.25); }
-.card h3 { margin: 0 0 18px; display: flex; align-items: baseline; gap: 10px; font: 500 15px var(--ui); letter-spacing: -.01em; }
-.card h3 small { font: 400 12.5px var(--mono); color: var(--t3); }
-.card h3 em { display: none; }
-.wide { grid-column: 1 / -1; }
-.grid { display: grid; gap: 12px; } .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: 1fr 1fr 1fr; }
-.fl { display: grid; gap: 7px; font: 400 12px var(--ui); color: var(--t3); }
-.in { width: 100%; color: var(--ink); background: var(--bg2); border: 1px solid var(--line); border-radius: 10px; padding: 11px 12px; outline: none; transition: border-color .2s, background .2s, box-shadow .2s; }
-.in:hover { border-color: var(--line2); } .in:focus { border-color: rgba(var(--acc-rgb),.55); box-shadow: 0 0 0 4px rgba(var(--acc-rgb),.06); background: var(--in-focus); }
-.in::placeholder { color: var(--t4); } textarea.in { resize: none; min-height: 70px; } .mono { font-family: var(--mono); font-size: 13px; }
-.drop { display: grid; grid-template-columns: 96px 1fr; gap: 16px; align-items: center; cursor: pointer; }
-.drop .pv { position: relative; width: 96px; height: 96px; border-radius: 16px; background: var(--bg2); display: grid; place-items: center; overflow: hidden; color: var(--t4); }
-.drop .pv::before { content: ''; position: absolute; inset: 0; z-index: 1; border-radius: 16px; padding: 1px; background: conic-gradient(from var(--ang, 0deg), var(--line2), var(--acc) 12%, var(--line2) 24%, var(--line2));
-  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0); -webkit-mask-composite: xor; mask-composite: exclude; opacity: .7; pointer-events: none; }
-.drop:hover .pv::before, .drop.drag .pv::before { animation: spin 2.4s linear infinite; }
-@property --ang { syntax: '<angle>'; inherits: false; initial-value: 0deg; } @keyframes spin { to { --ang: 360deg } }
-.drop .pv img { width: 100%; height: 100%; object-fit: cover; animation: picIn .6s var(--ease); } @keyframes picIn { from { opacity: 0; transform: scale(1.06) } }
+/* the coin + the market */
+.grid { display: grid; gap: 14px; } .g2 { grid-template-columns: 1fr 1fr; } .g3 { grid-template-columns: 1fr 1fr 1fr; }
+.drop { display: grid; grid-template-columns: 84px 1fr; gap: 16px; align-items: center; cursor: pointer; padding: 12px; border-radius: 12px; border: 1px dashed var(--line2); transition: border-color .2s, background .2s; }
+.drop:hover, .drop.drag { border-color: rgba(var(--acc-rgb), .6); background: rgba(var(--acc-rgb), .04); }
+.drop .pv { width: 84px; height: 84px; border-radius: 12px; background: var(--s2); display: grid; place-items: center; overflow: hidden; color: var(--t3); }
+.drop .pv img { width: 100%; height: 100%; object-fit: cover; animation: rise .5s var(--ease); }
 .drop .pv svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 1.5; }
-.drop b { display: block; font-weight: 500; } .drop small { color: var(--t3); font-size: 12px; }
+.drop b { display: block; font-weight: 500; } .drop small { color: var(--t3); font-size: 12.5px; }
 .row2 { display: flex; gap: 14px; align-items: flex-start; flex-wrap: wrap; }
-.hint { color: var(--t3); font-size: 12px; margin: 0; }
-/* any-token pair picker: every token pump.fun lists as a pair, read live from its program */
-[hidden] { display: none !important; }
-.tp { display: grid; gap: 10px; padding: 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--bg2); }
+.tp { display: grid; gap: 10px; padding: 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--s1); }
 .tp .tbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; } .tp .tbar .in { flex: 1; min-width: 180px; }
 .tp .tlist { max-height: 264px; overflow: auto; display: grid; gap: 2px; margin: 0 -4px; padding: 0 4px; }
-.tp .tok { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 10px; cursor: pointer; border: 1px solid transparent; }
-.tp .tok:hover { background: var(--panel2); } .tp .tok.on { border-color: rgba(var(--acc-rgb), .55); background: var(--panel2); }
-.tp .tok img, .tp .tok .ph { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: var(--panel2); }
-.tp .tok b { display: block; font: 600 13px var(--ui); color: var(--ink); } .tp .tok small { display: block; font: 400 12px var(--ui); color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tp .tok { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 12px; align-items: center; padding: 8px 10px; border-radius: 9px; cursor: pointer; border: 1px solid transparent; }
+.tp .tok:hover { background: var(--s2); } .tp .tok.on { border-color: rgba(var(--acc-rgb), .55); background: var(--s2); }
+.tp .tok img, .tp .tok .ph { width: 30px; height: 30px; border-radius: 50%; object-fit: cover; background: var(--s2); }
+.tp .tok b { display: block; font: 600 13px var(--ui); } .tp .tok small { display: block; font: 400 12px var(--ui); color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tp .tok span { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
 .tp .empty { color: var(--t3); font: 400 12.5px var(--mono); padding: 10px; }
-.split { display: grid; grid-template-columns: minmax(0, 1fr) 84px 38px; gap: 8px; align-items: center; animation: chipIn .5s var(--ease) both; }
-.ghost { border: 1px dashed var(--line2); background: none; border-radius: 10px; padding: 9px 12px; color: var(--t3); font-size: 12.5px; cursor: pointer; transition: color .2s, border-color .2s; }
-.ghost:hover { color: var(--ink); border-color: var(--t4); }
+.split { display: grid; grid-template-columns: minmax(0, 1fr) 84px 38px; gap: 8px; align-items: center; animation: rise .4s var(--ease) both; }
+button.ghost { border: 1px dashed var(--line2); background: none; border-radius: 9px; padding: 8px 12px; color: var(--t2); font: 500 12.5px var(--ui); cursor: pointer; transition: color .2s, border-color .2s; }
+button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
-/* launch: hold to launch, three-step timeline */
-.launch { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; }
-.sum { font: 400 12.5px var(--mono); color: var(--t3); line-height: 1.75; } .sum b { color: var(--ink); font-weight: 500; } .sum .a { color: var(--acc); } .sum .nm { font: 500 16px var(--ui); color: var(--ink); letter-spacing: -.01em; }
-.hold { position: relative; height: 56px; min-width: 240px; padding: 0 26px; border-radius: 14px; border: 0; overflow: hidden; cursor: pointer; background: var(--panel2); color: var(--ink); font: 600 15px var(--ui); letter-spacing: -.01em;
-  box-shadow: 0 0 0 1px var(--line2); user-select: none; -webkit-user-select: none; touch-action: none; transition: box-shadow .3s, transform .15s; }
+/* the launch panel */
+.lp .card-h { margin-bottom: 14px; }
+.sum { font: 400 12.5px var(--mono); color: var(--t3); line-height: 1.8; } .sum b { color: var(--ink); font-weight: 500; } .sum .a { color: var(--acc); } .sum .low { color: var(--bad); }
+.sum .nm { font: 600 18px var(--ui); color: var(--ink); letter-spacing: -.015em; display: block; margin-bottom: 4px; } .sum .nm + br { display: none; }
+.hold { position: relative; width: 100%; height: 52px; margin-top: 18px; border-radius: 11px; border: 0; overflow: hidden; cursor: pointer; background: var(--s2); color: var(--ink); font: 600 14.5px var(--ui); box-shadow: inset 0 0 0 1px var(--line2); user-select: none; -webkit-user-select: none; touch-action: none; transition: box-shadow .3s, transform .12s; }
 .hold::before { content: ''; position: absolute; inset: 0; background: var(--acc); transform-origin: left; transform: scaleX(var(--h, 0)); }
 .hold.back::before { transition: transform .35s var(--ease); }
-.hold span { position: relative; z-index: 1; display: inline-flex; gap: 10px; align-items: center; transition: color .2s; }
+.hold > span { position: relative; z-index: 1; display: inline-flex; gap: 10px; align-items: center; transition: color .2s; }
 .hold span svg { width: 16px; height: 16px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 .hold.full span, .hold.busy span { color: var(--acc-ink); } .hold.busy::before { transform: scaleX(1); animation: busy 1.4s ease-in-out infinite; }
 @keyframes busy { 50% { opacity: .75 } }
-.hold:hover { box-shadow: 0 0 0 1px rgba(var(--acc-rgb),.45); } .hold:active { transform: scale(.985); } .hold:disabled { cursor: default; }
-.timeline { position: relative; display: grid; grid-template-columns: repeat(3, 1fr); margin-top: 24px; }
-.timeline::before { content: ''; position: absolute; left: 6px; right: 6px; top: 5px; height: 1px; background: var(--line2); }
-.timeline .fill { position: absolute; left: 6px; top: 5px; height: 1px; width: 0; background: var(--acc); transition: width .7s var(--ease); }
-.timeline div { position: relative; font: 400 12px var(--ui); color: var(--t3); padding-top: 22px; }
-.timeline div::before { content: ''; position: absolute; left: 0; top: 0; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line2); transition: all .4s var(--ease); }
-.timeline div:nth-of-type(2) { text-align: center; } .timeline div:nth-of-type(2)::before { left: calc(50% - 6px); } .timeline div:nth-of-type(3) { text-align: right; } .timeline div:nth-of-type(3)::before { left: auto; right: 0; }
-.timeline div.run { color: var(--ink); } .timeline div.run::before { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(var(--acc-rgb),.12); animation: blink 1s infinite; }
+.hold:hover { box-shadow: inset 0 0 0 1px rgba(var(--acc-rgb),.5); } .hold:active { transform: translateY(1px); } .hold:disabled { cursor: default; }
+.timeline { position: relative; display: grid; gap: 12px; margin-top: 20px; padding-left: 2px; }
+.timeline .fill { display: none; }
+.timeline div { position: relative; padding-left: 24px; font: 400 12.5px var(--ui); color: var(--t3); }
+.timeline div::before { content: ''; position: absolute; left: 0; top: 3px; width: 11px; height: 11px; border-radius: 50%; background: var(--bg); border: 1px solid var(--line2); transition: all .4s var(--ease); }
+.timeline div:not(:last-of-type)::after { content: ''; position: absolute; left: 5px; top: 17px; height: 12px; width: 1px; background: var(--line2); }
+.timeline div.run { color: var(--ink); } .timeline div.run::before { border-color: var(--acc); box-shadow: 0 0 0 4px rgba(var(--acc-rgb),.14); animation: blink 1s infinite; }
 .timeline div.ok { color: var(--t2); } .timeline div.ok::before { background: var(--acc); border-color: var(--acc); }
 .timeline div.no { color: var(--bad); } .timeline div.no::before { background: var(--bad); border-color: var(--bad); }
-.note { margin: 16px 0 0; min-height: 19px; font: 400 12.5px var(--mono); color: var(--t2); } .note.err { color: var(--bad); animation: nudge .35s; }
+.note { margin: 14px 0 0; min-height: 19px; font: 400 12.5px var(--mono); color: var(--t2); overflow-wrap: anywhere; } .note.err { color: var(--bad); animation: nudge .35s; }
 @keyframes nudge { 25% { transform: translateX(-3px) } 75% { transform: translateX(3px) } }
-.short { margin-top: 18px; padding: 18px 20px; border-radius: 14px; border: 1px solid rgba(255,122,107,.45); background: radial-gradient(120% 140% at 0% 0%, rgba(255,122,107,.10), transparent 60%); display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: center; animation: chipIn .6s var(--ease) both; }
-.short .ic { grid-row: span 2; width: 38px; height: 38px; border-radius: 11px; display: grid; place-items: center; background: rgba(255,122,107,.12); color: var(--bad); font: 600 18px var(--ui); }
-.short b { font: 600 16px var(--ui); color: var(--ink); letter-spacing: -.01em; } .short span { font: 400 12.5px var(--mono); color: var(--t2); } .short span em { font-style: normal; color: var(--bad); }
-.pill.low { border-color: rgba(255,122,107,.55); } .pill.low b { color: var(--bad) !important; }
-.sum .low { color: var(--bad); }
-.done { margin-top: 18px; padding: 22px; border-radius: 14px; border: 1px solid rgba(var(--acc-rgb),.35); background: radial-gradient(120% 140% at 0% 0%, rgba(var(--acc-rgb),.08), transparent 60%); animation: chipIn .8s var(--ease) both; }
-.done .t { font: 600 26px/1.1 var(--ui); letter-spacing: -.02em; } .done code { display: block; margin: 10px 0 16px; font: 500 15px var(--mono); word-break: break-all; color: var(--ink); } .done code b { color: var(--acc); }
-.done a { color: var(--t2); text-decoration: none; margin-right: 18px; font-size: 13px; border-bottom: 1px solid var(--line2); padding-bottom: 1px; transition: color .2s, border-color .2s; } .done a:hover { color: var(--acc); border-color: var(--acc); }
+.short { margin-top: 14px; padding: 16px; border-radius: 12px; border: 1px solid rgba(255,122,107,.45); background: rgba(255,122,107,.05); display: grid; grid-template-columns: auto 1fr; gap: 4px 14px; align-items: center; animation: rise .5s var(--ease) both; }
+.short .ic { grid-row: span 2; width: 34px; height: 34px; border-radius: 9px; display: grid; place-items: center; background: rgba(255,122,107,.12); color: var(--bad); font: 600 16px var(--ui); }
+.short b { font: 600 14.5px var(--ui); } .short span { font: 400 12px var(--mono); color: var(--t2); } .short span em { font-style: normal; color: var(--bad); }
+.done { margin-top: 14px; padding: 18px; border-radius: 12px; border: 1px solid rgba(var(--acc-rgb),.4); background: rgba(var(--acc-rgb),.06); animation: rise .6s var(--ease) both; }
+.done .t { font: 600 20px/1.15 var(--ui); letter-spacing: -.02em; } .done code { display: block; margin: 10px 0 14px; font: 500 13px var(--mono); word-break: break-all; } .done code b { color: var(--acc); }
+.done a { color: var(--t2); text-decoration: none; margin-right: 14px; font-size: 13px; border-bottom: 1px solid var(--line2); } .done a:hover { color: var(--acc); border-color: var(--acc); }
+.facts { display: grid; gap: 10px; font-size: 12.5px; color: var(--t3); }
+.facts div { display: flex; gap: 10px; align-items: flex-start; } .facts .ic { width: 16px; height: 16px; color: var(--t2); margin-top: 1px; }
 
-/* launched with dzz: the public list */
-.lrow { display: grid; grid-template-columns: 44px minmax(0, 1.2fr) minmax(0, 1.6fr) 90px 70px auto; gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
-.lrow:first-child { border-top: 0; } .lrow img, .lrow .ph { width: 44px; height: 44px; border-radius: 11px; object-fit: cover; background: var(--bg2); display: grid; place-items: center; font: 600 15px var(--mono); color: var(--t3); }
+/* lists */
+.lrow { display: grid; grid-template-columns: 40px minmax(0, 1.2fr) minmax(0, 1.5fr) 80px 56px auto; gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.lrow:first-child { border-top: 0; } .lrow img, .lrow .ph { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--s2); display: grid; place-items: center; font: 600 14px var(--mono); color: var(--t3); }
 .lrow b { display: block; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lrow b small { color: var(--t3); font: 400 12px var(--mono); margin-left: 6px; }
-.ca { display: inline-flex; align-items: center; gap: 10px; max-width: 100%; padding: 7px 8px 7px 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--bg2); cursor: pointer; font: 500 12.5px var(--mono); color: var(--t2); transition: border-color .2s, color .2s; }
-.ca:hover { border-color: rgba(var(--acc-rgb), .5); color: var(--ink); } .ca code { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; } .ca code em { font-style: normal; color: var(--acc); }
-.ca span { flex: none; font: 500 12px var(--ui); padding: 3px 8px; border-radius: 7px; background: var(--panel2); color: var(--t2); } .ca.ok span { background: var(--acc); color: var(--acc-ink); }
-.lrow .mc { font: 500 13px var(--mono); color: var(--ink); text-align: right; } .lrow .age { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
-.lrow .lk { display: flex; gap: 10px; font-size: 12.5px; } .lrow .lk a { color: var(--t3); text-decoration: none; } .lrow .lk a:hover { color: var(--acc); } .lrow .lk .fees { all: unset; cursor: pointer; color: var(--acc); font: inherit; } .lrow .lk .fees:hover { text-decoration: underline; }
+.lrow .mc { font: 500 13px var(--mono); text-align: right; } .lrow .age { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
+.lrow .lk { display: flex; gap: 12px; font-size: 12.5px; } .lrow .lk a { color: var(--t3); text-decoration: none; } .lrow .lk a:hover { color: var(--acc); } .lrow .lk .fees { all: unset; cursor: pointer; color: var(--acc); font: inherit; } .lrow .lk .fees:hover { text-decoration: underline; }
 .lempty { color: var(--t3); font: 400 13px var(--mono); padding: 18px 0 6px; }
-@media (max-width: 760px) { .lrow { grid-template-columns: 40px 1fr auto; } .lrow .ca, .lrow .age, .lrow .lk { grid-column: 2 / -1; } }
-/* history + settings */
 .hrow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
-.hrow:first-child { border-top: 0; } .hrow img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--bg2); }
-.hrow b { font-weight: 500; } .hrow b span { color: var(--t3); font-weight: 400; margin-left: 6px; } .hrow code { display: block; font: 400 12px var(--mono); color: var(--t3); }
+.hrow:first-child { border-top: 0; } .hrow img { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; background: var(--s2); }
+.hrow b { font-weight: 500; } .hrow b span { color: var(--t3); font-weight: 400; margin-left: 6px; } .hrow code { display: block; font: 400 12px var(--mono); color: var(--t3); overflow: hidden; text-overflow: ellipsis; }
 .hrow a { color: var(--t3); font-size: 12.5px; text-decoration: none; margin-left: 14px; } .hrow a:hover { color: var(--acc); }
-.sheet { backdrop-filter: blur(18px) saturate(1.3); -webkit-backdrop-filter: blur(18px) saturate(1.3); position: fixed; right: 20px; top: 66px; z-index: 10; width: 360px; padding: 20px; border-radius: 16px; border: 1px solid var(--line2); background: var(--panel);
-  box-shadow: 0 30px 80px var(--shadow); opacity: 0; transform: translateY(-8px) scale(.98); pointer-events: none; transition: opacity .25s, transform .3s var(--ease); display: grid; gap: 12px; }
-.sheet.on { opacity: 1; transform: none; pointer-events: auto; }
-.sheet .btn { justify-self: start; height: 36px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line2); background: var(--panel2); cursor: pointer; font-weight: 500; }
+.hrow .fees { all: unset; cursor: pointer; color: var(--acc); font-size: 12.5px; margin-right: 4px; } .hrow .fees:hover { text-decoration: underline; } .hrow .fees[disabled] { opacity: .6; }
+.lrow .ca { height: 32px; } .lrow .ca code { min-width: 0; }
 
-.reveal { opacity: 0; transform: translateY(14px); filter: blur(6px); animation: rev .9s var(--ease) forwards; } @keyframes rev { to { opacity: 1; transform: none; filter: none } }
-@media (max-width: 960px) { .composer { grid-template-columns: 1fr; } .g3 { grid-template-columns: 1fr; } main, .bar { padding-left: 16px; padding-right: 16px; } .launch { grid-template-columns: 1fr; } .hold { width: 100%; } }
-@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } .reveal { opacity: 1; transform: none; filter: none; } }
+/* settings sheet */
+.sheet { position: fixed; left: 14px; bottom: 64px; z-index: 30; width: 320px; padding: 18px; border-radius: 14px; border: 1px solid var(--line2); background: var(--pop); box-shadow: 0 30px 80px rgba(0,0,0,.5); opacity: 0; transform: translateY(8px) scale(.98); pointer-events: none; transition: opacity .2s, transform .3s var(--ease); display: grid; gap: 12px; }
+.sheet.on { opacity: 1; transform: none; pointer-events: auto; }
+.sheet .btn { justify-self: start; }
+
+/* account view */
+.acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+.acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
+.acc-head h2 { margin: 0; font: 600 26px/1.1 var(--ui); letter-spacing: -.03em; } .acc-head p { margin: 4px 0 0; color: var(--t3); font: 400 12.5px var(--mono); }
+.acc-head .end { margin-left: auto; display: flex; gap: 8px; }
+.two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.idrow, .wrow { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); min-height: 58px; }
+.idrow:first-child, .wrow:first-child { border-top: 0; }
+.idrow .ic { width: 20px; height: 20px; } .idrow b, .wrow b { display: block; font: 500 13.5px var(--ui); } .idrow small, .wrow small { display: block; font: 400 12px var(--mono); color: var(--t3); }
+.idrow .end, .wrow .end { margin-left: auto; display: flex; gap: 6px; }
+.wrow .wi { width: 32px; height: 32px; border-radius: 9px; background: var(--s2); display: grid; place-items: center; color: var(--t2); } .wrow .wi .ic { width: 16px; height: 16px; }
+.wrow code { font: 500 13px var(--mono); }
+.gate { max-width: 460px; margin: 30px auto 0; text-align: center; }
+.gate h2 { margin: 0; font: 600 26px/1.15 var(--ui); letter-spacing: -.03em; } .gate p { color: var(--t2); margin: 10px 0 24px; }
+.gate .opts { display: grid; gap: 10px; text-align: left; }
+.opt { height: 46px; border-radius: 11px; border: 1px solid var(--line2); background: var(--s1); display: grid; grid-template-columns: 22px 1fr 40px; align-items: center; gap: 10px; padding: 0 14px; font: 500 14px var(--ui); cursor: pointer; text-align: center; transition: background .2s, border-color .2s; }
+.opt:hover { background: var(--s2); border-color: var(--t4); } .opt:disabled { cursor: default; color: var(--t3); } .opt:disabled .ic { filter: grayscale(1); opacity: .5; }
+.opt small { font: 400 11.5px var(--mono); color: var(--t3); text-align: right; }
+.opt .ic { width: 19px; height: 19px; }
+.amsg { min-height: 20px; margin: 14px 0 0; font-size: 13px; color: var(--t2); } .amsg.err { color: var(--bad); }
+
+@media (max-width: 1180px) { .lgrid { grid-template-columns: 1fr; } .rail { position: static; } }
+@media (max-width: 900px) {
+  .shell { grid-template-columns: 1fr; }
+  .side { position: fixed; z-index: 40; top: auto; bottom: 0; left: 0; right: 0; height: auto; flex-direction: row; justify-content: space-around; gap: 0; padding: 6px 6px calc(6px + env(safe-area-inset-bottom)); border-right: 0; border-top: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 92%, transparent); }
+  .side .mark, .side .grp, .side .fill, .side .me, .side .tools { display: none; }
+  .nv { flex-direction: column; height: auto; gap: 3px; padding: 6px 8px; font-size: 10.5px; } .nv.on::before { display: none; } .nv .cnt { display: none; }
+  .main { padding: 0 16px 110px; } .topbar { margin: 0 -16px; padding: 0 16px; } .topbar .tmark { display: inline-flex; } .topbar h1, .topbar .crumb { display: none; }
+  .sheet { left: 12px; right: 12px; width: auto; bottom: 84px; }
+  .two { grid-template-columns: 1fr; } .g2, .g3 { grid-template-columns: 1fr; }
+  .addrc { padding: 20px 14px; } .addr { padding: 16px 12px; } .addr .cells { font-size: 2.45vw; } .addrc .card-h .sub { display: none; }
+  .lrow { grid-template-columns: 40px 1fr auto; } .lrow .ca, .lrow .age, .lrow .lk { grid-column: 2 / -1; }
+}
+@media (max-width: 900px) and (min-width: 0) { .topbar .right .hide-m { display: none; } }
 </style>
 </head>
-<body>
+<body data-bg="soft">
 
-<header class="bar">
-  <a class="mark" href="/" style="text-decoration:none;color:inherit"><b>dz<i>z</i></b><span>custom-CA launcher</span></a>
-  <button class="ib" id="snd" title="Sound"><svg viewBox="0 0 24 24"><path d="M4 9h3l5-4v14l-5-4H4z"/><path class="on-i" d="M16 9a4 4 0 0 1 0 6M18.5 6.5a8 8 0 0 1 0 11"/><path class="off-i" d="m16.5 9.5 5 5m0-5-5 5"/></svg></button>
-  <button class="ib" data-theme-picker title="Theme"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 3.5a8.5 8.5 0 0 0 0 17z" fill="currentColor" stroke="none"/></svg></button>
-  <button class="ib" id="setBtn" title="Settings"><svg viewBox="0 0 24 24"><path d="M4 7h10M18 7h2M4 17h4M12 17h8"/><circle cx="16" cy="7" r="2"/><circle cx="10" cy="17" r="2"/></svg></button>
-  <a class="pill" href="/me" style="text-decoration:none">Profile</a>
-  <button class="pill" id="wallet"><i></i><span>Connect wallet</span></button>
-</header>
+<div class="shell">
+  <aside class="side">
+    <a class="mark" href="/"><b>dz<i>z</i></b></a>
+    <a class="nv" href="#launch" data-view="launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch</a>
+    <a class="nv" href="#coins" data-view="coins"><svg class="ic"><use href="/assets/icons.svg#coins"/></svg>My coins<span class="cnt" id="navCoins"></span></a>
+    <a class="nv" href="#fees" data-view="fees"><svg class="ic"><use href="/assets/icons.svg#fees"/></svg>Creator fees</a>
+    <a class="nv" href="#explore" data-view="explore"><svg class="ic"><use href="/assets/icons.svg#explore"/></svg>Explore<span class="cnt" id="navPub"></span></a>
+    <a class="nv" href="#account" data-view="account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Account</a>
+    <div class="fill"></div>
+    <a class="me" href="#account" id="meCard"><span class="av" id="meAv"><svg class="ic sm"><use href="/assets/icons.svg#user"/></svg></span><div><b id="meName">Sign in</b><small id="meSub">Google, Discord, X or wallet</small></div></a>
+    <div class="tools">
+      <button class="iconbtn" id="snd" title="Sound"><svg class="ic on-i"><use href="/assets/icons.svg#sound"/></svg><svg class="ic off-i"><use href="/assets/icons.svg#mute"/></svg></button>
+      <button class="iconbtn" data-theme-picker title="Theme"><svg class="ic"><use href="/assets/icons.svg#theme"/></svg></button>
+      <button class="iconbtn" id="setBtn" title="Settings"><svg class="ic"><use href="/assets/icons.svg#sliders"/></svg></button>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <a class="mark tmark" href="/"><b>dz<i>z</i></b></a>
+      <h1 id="viewTitle">Launch</h1>
+      <span class="crumb"><i class="live" id="live"></i><span class="st" id="state">idle</span></span>
+      <div class="right">
+        <button class="pill" id="wallet"><i></i><span>Connect wallet</span></button>
+      </div>
+    </header>
+
+    <!-- LAUNCH -->
+    <section class="view" data-view="launch">
+      <div class="lgrid">
+        <div class="lcol">
+          <div class="card addrc">
+            <div class="card-h"><span class="step">01</span><h3>Address</h3><span class="sub">click the start or the end of it and type</span></div>
+            <div class="addr" id="addr">
+              <div class="cells" id="cells"></div>
+              <input id="pre" maxlength="9" autocomplete="off" spellcheck="false" aria-label="Starts with">
+              <input id="suf" maxlength="9" autocomplete="off" spellcheck="false" aria-label="Ends with">
+              <div class="help" id="help">click the <b>start</b> or the <b>end</b> and type</div>
+            </div>
+            <div class="meter">
+              <div class="track"><i id="prog"></i></div>
+              <div id="stats"></div>
+              <div class="controls">
+                <div class="seg" id="ci"><span class="thumb"></span><button data-v="0" class="on">Exact case</button><button data-v="1">Any case</button></div>
+                <div class="seg" id="cnt"><span class="thumb"></span><button data-v="1" class="on">1</button><button data-v="3">3</button><button data-v="5">5</button></div>
+                <button class="go" id="grind">Find address <kbd>↵</kbd></button>
+              </div>
+            </div>
+            <div class="found" id="found"></div>
+            <p class="keynote"><svg class="ic sm"><use href="/assets/icons.svg#key"/></svg>found and kept in this browser only · the keys never leave it</p>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><span class="step">02</span><h3>The coin</h3></div>
+            <div class="grid">
+              <label class="drop" id="drop"><span class="pv" id="pv"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="9" cy="9.5" r="1.8"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg></span><span><b>Picture</b><small>drop or choose · square, 512 px</small></span><input type="file" id="file" accept="image/*" hidden></label>
+              <div class="grid g2"><label class="fl">Name<input class="in" id="name" maxlength="32" placeholder="Coin name"></label><label class="fl">Ticker<input class="in mono" id="sym" maxlength="10" placeholder="TICKER"></label></div>
+              <label class="fl">Description<textarea class="in" id="desc" maxlength="600" placeholder="One or two lines"></textarea></label>
+              <div class="grid g3"><label class="fl">X<input class="in" id="x" placeholder="x.com/…"></label><label class="fl">Website<input class="in" id="web" placeholder="https://…"></label><label class="fl">Telegram<input class="in" id="tg" placeholder="t.me/…"></label></div>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-h"><span class="step">03</span><h3>The market</h3></div>
+            <div class="grid" style="gap:20px">
+              <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on">pump.fun</button><button data-v="meteora">Meteora</button></div></div>
+              <div class="fl" data-only="pump">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
+                <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden>
+                <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
+                  <div class="tlist" id="tlist"><div class="empty">loading pump.fun's list…</div></div></div></div>
+              <div class="fl" data-only="pump">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint" id="feeNote"></p></div>
+              <div class="fl" data-only="meteora" hidden>Paired with<div class="seg" id="mpair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TTWO">Take-Two (TTWO)</button><button data-v="ANY">Any token</button></div><div id="manyRow" hidden style="margin-top:10px"><input class="in mono" id="manyMint" placeholder="Paste the token's mint address" spellcheck="false" autocomplete="off"></div><p class="hint" id="mpairNote"></p></div>
+              <div class="fl" data-only="meteora" hidden>Trading fee<div class="seg" id="mfee" style="justify-self:start"><span class="thumb"></span><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint">Paid on every trade. Meteora keeps 20% of it, the rest is yours to claim. It is not sent to you by itself.</p></div>
+              <div class="fl" data-only="meteora" hidden>Graduates at<div class="seg" id="mgrad" style="justify-self:start"><span class="thumb"></span><button data-v="200">200 SOL</button><button data-v="400" class="on">400 SOL</button><button data-v="800">800 SOL</button></div><p class="hint" id="mgradNote"></p></div>
+              <div class="fl" data-only="meteora" hidden>Anti-snipe<div class="seg" id="msnipe" style="justify-self:start"><span class="thumb"></span><button data-v="1" class="on">On</button><button data-v="0">Off</button></div><p class="hint" id="msnipeNote"></p></div>
+              <div class="row2">
+                <label class="fl" style="width:180px"><span>Dev buy, <span id="unit">SOL</span></span><input class="in mono" id="buy" type="number" min="0" step="0.01" value="0"></label>
+                <p class="hint" id="buyNote" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.</p>
+              </div>
+              <div class="fl">Fee split <span class="hint" id="splitNote">optional · written on chain at launch · the rest is yours</span>
+                <div id="splits" class="grid" style="gap:8px"></div>
+                <button class="ghost" id="addSplit" style="justify-self:start">+ add a wallet</button></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="rail">
+          <div class="card lp">
+            <div class="card-h"><span class="step">04</span><h3>Launch</h3></div>
+            <div class="sum" id="sum"></div>
+            <button class="hold" id="hold"><span><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span id="holdTxt">Hold to launch</span></span></button>
+            <div class="timeline" id="tl"><span class="fill" id="tlFill"></span><div data-k="meta">Picture and details saved</div><div data-k="sign">Approved in your wallet</div><div data-k="live">Live on pump.fun</div></div>
+            <p class="note" id="note"></p>
+            <div id="done"></div>
+          </div>
+          <div class="card facts">
+            <div><svg class="ic"><use href="/assets/icons.svg#key"/></svg>The coin's key is made and kept in this browser. dzz never sees it.</div>
+            <div><svg class="ic"><use href="/assets/icons.svg#hand"/></svg>One approval in your wallet. No platform fee, only network rent.</div>
+            <div><svg class="ic"><use href="/assets/icons.svg#check"/></svg>Every launch is checked on Solana before it is listed.</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- MY COINS -->
+    <section class="view" data-view="coins" hidden>
+      <div class="vh"><div><h2>My coins</h2><p>Coins launched from this browser. Meteora coins have a fees button to claim what they earned.</p></div><a class="btn" href="#account">All my wallets<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
+      <div class="card" id="histCard"><div id="hist"><div class="lempty">No coins launched from this browser yet.</div></div><p class="hint" id="histN" hidden></p></div>
+    </section>
+
+    <!-- CREATOR FEES -->
+    <section class="view" data-view="fees" hidden>
+      <div class="vh"><div><h2>Creator fees</h2><p>What your coins earned, across every wallet on your account. Read from Solana.</p></div><a class="btn" href="/fees">Everyone's fees<svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a></div>
+      <div id="feesCard"><div id="feesTotal"><div class="lempty">reading…</div></div></div>
+      <div class="card" id="claimCard" style="margin-top:16px"><div class="card-h"><h3>Claim on Meteora</h3><span class="sub">pump.fun fees are claimed on pump.fun</span></div><p class="hint">Open <a class="link" href="#coins">My coins</a> and press <b>fees</b> on a Meteora coin to see and claim what it earned, before or after graduation.</p></div>
+    </section>
+
+    <!-- EXPLORE -->
+    <section class="view" data-view="explore" hidden>
+      <div class="vh"><div><h2>Launched with dzz</h2><p>Every coin launched with dzz, checked on Solana before it is listed. <span id="pubN" class="muted"></span></p></div></div>
+      <div class="card" id="pubCard"><div id="pub"><div class="lempty">loading…</div></div></div>
+    </section>
+
+    <!-- ACCOUNT -->
+    <section class="view" data-view="account" hidden>
+      <div id="accOut">
+        <div class="gate">
+          <h2>Sign in to dzz</h2>
+          <p>See your launches and creator fees from every wallet, from the website and the desktop app, in one place.</p>
+          <div class="opts">
+            <button class="opt" data-p="google"><svg class="ic brand"><use href="/assets/icons.svg#google"/></svg><span>Continue with Google</span><small></small></button>
+            <button class="opt" data-p="discord"><svg class="ic brand"><use href="/assets/icons.svg#discord"/></svg><span>Continue with Discord</span><small></small></button>
+            <button class="opt" data-p="x"><svg class="ic brand"><use href="/assets/icons.svg#x"/></svg><span>Continue with X</span><small></small></button>
+            <button class="opt" id="accWallet"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg><span>Sign in with a Solana wallet</span><small></small></button>
+          </div>
+          <p class="amsg" id="amsg0"></p>
+        </div>
+      </div>
+      <div id="accIn" hidden>
+        <div class="acc-head"><span class="av" id="accAv"></span><div><h2 id="accName">…</h2><p id="accSub"></p></div><div class="end"><button class="btn sm" id="accRename">Rename</button><button class="btn sm ghost" id="accOutBtn"><svg class="ic"><use href="/assets/icons.svg#out"/></svg>Sign out</button></div></div>
+        <div class="stats4">
+          <div><b id="aCoins">–</b><span>coins launched</span></div>
+          <div><b id="aClaimed">–</b><span>SOL collected <i id="aClaimedUsd"></i></span></div>
+          <div><b id="aWaiting">–</b><span>SOL waiting to collect <i id="aWaitingUsd"></i></span></div>
+          <div><b id="aGen">–</b><span>SOL earned in total <i id="aGenUsd"></i></span></div>
+        </div>
+        <div class="two">
+          <div class="card"><div class="card-h"><h3>Sign-in accounts</h3><span class="sub">use any of them to sign in</span></div><div id="accIds"></div></div>
+          <div class="card"><div class="card-h"><h3>Wallets</h3><span class="end"><button class="btn sm" id="accLink"><svg class="ic"><use href="/assets/icons.svg#plus"/></svg>Link this wallet</button></span></div><div id="accWallets"></div><p class="hint" style="margin-top:12px">To add another wallet, switch to it in your wallet app, then press Link this wallet and sign. A wallet that already had launches brings them along.</p></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-h"><h3>Launches</h3><span class="sub">from every wallet on this account</span></div>
+          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Coin</th><th>Where</th><th>Wallet</th><th class="r">Collected</th><th class="r">Waiting</th></tr></thead><tbody id="accRows"></tbody></table></div>
+          <p class="hint" id="accNote" style="margin-top:14px"></p></div>
+        <p class="amsg" id="amsg"></p>
+      </div>
+    </section>
+  </div>
+</div>
 
 <div class="sheet" id="settings">
   <label class="fl">Solana RPC<input class="in mono" id="sRpc"></label>
   <label class="fl">Threads<input class="in mono" id="sThreads" type="number" min="1"></label>
   <button class="btn" id="sSave">Save</button><p class="hint" id="sNote"></p>
 </div>
-
-<main>
-  <section class="stage">
-    <div class="kicker reveal"><i class="live" id="live"></i>Contract address<span class="st" id="state">idle</span></div>
-    <h1 class="headline reveal" style="animation-delay:.08s">Your coin, at the <em>address you choose.</em></h1>
-    <div class="reveal" style="animation-delay:.16s">
-      <div class="addr" id="addr">
-        <div class="cells" id="cells"></div>
-        <input id="pre" maxlength="9" autocomplete="off" spellcheck="false" aria-label="Starts with">
-        <input id="suf" maxlength="9" autocomplete="off" spellcheck="false" aria-label="Ends with">
-        <div class="help" id="help">click the <b>start</b> or the <b>end</b> and type</div>
-      </div>
-    </div>
-    <div class="meter reveal" style="animation-delay:.24s">
-      <div class="track"><i id="prog"></i></div>
-      <div class="stats" id="stats"></div>
-      <div class="controls">
-        <div class="seg" id="ci"><span class="thumb"></span><button data-v="0" class="on">Exact case</button><button data-v="1">Any case</button></div>
-        <div class="seg" id="cnt"><span class="thumb"></span><button data-v="1" class="on">1</button><button data-v="3">3</button><button data-v="5">5</button></div>
-        <button class="go" id="grind">Find address <kbd>↵</kbd></button>
-      </div>
-    </div>
-    <div class="found" id="found"></div>
-    <p class="hint" style="margin-top:18px;font-family:var(--mono);font-size:11.5px">found and kept in this browser only · the keys never leave it</p>
-  </section>
-
-  <section class="composer reveal" style="animation-delay:.32s">
-    <div class="card">
-      <h3>The coin <small>02</small><em>name it</em></h3>
-      <div class="grid">
-        <label class="drop" id="drop"><span class="pv" id="pv"><svg viewBox="0 0 24 24"><rect x="3.5" y="3.5" width="17" height="17" rx="4"/><circle cx="9" cy="9.5" r="1.8"/><path d="m4 17 5-5 4 4 3-3 4 4"/></svg></span><span><b>Picture</b><small>drop or choose · square, 512 px</small></span><input type="file" id="file" accept="image/*" hidden></label>
-        <div class="grid g2"><label class="fl">Name<input class="in" id="name" maxlength="32" placeholder="Coin name"></label><label class="fl">Ticker<input class="in mono" id="sym" maxlength="10" placeholder="TICKER"></label></div>
-        <label class="fl">Description<textarea class="in" id="desc" maxlength="600" placeholder="One or two lines"></textarea></label>
-        <div class="grid g3"><label class="fl">X<input class="in" id="x" placeholder="x.com/…"></label><label class="fl">Website<input class="in" id="web" placeholder="https://…"></label><label class="fl">Telegram<input class="in" id="tg" placeholder="t.me/…"></label></div>
-      </div>
-    </div>
-    <div class="card">
-      <h3>The market <small>03</small><em>set it</em></h3>
-      <div class="grid" style="gap:18px">
-        <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on">pump.fun</button><button data-v="meteora">Meteora</button></div></div>
-        <div class="fl" data-only="pump">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
-          <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden>
-          <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
-            <div class="tlist" id="tlist"><div class="empty">loading pump.fun's list…</div></div></div></div>
-        <div class="fl" data-only="pump">Creator fee<div class="seg" id="fee" style="justify-self:start"><span class="thumb"></span><button data-v="0">default</button><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint" id="feeNote"></p></div>
-        <div class="fl" data-only="meteora" hidden>Paired with<div class="seg" id="mpair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TTWO">Take-Two (TTWO)</button><button data-v="ANY">Any token</button></div><div id="manyRow" hidden style="margin-top:10px"><input class="in mono" id="manyMint" placeholder="Paste the token's mint address" spellcheck="false" autocomplete="off"></div><p class="hint" id="mpairNote"></p></div>
-        <div class="fl" data-only="meteora" hidden>Trading fee<div class="seg" id="mfee" style="justify-self:start"><span class="thumb"></span><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint">Paid on every trade. Meteora keeps 20% of it, the rest is yours to claim. It is not sent to you by itself.</p></div>
-        <div class="fl" data-only="meteora" hidden>Graduates at<div class="seg" id="mgrad" style="justify-self:start"><span class="thumb"></span><button data-v="200">200 SOL</button><button data-v="400" class="on">400 SOL</button><button data-v="800">800 SOL</button></div><p class="hint" id="mgradNote"></p></div>
-        <div class="fl" data-only="meteora" hidden>Anti-snipe<div class="seg" id="msnipe" style="justify-self:start"><span class="thumb"></span><button data-v="1" class="on">On</button><button data-v="0">Off</button></div><p class="hint" id="msnipeNote"></p></div>
-        <div class="row2">
-          <label class="fl" style="width:180px"><span>Dev buy, <span id="unit">SOL</span></span><input class="in mono" id="buy" type="number" min="0" step="0.01" value="0"></label>
-          <p class="hint" id="buyNote" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.</p>
-        </div>
-        <div class="fl">Fee split <span style="color:var(--t4)" id="splitNote">optional · written on chain at launch · the rest is yours</span>
-          <div id="splits" class="grid" style="gap:8px"></div>
-          <button class="ghost" id="addSplit" style="justify-self:start">+ add a wallet</button></div>
-      </div>
-    </div>
-    <div class="card wide">
-      <div class="launch">
-        <div class="sum" id="sum"></div>
-        <button class="hold" id="hold"><span><svg viewBox="0 0 24 24"><path d="M12 19V5M6 11l6-6 6 6"/></svg><span id="holdTxt">Hold to launch</span></span></button>
-      </div>
-      <div class="timeline" id="tl"><span class="fill" id="tlFill"></span><div data-k="meta">Picture and details saved</div><div data-k="sign">Approved in your wallet</div><div data-k="live">Live on pump.fun</div></div>
-      <p class="note" id="note"></p>
-      <div id="done"></div>
-    </div>
-    <div class="card wide" id="feesCard"><h3>Your creator fees<em>every wallet you launch from</em></h3><div id="feesTotal"><div class="lempty">reading…</div></div></div>
-    <div class="card wide" id="histCard" hidden><h3>Launched <small id="histN"></small><em>yours</em></h3><div id="hist"></div></div>
-    <div class="card wide" id="pubCard"><h3>Launched with dzz <small id="pubN"></small><em>everyone's · <a href="/fees" style="color:inherit">fees</a></em></h3><div id="pub"><div class="lempty">loading…</div></div></div>
-  </section>
-</main>
+<div class="toast" id="toast"></div>
 
 <script src="/assets/bg.js"></script>
 <script src="/assets/launcher.js"></script>
@@ -613,9 +710,10 @@ function render(v) {
   const prev = new Set([...$('found').children].map((c) => c.dataset.m))
   $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>${venue === 'meteora' ? 'random address' : 'normal · …<b>pump</b>'}</code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
   // history
-  $('histCard').hidden = !v.history.length; $('histN').textContent = v.history.length
+  $('navCoins').textContent = v.history.length || ''
   { const ms = v.history.map((h) => h.mint).join(','); if (ms !== window.DZZ_MY_MINTS_KEY) { window.DZZ_MY_MINTS_KEY = ms; window.DZZ_MY_MINTS = v.history.map((h) => h.mint); window.DzzFeesTotal?.refresh() } }
   $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
+  if (!v.history.length) $('hist').innerHTML = '<div class="lempty">No coins launched from this browser yet.</div>'
   stats(); summary()
 }
 $('found').onclick = async (e) => {
@@ -758,7 +856,7 @@ const usd = (v) => (v == null ? '–' : '$' + (v >= 1e6 ? (v / 1e6).toFixed(2) +
 async function loadPublic() {
   let coins = []
   try { coins = (await (await fetch(DZZ_API, { cache: 'no-store' })).json()).coins || [] } catch { $('pub').innerHTML = '<div class="lempty">could not load the list right now</div>'; return }
-  $('pubN').textContent = coins.length || ''
+  $('pubN').textContent = coins.length ? coins.length + ' listed.' : ''; $('navPub').textContent = coins.length || ''
   if (!coins.length) { $('pub').innerHTML = '<div class="lempty">no coins yet · yours can be the first</div>'; return }
   const mcs = {}
   for (let i = 0; i < Math.min(coins.length, 90); i += 30) {
@@ -803,6 +901,102 @@ async function registerLaunch(mint, signature) {
 }
 loadPublic(); setInterval(loadPublic, 60000)
 summary(); stats()
+</script>
+<script src="/assets/account.js"></script>
+<script>
+// ---------------------------------------------------------------- views: #launch #coins #fees #explore #account
+;(() => {
+  const $ = (id) => document.getElementById(id)
+  const TITLES = { launch: 'Launch', coins: 'My coins', fees: 'Creator fees', explore: 'Explore', account: 'Account' }
+  function show() {
+    const v = (location.hash.slice(1).split('&')[0] || 'launch'), id = TITLES[v] ? v : 'launch'
+    document.querySelectorAll('.view').forEach((s) => (s.hidden = s.dataset.view !== id))
+    document.querySelectorAll('.nv').forEach((a) => a.classList.toggle('on', a.dataset.view === id))
+    $('viewTitle').textContent = TITLES[id]; document.title = `dzz · ${TITLES[id].toLowerCase()}`
+    dispatchEvent(new Event('resize'))                     // segmented controls measure themselves when shown
+    if (id === 'account') account()
+    if (id === 'fees') window.DzzFeesTotal?.refresh()
+  }
+  addEventListener('hashchange', () => { show(); scrollTo({ top: 0 }) })
+  show()
+
+  // ---------------------------------------------------------------- account
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+  const NAMES = { google: 'Google', discord: 'Discord', x: 'X' }, short = DzzAuth.short
+  const sol = (l) => (l == null ? '—' : !l ? '0' : (l / 1e9).toFixed(l < 1e8 ? 4 : 3))
+  const say = (t, err, id = 'amsg') => { const el = $(id); if (el) { el.textContent = t || ''; el.className = 'amsg' + (err ? ' err' : '') } }
+  const toast = (t, err) => { const el = $('toast'); el.textContent = t; el.className = 'toast on' + (err ? ' err' : ''); clearTimeout(toast.t); toast.t = setTimeout(() => (el.className = 'toast'), 2200) }
+  const avatar = (p) => (p?.avatar ? `<img src="${esc(p.avatar)}" alt="">` : esc((p?.name || '?')[0].toUpperCase()))
+  let providers = { google: false, discord: false, x: false }
+
+  function meCard(p) {
+    $('meAv').innerHTML = p ? avatar(p) : '<svg class="ic sm"><use href="/assets/icons.svg#user"/></svg>'
+    $('meName').textContent = p ? p.name : 'Sign in'
+    $('meSub').textContent = p ? `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'}${p.identities?.length ? ' · ' + p.identities.map((i) => NAMES[i.provider]).join(', ') : ''}` : 'Google, Discord, X or wallet'
+  }
+  addEventListener('dzz-auth', (e) => { meCard(e.detail); if (!$('accIn').closest('.view').hidden) account(); window.DzzFeesTotal?.refresh() })
+  DzzAuth.me().then(meCard)
+  DzzAuth.providers().then((p) => { providers = p; document.querySelectorAll('.gate .opt[data-p]').forEach((b) => { if (!p[b.dataset.p]) { b.disabled = true; b.querySelector('small').textContent = 'soon' } }) })
+  if (DzzAuth.lastError) { location.hash = 'account'; setTimeout(() => toast(DzzAuth.lastError, true), 300) }
+
+  document.querySelectorAll('.gate .opt[data-p]').forEach((b) => (b.onclick = () => DzzAuth.oauth(b.dataset.p, { back: location.origin + '/app#account' })))
+  $('accWallet').onclick = async () => { try { say('Sign the message in your wallet…', false, 'amsg0'); await DzzAuth.signInWallet(); say('', false, 'amsg0') } catch (e) { say(e.message, true, 'amsg0') } }
+  $('accOutBtn').onclick = () => { DzzAuth.signOut(); toast('Signed out') }
+  $('accRename').onclick = async () => { const n = prompt('Name on your account', $('accName').textContent); if (!n) return; try { await DzzAuth.rename(n) } catch (e) { toast(e.message, true) } }
+  $('accLink').onclick = async () => { try { say('Sign the message in your wallet…'); await DzzAuth.linkWallet(); say(''); toast('Wallet linked') } catch (e) { say(e.message, true) } }
+
+  async function account() {
+    const p = await DzzAuth.me()
+    $('accOut').hidden = !!p; $('accIn').hidden = !p
+    if (!p) return
+    $('accAv').innerHTML = avatar(p); $('accName').textContent = p.name
+    $('accSub').textContent = `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'} · ${p.identities?.length || 0} sign-in account${p.identities?.length === 1 ? '' : 's'}`
+    const ids = p.identities || [], canDrop = ids.length + p.wallets.length > 1
+    $('accIds').innerHTML = ['google', 'discord', 'x'].map((k) => {
+      const mine = ids.filter((i) => i.provider === k)
+      const icon = `<svg class="ic brand"><use href="/assets/icons.svg#${k}"/></svg>`
+      if (mine.length) return mine.map((i) => `<div class="idrow">${icon}<div><b>${esc(NAMES[k])}</b><small>${esc(i.handle ? (k === 'x' ? '@' : '') + i.handle : i.name || 'connected')}</small></div><span class="end">${canDrop ? `<button class="btn sm ghost" data-unid="${k}" data-sub="${esc(i.sub || '')}">Remove</button>` : '<span class="tag ok">connected</span>'}</span></div>`).join('')
+      return `<div class="idrow">${icon}<div><b>${esc(NAMES[k])}</b><small>not connected</small></div><span class="end">${providers[k] ? `<button class="btn sm" data-conn="${k}">Connect</button>` : '<span class="tag">soon</span>'}</span></div>`
+    }).join('')
+    $('accWallets').innerHTML = p.wallets.length ? p.wallets.map((w) => `<div class="wrow"><span class="wi"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg></span><div><code>${short(w)}</code><small><a class="link" href="https://solscan.io/account/${esc(w)}" target="_blank" rel="noopener">solscan ↗</a></small></div><span class="end">${canDrop ? `<button class="btn sm ghost" data-unw="${esc(w)}">Remove</button>` : ''}</span></div>`).join('') : '<p class="hint">No wallets yet. Connect one in your wallet app and press Link this wallet.</p>'
+    $('accIds').querySelectorAll('[data-conn]').forEach((b) => (b.onclick = () => DzzAuth.oauth(b.dataset.conn, { link: true, back: location.origin + '/app#account' })))
+    $('accIds').querySelectorAll('[data-unid]').forEach((b) => (b.onclick = async () => { if (!confirm(`Remove ${NAMES[b.dataset.unid]} from this account?`)) return; try { await DzzAuth.unlinkIdentity(b.dataset.unid) } catch (e) { toast(e.message, true) } }))
+    $('accWallets').querySelectorAll('[data-unw]').forEach((b) => (b.onclick = async () => { if (!confirm(`Remove ${short(b.dataset.unw)} from this account?`)) return; try { await DzzAuth.unlinkWallet(b.dataset.unw) } catch (e) { toast(e.message, true) } }))
+    launches(p)
+  }
+
+  // launches and fees of every wallet on the account. pump.fun keeps fees per wallet, so a wallet's pump.fun total counts once
+  async function launches(p) {
+    const mine = new Set(p.wallets)
+    try {
+      const [l, f, px] = await Promise.all([
+        fetch('/api/launched').then((r) => r.json()),
+        fetch('/api/fees').then((r) => r.json()).catch(() => ({ coins: [] })),
+        fetch('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => j.So11111111111111111111111111111111111111112?.usdPrice).catch(() => 0),
+      ])
+      const list = (l.coins || []).filter((c) => mine.has(c.dev)), fees = new Map((f.coins || []).map((x) => [x.mint, x]))
+      let claimed = 0, waiting = 0, other = 0; const pumpSeen = new Set()
+      for (const c of list) {
+        const x = fees.get(c.mint); if (!x) continue; if (x.generated == null) { other++; continue }
+        if (c.venue !== 'meteora') { if (pumpSeen.has(x.dev)) continue; pumpSeen.add(x.dev) }
+        claimed += x.claimed || 0; waiting += x.waiting || 0
+      }
+      const usd = (v) => (px ? '$' + ((v / 1e9) * px).toFixed(2) : '')
+      $('aCoins').textContent = list.length
+      $('aClaimed').innerHTML = `${sol(claimed)}<small>SOL</small>`; $('aClaimedUsd').textContent = usd(claimed)
+      $('aWaiting').innerHTML = `${sol(waiting)}<small>SOL</small>`; $('aWaitingUsd').textContent = usd(waiting)
+      $('aGen').innerHTML = `${sol(claimed + waiting)}<small>SOL</small>`; $('aGenUsd').textContent = usd(claimed + waiting)
+      $('accRows').innerHTML = list.length ? list.map((c) => {
+        const x = fees.get(c.mint) || {}, pump = c.venue !== 'meteora', star = pump && x.generated != null ? ' *' : ''
+        return `<tr><td><a class="coinc" href="${pump ? 'https://pump.fun/coin/' : 'https://jup.ag/tokens/'}${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}</b><small>$${esc(c.symbol)}</small></div></a></td>
+          <td class="dim">${pump ? 'pump.fun' : 'Meteora'}</td><td class="num muted">${short(c.dev)}</td>
+          <td class="r num">${x.generated == null ? '—' : sol(x.claimed) + star}</td><td class="r num" style="color:${x.waiting ? 'var(--acc)' : 'var(--t3)'}">${x.generated == null ? '—' : sol(x.waiting) + star}</td></tr>`
+      }).join('') : '<tr><td colspan="5" class="muted">No launches from these wallets yet.</td></tr>'
+      $('accNote').textContent = 'Amounts are your creator share in SOL, read from Solana; coins paired with another token are shown in SOL at today\'s price. * pump.fun keeps fees per wallet, not per coin, so those rows show the whole wallet, and the totals count each wallet once.' + (other ? ` ${other} coin${other > 1 ? 's have' : ' has'} no SOL price yet.` : '') + (f.reading ? ' Some wallets are still being read; this updates by itself.' : '')
+      if (f.reading) setTimeout(() => { if (!$('accIn').hidden) launches(p) }, 20000)
+    } catch { say('Could not read your launches just now. Try again in a moment.', true) }
+  }
+})()
 </script>
 <script src="/assets/feestotal.js" defer></script>
 </body>
