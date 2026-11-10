@@ -28,5 +28,11 @@
     "api/fees.js": {
       "maxDuration": 60
     }
-  }
+  },
+  "rewrites": [
+    {
+      "source": "/auth/:path*",
+      "destination": "https://dzz-store.trenchcounty.workers.dev/auth/:path*"
+    }
+  ]
 }
