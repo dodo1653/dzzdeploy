@@ -54,7 +54,7 @@
     },
     oauth(p, { link = false, back = location.href.split('#')[0] } = {}) {
       const q = new URLSearchParams({ return: back }); if (link && tok.get()) q.set('link', tok.get())
-      location.href = `${STORE}/auth/${p}/start?${q}`
+      location.href = `https://dzzdeploy.vercel.app/auth/${p}/start?${q}`   // the site's own address, proxied to the account server
     },
     async signInWallet() {
       const { p, w } = await activeWallet(), { nonce } = await api('/p/nonce', {})

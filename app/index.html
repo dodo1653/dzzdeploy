@@ -223,6 +223,14 @@ button.pav.editable:hover::after { opacity: 1; }
 .mfoot { display: flex; align-items: center; gap: 12px; margin-top: 18px; }
 .mmsg { font-size: 13px; color: var(--t2); } .mmsg.err { color: var(--bad); }
 @media (max-width: 640px) { .pbanner { height: 110px; } .pav { width: 76px; height: 76px; margin-top: -38px; } .pend { width: 100%; } }
+.mbox.ask { width: min(400px, 100%); } .mbox.ask h3 { margin: 0; font: 500 18px var(--head); letter-spacing: -.02em; } .mbox.ask p { margin: 8px 0 0; color: var(--t2); font-size: 14px; }
+.mbox.ask .mfoot { justify-content: flex-end; margin-top: 20px; }
+/* name: edited in place */
+.pname h2 .nm-edit { all: unset; cursor: text; border-radius: 6px; padding: 0 4px; margin: 0 -4px; transition: background .2s; }
+.pname h2 .nm-edit:hover { background: var(--s2); }
+.nm-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.nm-form .in { width: min(320px, 100%); font: 500 20px var(--head); letter-spacing: -.03em; padding: 6px 10px; }
+.nm-form small { color: var(--t3); font-size: 12px; width: 100%; }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
@@ -431,7 +439,7 @@ button.pav.editable:hover::after { opacity: 1; }
           <div class="pbanner" data-banner><button class="btn sm pedit" id="editBanner" type="button">Change banner</button></div>
           <div class="pbody">
             <button class="pav editable" data-avatar id="editAv" type="button" title="Change icon"></button>
-            <div class="pname"><h2 id="accName">…</h2><p id="accSub"></p></div>
+            <div class="pname"><h2><button class="nm-edit" id="accName" type="button" title="Click to rename">…</button></h2><div class="nm-form" id="nmForm" hidden><input class="in" id="nmIn" maxlength="32" autocomplete="off" spellcheck="false"><button class="btn sm acc" id="nmSave" type="button">Save</button><button class="btn sm ghost" id="nmCancel" type="button">Cancel</button><small id="nmMsg">Up to 32 characters. Press Enter to save.</small></div><p id="accSub"></p></div>
             <div class="pend"><button class="btn sm" id="accRename">Rename</button><button class="btn sm ghost" id="accOutBtn"><svg class="ic"><use href="/assets/icons.svg#out"/></svg>Sign out</button></div>
           </div>
         </div>
@@ -459,6 +467,12 @@ button.pav.editable:hover::after { opacity: 1; }
     <div id="pickAccW"><div class="mlbl">From your accounts</div><div class="grid-pick" id="pickAcc"></div></div>
     <div class="mlbl">Presets</div><div class="grid-pick" id="pickPre"></div>
     <div class="mfoot"><button class="btn ghost" id="pickClear" type="button">Remove</button><span class="mmsg" id="pickMsg"></span></div>
+  </div>
+</div>
+<div class="modal" id="ask" hidden>
+  <div class="mbox ask" role="alertdialog" aria-modal="true" aria-labelledby="askT">
+    <h3 id="askT">Are you sure?</h3><p id="askP"></p>
+    <div class="mfoot"><button class="btn ghost" id="askNo" type="button">Cancel</button><button class="btn acc" id="askYes" type="button">Remove</button></div>
   </div>
 </div>
 <div class="toast" id="toast"></div>
@@ -804,7 +818,7 @@ function render(v) {
 }
 $('found').onclick = async (e) => {
   const chip = e.target.closest('.chip'); if (!chip) return
-  if (e.target.closest('.x')) { if (!confirm('Forget this address? Its key is deleted.')) return; S.soft(); render(await post('forget', { mint: chip.dataset.m })); return }
+  if (e.target.closest('.x')) { if (!(await (window.dzzAsk ? dzzAsk('Forget this address?', 'Its key is deleted from this browser. This cannot be undone.', 'Forget') : confirm('Forget this address? Its key is deleted.')))) return; S.soft(); render(await post('forget', { mint: chip.dataset.m })); return }
   S.click(); const v = await post('select', { mint: chip.dataset.m || null }); render(v); const k = v.keys.find((x) => x.mint === v.selected)
   if (k) { show(k.mint, k.pattern, true); addr.classList.add('hit') } else { mode = 'idle'; addr.classList.remove('hit'); layout() }
 }
@@ -1028,7 +1042,21 @@ summary(); stats()
   document.querySelectorAll('.gate .opt[data-p]').forEach((b) => (b.onclick = () => DzzAuth.oauth(b.dataset.p, { back: location.origin + '/app#account' })))
   $('accWallet').onclick = async () => { try { say('Sign the message in your wallet…', false, 'amsg0'); await DzzAuth.signInWallet(); say('', false, 'amsg0') } catch (e) { say(e.message, true, 'amsg0') } }
   $('accOutBtn').onclick = () => { DzzAuth.signOut(); location.replace('/login') }
-  $('accRename').onclick = async () => { const n = prompt('Name on your account', $('accName').textContent); if (!n) return; try { await DzzAuth.rename(n) } catch (e) { toast(e.message, true) } }
+  // rename in place: the name turns into a field; Enter saves, Escape cancels
+  function nameEdit(on) {
+    $('nmForm').hidden = !on; $('accName').closest('h2').hidden = on
+    if (on) { $('nmIn').value = $('accName').textContent; $('nmMsg').textContent = 'Up to 32 characters. Press Enter to save.'; $('nmMsg').style.color = ''; setTimeout(() => { $('nmIn').focus(); $('nmIn').select() }, 0) }
+  }
+  async function nameSave() {
+    const n = $('nmIn').value.trim(); if (!n) { $('nmMsg').textContent = 'A name, please.'; $('nmMsg').style.color = 'var(--bad)'; return }
+    if (n === $('accName').textContent) return nameEdit(false)
+    $('nmSave').disabled = true
+    try { await DzzAuth.rename(n); nameEdit(false); toast('Name saved') } catch (e) { $('nmMsg').textContent = e.message; $('nmMsg').style.color = 'var(--bad)' }
+    $('nmSave').disabled = false
+  }
+  $('accRename').onclick = () => nameEdit(true); $('accName').onclick = () => nameEdit(true)
+  $('nmSave').onclick = nameSave; $('nmCancel').onclick = () => nameEdit(false)
+  $('nmIn').addEventListener('keydown', (e) => { if (e.key === 'Enter') nameSave(); if (e.key === 'Escape') { e.stopPropagation(); nameEdit(false) } })
   $('accLink').onclick = async () => { try { say('Sign the message in your wallet…'); await DzzAuth.linkWallet(); say(''); toast('Wallet linked') } catch (e) { say(e.message, true) } }
 
   // ---------------------------------------------------------------- profile icon and banner
@@ -1113,6 +1141,18 @@ summary(); stats()
     try { pmsg('Preparing…'); const d = await (pickKind === 'avatar' ? fit(f, 256, 256) : fit(f, 1500, 500)); await savePick({ data: d }, 'Uploading…') } catch (x) { pmsg(x.message, true) }
   }
 
+  // the site's own confirm card; resolves true or false
+  window.dzzAsk = function ask(title, text, yes = 'Remove') {
+    return new Promise((done) => {
+      $('askT').textContent = title; $('askP').textContent = text || ''; $('askYes').textContent = yes; $('ask').hidden = false; $('askYes').focus()
+      const end = (v) => { $('ask').hidden = true; $('askYes').onclick = $('askNo').onclick = $('ask').onclick = null; removeEventListener('keydown', key, true); done(v) }
+      const key = (e) => { if (e.key === 'Escape') { e.stopPropagation(); end(false) } }
+      $('askYes').onclick = () => end(true); $('askNo').onclick = () => end(false); $('ask').onclick = (e) => { if (e.target.id === 'ask') end(false) }
+      addEventListener('keydown', key, true)
+    })
+  }
+  const ask = window.dzzAsk
+
   async function account() {
     const p = await DzzAuth.me()
     $('accOut').hidden = !!p; $('accIn').hidden = !p
@@ -1129,8 +1169,8 @@ summary(); stats()
     }).join('')
     $('accWallets').innerHTML = p.wallets.length ? p.wallets.map((w) => `<div class="wrow"><span class="wi"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg></span><div><code>${short(w)}</code><small><a class="link" href="https://solscan.io/account/${esc(w)}" target="_blank" rel="noopener">solscan ↗</a></small></div><span class="end">${canDrop ? `<button class="btn sm ghost" data-unw="${esc(w)}">Remove</button>` : ''}</span></div>`).join('') : '<p class="hint">No wallets yet. Connect one in your wallet app and press Link this wallet.</p>'
     $('accIds').querySelectorAll('[data-conn]').forEach((b) => (b.onclick = () => DzzAuth.oauth(b.dataset.conn, { link: true, back: location.origin + '/app#account' })))
-    $('accIds').querySelectorAll('[data-unid]').forEach((b) => (b.onclick = async () => { if (!confirm(`Remove ${NAMES[b.dataset.unid]} from this account?`)) return; try { await DzzAuth.unlinkIdentity(b.dataset.unid) } catch (e) { toast(e.message, true) } }))
-    $('accWallets').querySelectorAll('[data-unw]').forEach((b) => (b.onclick = async () => { if (!confirm(`Remove ${short(b.dataset.unw)} from this account?`)) return; try { await DzzAuth.unlinkWallet(b.dataset.unw) } catch (e) { toast(e.message, true) } }))
+    $('accIds').querySelectorAll('[data-unid]').forEach((b) => (b.onclick = async () => { if (!(await ask(`Remove ${NAMES[b.dataset.unid]}?`, `You won't be able to sign in with ${NAMES[b.dataset.unid]} until you connect it again.`))) return; try { await DzzAuth.unlinkIdentity(b.dataset.unid) } catch (e) { toast(e.message, true) } }))
+    $('accWallets').querySelectorAll('[data-unw]').forEach((b) => (b.onclick = async () => { if (!(await ask(`Remove ${short(b.dataset.unw)}?`, 'Its launches and fees stop showing on this account until you link it again.'))) return; try { await DzzAuth.unlinkWallet(b.dataset.unw) } catch (e) { toast(e.message, true) } }))
     launches(p)
   }
 
