@@ -32,7 +32,7 @@
   document.documentElement.dataset.theme = cur
   // the picker: a popover of swatches under whatever is marked [data-theme-picker]
   const pcss = document.createElement('style')
-  pcss.textContent = `.dzz-themes{position:fixed;z-index:50;padding:8px;border-radius:14px;border:1px solid var(--line2);background:var(--panel);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 24px 60px var(--shadow);display:grid;gap:2px;min-width:180px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .22s,transform .3s cubic-bezier(.2,.8,.2,1)}
+  pcss.textContent = `.dzz-themes{position:fixed;z-index:80;padding:8px;border-radius:14px;border:1px solid var(--line2);background:var(--panel);backdrop-filter:blur(18px) saturate(1.3);-webkit-backdrop-filter:blur(18px) saturate(1.3);box-shadow:0 24px 60px var(--shadow);display:grid;gap:2px;min-width:180px;opacity:0;transform:translateY(-6px) scale(.98);pointer-events:none;transition:opacity .22s,transform .3s cubic-bezier(.2,.8,.2,1)}
 .dzz-themes.on{opacity:1;transform:none;pointer-events:auto}
 .dzz-themes button{display:flex;align-items:center;gap:10px;border:0;background:none;color:var(--t2);font:500 13px Geist,system-ui,sans-serif;padding:8px 10px;border-radius:9px;cursor:pointer;text-align:left}
 .dzz-themes button:hover{background:var(--panel2);color:var(--ink)} .dzz-themes button.on{color:var(--ink)}
@@ -45,7 +45,10 @@
     pop.onclick = (e) => { const b = e.target.closest('button'); if (b) { apply(b.dataset.t); window.dzzClick?.() } }
     document.querySelectorAll('[data-theme-picker]').forEach((btn) => btn.addEventListener('click', (e) => {
       e.stopPropagation(); const r = btn.getBoundingClientRect()
-      pop.style.top = r.bottom + 8 + 'px'; pop.style.left = Math.min(innerWidth - 196, Math.max(8, r.right - 180)) + 'px'; pop.classList.toggle('on')
+      // open below the button, or above it when there is no room (buttons at the bottom of the screen)
+      const h = pop.offsetHeight || 300, below = innerHeight - r.bottom - 12
+      pop.style.top = (below >= h ? r.bottom + 8 : Math.max(8, r.top - h - 8)) + 'px'
+      pop.style.left = Math.min(innerWidth - 196, Math.max(8, r.left + r.width / 2 - 90)) + 'px'; pop.classList.toggle('on')
     }))
     addEventListener('click', (e) => { if (!e.target.closest('.dzz-themes')) pop.classList.remove('on') })
     apply(cur)

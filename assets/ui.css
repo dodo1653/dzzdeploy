@@ -157,7 +157,7 @@ textarea.in { resize: vertical; min-height: 76px; }
 h1, h2, h3, h4, .display, .mark b, .stats4 b { font-family: var(--head); }
 body { font-feature-settings: 'cv11', 'ss01'; }
 
-/* the dzz mark: d and z drawn as address characters, the last z picked out as a tile (the ending you choose) */
-.logo { display: block; height: 22px; width: auto; color: var(--ink); overflow: visible; }
-.logo .lg-cut { stroke: var(--logo-cut, var(--bg)); }
-.mark .logo { height: 22px; }
+/* the dzz mark: a Z cut into three pieces (bar, diagonal, bar), with the name set beside it */
+.logo { display: inline-flex; align-items: center; gap: 8px; color: var(--ink); line-height: 1; }
+.logo svg { width: 18px; height: 18px; fill: currentColor; flex: none; }
+.logo b { font: 600 18px/1 var(--head); letter-spacing: -.045em; }

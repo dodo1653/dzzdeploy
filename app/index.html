@@ -177,6 +177,15 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 .sheet.on { opacity: 1; transform: none; pointer-events: auto; }
 .sheet .btn { justify-self: start; }
 
+
+/* claim */
+.crow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
+.crow:first-child { border-top: 0; }
+.crow .amt { font: 500 14px var(--mono); text-align: right; } .crow .amt small { display: block; font: 400 11.5px var(--mono); color: var(--t3); }
+.crow .btn { min-width: 108px; } .crow .btn.acc[disabled] { opacity: .5; }
+.crow .who { font: 400 11.5px var(--mono); color: var(--t3); }
+.claim-any { display: flex; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid var(--line); }
+.claim-any .in { flex: 1; }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
@@ -217,7 +226,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
 <div class="shell">
   <aside class="side">
-    <a class="mark" href="/about"><svg class="logo" viewBox="0 0 80 28" role="img" aria-label="dzz" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="17.5" r="6"/><path d="M15.5 4.5v19"/><path d="M26 11.5h11L26 23.5h11"/><rect x="47" y="4.5" width="29" height="22" rx="5.5" fill="currentColor" stroke="none"/><path class="lg-cut" d="M56 10.5h11L56 20.5h11"/></svg></a>
+    <a class="mark" href="/about"><span class="logo" role="img" aria-label="dzz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3.4H4z M13.6 8.6H20l-9.6 6.8H4z M4 16.6h16V20H4z"/></svg><b>dzz</b></span></a>
     <a class="nv" href="#dashboard" data-view="dashboard"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg>Dashboard</a>
     <a class="nv" href="#launch" data-view="launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch</a>
     <a class="nv" href="#coins" data-view="coins"><svg class="ic"><use href="/assets/icons.svg#coins"/></svg>My coins<span class="cnt" id="navCoins"></span></a>
@@ -235,7 +244,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
   <div class="main">
     <header class="topbar">
-      <a class="mark tmark" href="/about"><svg class="logo" viewBox="0 0 80 28" role="img" aria-label="dzz" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="9.5" cy="17.5" r="6"/><path d="M15.5 4.5v19"/><path d="M26 11.5h11L26 23.5h11"/><rect x="47" y="4.5" width="29" height="22" rx="5.5" fill="currentColor" stroke="none"/><path class="lg-cut" d="M56 10.5h11L56 20.5h11"/></svg></a>
+      <a class="mark tmark" href="/about"><span class="logo" role="img" aria-label="dzz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3.4H4z M13.6 8.6H20l-9.6 6.8H4z M4 16.6h16V20H4z"/></svg><b>dzz</b></span></a>
       <h1 id="viewTitle">Launch</h1>
       <span class="crumb"><i class="live" id="live"></i><span class="st" id="state">idle</span></span>
       <div class="right">
@@ -337,7 +346,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
     <!-- MY COINS -->
     <section class="view" data-view="coins" hidden>
-      <div class="vh"><div><h2>My coins</h2><p>Coins launched from this browser. Meteora coins have a fees button to claim what they earned.</p></div><a class="btn" href="#account">All my wallets<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
+      <div class="vh"><div><h2>My coins</h2><p>Coins launched from this browser. To claim fees, open <a class="link" href="#fees">Creator fees</a>.</p></div><a class="btn" href="#account">All my wallets<svg class="ic"><use href="/assets/icons.svg#arrow"/></svg></a></div>
       <div class="card" id="histCard"><div id="hist"><div class="lempty">No coins launched from this browser yet.</div></div><p class="hint" id="histN" hidden></p></div>
     </section>
 
@@ -345,7 +354,12 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
     <section class="view" data-view="fees" hidden>
       <div class="vh"><div><h2>Creator fees</h2><p>What your coins earned, across every wallet on your account. Read from Solana.</p></div><a class="btn" href="/fees">Everyone's fees<svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a></div>
       <div id="feesCard"><div id="feesTotal"><div class="lempty">reading…</div></div></div>
-      <div class="card" id="claimCard" style="margin-top:16px"><div class="card-h"><h3>Claim on Meteora</h3><span class="sub">pump.fun fees are claimed on pump.fun</span></div><p class="hint">Open <a class="link" href="#coins">My coins</a> and press <b>fees</b> on a Meteora coin to see and claim what it earned, before or after graduation.</p></div>
+      <div class="card" id="claimCard" style="margin-top:16px">
+        <div class="card-h"><h3>Claim</h3><span class="sub">Meteora coins you launched</span><span class="end"><button class="btn sm" id="claimReload" type="button">Refresh</button></span></div>
+        <div id="claimRows"><div class="lempty">reading…</div></div>
+        <div class="claim-any"><input class="in mono" id="claimCa" placeholder="Or paste a coin's contract address" spellcheck="false" autocomplete="off"><button class="btn" id="claimFind" type="button">Find</button></div>
+        <p class="hint" id="claimMsg" style="margin-top:12px">Connect the wallet that launched the coin to claim. pump.fun coins are claimed on pump.fun: your profile, Creator rewards.</p>
+      </div>
     </section>
 
     <!-- EXPLORE -->
@@ -723,7 +737,7 @@ function render(v) {
   // history
   $('navCoins').textContent = v.history.length || ''
   { const ms = v.history.map((h) => h.mint).join(','); if (ms !== window.DZZ_MY_MINTS_KEY) { window.DZZ_MY_MINTS_KEY = ms; window.DZZ_MY_MINTS = v.history.map((h) => h.mint); window.DzzFeesTotal?.refresh() } }
-  $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
+  $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="#fees" style="color:var(--acc)">Claim fees</a><a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
   if (!v.history.length) $('hist').innerHTML = '<div class="lempty">No coins launched from this browser yet.</div>'
   stats(); summary()
 }
@@ -891,10 +905,10 @@ $('pub').addEventListener('click', async (e) => {
       if (f.dataset.ready) { f.textContent = 'claiming…'; await M.claim({ owner: sol, pool: f.dataset.pool }); f.textContent = 'claimed'; delete f.dataset.ready; S.click(); balance() }
       else {
         f.textContent = 'reading…'; const v = await M.feesOf(f.dataset.pool, sol)
-        if (v.sol > 0) { f.dataset.ready = '1'; f.textContent = `claim ${v.sol.toFixed(4)} SOL` }
+        if (v.sol > 0) { f.dataset.ready = '1'; f.textContent = `claim ${v.sol.toFixed(4)} ${v.unit}` }
         else f.textContent = v.yours ? 'nothing to claim yet' : 'not your coin'
       }
-    } catch (x) { f.textContent = 'fees'; delete f.dataset.ready; if (!/rejected/i.test(x.message)) note(String(x.message).slice(0, 200), true) }
+    } catch (x) { f.textContent = 'fees'; delete f.dataset.ready; if (!/rejected/i.test(x.message)) window.dzzToast?.(String(x.message).slice(0, 200), true) }
     f.disabled = false; return
   }
   const b = e.target.closest('.ca'); if (!b) return
@@ -1008,6 +1022,62 @@ summary(); stats()
       if (f.reading) setTimeout(() => { if (!$('accIn').hidden) launches(p) }, 20000)
     } catch { say('Could not read your launches just now. Try again in a moment.', true) }
   }
+})()
+</script>
+<script>
+// ---------------------------------------------------------------- claim: every Meteora coin you launched, one button each
+;(() => {
+  const $ = (id) => document.getElementById(id), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
+  const short = (a) => (a ? `${a.slice(0, 4)}…${a.slice(-4)}` : '—')
+  const say = (t, err) => { const m = $('claimMsg'); m.textContent = t; m.style.color = err ? 'var(--bad)' : '' }
+  let list = []
+  async function load() {
+    $('claimRows').innerHTML = '<div class="lempty">reading…</div>'
+    let mine = []; try { mine = JSON.parse(localStorage.getItem('dzz-history') || '[]') } catch {}
+    const [l, f, p] = await Promise.all([fetch('/api/launched').then((r) => r.json()).catch(() => ({ coins: [] })), fetch('/api/fees').then((r) => r.json()).catch(() => ({ coins: [] })), window.DzzAuth?.me().catch(() => null)])
+    const wallets = new Set(p?.wallets || []), pub = l.coins || [], fees = new Map((f.coins || []).map((x) => [x.mint, x])), seen = new Set()
+    list = []
+    for (const c of [...mine.map((h) => ({ ...h, dev: pub.find((x) => x.mint === h.mint)?.dev })), ...pub.filter((c) => wallets.has(c.dev))]) {
+      if (c.venue !== 'meteora' || !c.pool || seen.has(c.mint)) continue
+      seen.add(c.mint); list.push({ ...c, fee: fees.get(c.mint) })
+    }
+    draw()
+  }
+  function draw() {
+    $('claimRows').innerHTML = list.length ? list.map((c, i) => {
+      const w = c.fee?.waiting, amt = w == null ? '—' : (w / 1e9).toFixed(w < 1e8 ? 4 : 3)
+      return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">launched from ${short(c.dev)}</span></div></div>
+        <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'SOL waiting'}</small></div><button class="btn acc" type="button" data-i="${i}">Claim</button></div>`
+    }).join('') : '<div class="lempty">No Meteora coins found for this browser or your account. Paste a contract address below.</div>'
+  }
+  async function claim(b) {
+    const c = list[+b.dataset.i]; if (!c || b.disabled) return
+    b.disabled = true; const label = (t) => (b.textContent = t)
+    try {
+      label('Connecting…'); await connect()
+      if (c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
+      label('Reading…'); const M = await meteora(), v = await M.feesOf(c.pool, sol)
+      if (!v.yours) { say(`This wallet is not the creator of ${c.symbol}.`, true); label('Claim'); b.disabled = false; return }
+      if (!(v.sol > 0)) { say(`Nothing to claim on ${c.symbol} yet.`); label('Nothing yet'); setTimeout(() => { label('Claim'); b.disabled = false }, 2500); return }
+      label('Approve…'); say(`Approve the claim of ${v.sol.toFixed(4)} ${v.unit} in your wallet.`)
+      await M.claim({ owner: sol, pool: c.pool })
+      label('Claimed'); say(`Claimed ${v.sol.toFixed(4)} ${v.unit} from ${c.symbol}.`); S.click(); balance(); window.DzzFeesTotal?.refresh()
+      setTimeout(() => { b.disabled = false; label('Claim'); load() }, 4000)
+    } catch (x) { const m = String(x?.message || x); say(/reject/i.test(m) ? 'Cancelled in the wallet. Nothing was sent.' : m.slice(0, 220), !/reject/i.test(m)); label('Claim'); b.disabled = false }
+  }
+  $('claimRows').addEventListener('click', (e) => { const b = e.target.closest('button[data-i]'); if (b) claim(b) })
+  $('claimReload').onclick = load
+  $('claimFind').onclick = async () => {
+    const ca = $('claimCa').value.trim(); if (!ca) return
+    const pub = (await fetch('/api/launched').then((r) => r.json()).catch(() => ({ coins: [] }))).coins || [], c = pub.find((x) => x.mint === ca)
+    if (!c) return say('That coin is not on the dzz list. Only coins launched with dzz can be claimed here.', true)
+    if (c.venue !== 'meteora') return say(`${c.symbol} is a pump.fun coin: claim it on pump.fun, from your profile's Creator rewards.`, true)
+    if (!list.some((x) => x.mint === ca)) { list.unshift(c); draw() }
+    say(`${c.symbol} added. Press Claim with ${short(c.dev)} connected.`)
+  }
+  addEventListener('hashchange', () => { if (location.hash.startsWith('#fees')) load() })
+  if (location.hash.startsWith('#fees')) load()
+  window.dzzToast = (t, err) => { const el = $('toast'); el.textContent = t; el.className = 'toast on' + (err ? ' err' : ''); clearTimeout(el._t); el._t = setTimeout(() => (el.className = 'toast'), 3200) }
 })()
 </script>
 <script src="/assets/statusbar.js"></script>
