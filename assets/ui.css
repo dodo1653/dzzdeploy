@@ -1,7 +1,7 @@
 /* dzz design system: tokens and components shared by every page (landing, login, app, fees).
    Colours come from assets/theme.js (data-theme on <html>): --bg, --acc, --acc-rgb, --acc-ink, --ink, --t2..t4, --line, --line2. */
 :root {
-  --ui: 'Geist', system-ui, sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
+  --ui: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; --head: 'Geist', 'Inter', sans-serif; --mono: 'Geist Mono', ui-monospace, monospace;
   --ok: #6fdc9c; --bad: #ff7a6b; --warn: #f2c46d;
   --s1: rgba(255,255,255,.028); --s2: rgba(255,255,255,.05); --s3: rgba(255,255,255,.08);
   --card: rgba(13,14,18,.82); --pop: rgba(16,17,22,.96);
@@ -149,6 +149,10 @@ textarea.in { resize: vertical; min-height: 76px; }
 
 /* highlighted words in headlines: a soft light-to-accent sweep */
 .grad { background: linear-gradient(92deg, color-mix(in srgb, var(--ink) 92%, var(--acc)) 0%, var(--acc) 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
-.display { font: 500 clamp(40px, 5.4vw, 70px)/1 var(--ui); letter-spacing: -.055em; margin: 0; }
+.display { font: 500 clamp(40px, 5.4vw, 70px)/1 var(--head); letter-spacing: -.055em; margin: 0; }
 .display.md { font-size: clamp(30px, 3.6vw, 44px); letter-spacing: -.045em; }
 .lead { color: var(--t2); font-size: 16.5px; line-height: 1.6; }
+
+/* headings and figures in Geist, body in Inter */
+h1, h2, h3, h4, .display, .mark b, .stats4 b { font-family: var(--head); }
+body { font-feature-settings: 'cv11', 'ss01'; }

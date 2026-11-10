@@ -5,7 +5,7 @@
 <meta name="description" content="What every coin launched with dzz has generated in fees, and what its dev has claimed. Read live from Solana.">
 <script src="/assets/theme.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/assets/ui.css">
 <style>
 main { position: relative; z-index: 2; padding-top: 48px; }
@@ -41,7 +41,9 @@ tr:last-child td { border-bottom: 0; }
   <p class="note">Generated is the dev's share of trading fees, after the platform's cut, in SOL. Coins paired with another token are shown in SOL at today's price. <span class="star">*</span> pump.fun keeps fees per wallet, not per coin, so those rows cover everything that dev wallet launched.</p>
 </main>
 <footer class="foot"><div class="wrap"><div class="base" style="margin-top:0;padding-top:0;border:0"><span>© dzz · independent tool</span><span>Not affiliated with pump.fun or Meteora</span></div></div></footer>
-<script src="/assets/bg.js"></script>
+<script src="/assets/bars.js"></script><script>window.DZZBARS?.set({ amp: .55, glow: .5 })</script>
+<script src="/assets/account.js"></script>
+<script src="/assets/statusbar.js"></script>
 <script>addEventListener('scroll', () => document.getElementById('nav').classList.toggle('scrolled', scrollY > 8), { passive: true })</script>
 <script>
 const $ = (i) => document.getElementById(i), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
