@@ -232,44 +232,51 @@ button.pav.editable:hover::after { opacity: 1; }
 .nm-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .nm-form .in { width: min(320px, 100%); font: 500 20px var(--head); letter-spacing: -.03em; padding: 6px 10px; }
 .nm-form small { color: var(--t3); font-size: 12px; width: 100%; }
-/* explore: address plates */
-.xbar { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin-bottom: 18px; }
-.xsearch { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 10px; height: 40px; padding: 0 12px; border-radius: 10px; border: 1px solid var(--line); background: var(--s1); color: var(--t3); transition: border-color .2s; }
+/* explore: address plates, compact */
+.vlogo { width: 20px; height: 20px; border-radius: 50%; display: block; flex: none; }
+.seg button.vbtn { padding: 5px 10px; display: inline-grid; place-items: center; }
+.seg button.vbtn .vlogo { width: 20px; height: 20px; opacity: .55; filter: grayscale(.6); transition: opacity .2s, filter .2s; }
+.seg button.vbtn.on .vlogo, .seg button.vbtn:hover .vlogo { opacity: 1; filter: none; }
+#venue button.vbtn { padding: 6px 14px; } #venue button.vbtn .vlogo { width: 22px; height: 22px; }
+.xbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
+.xsearch { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 9px; height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--s1); color: var(--t3); transition: border-color .2s; }
 .xsearch:focus-within { border-color: rgba(var(--acc-rgb), .55); }
-.xsearch input { all: unset; flex: 1; color: var(--ink); font: 400 14px var(--ui); } .xsearch input::placeholder { color: var(--t4); }
-.xspot { position: relative; display: grid; grid-template-columns: 260px minmax(0, 1fr); gap: 0; border-radius: 18px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 16px; background: var(--card); isolation: isolate; }
-.xspot .art { position: relative; display: grid; place-items: center; min-height: 240px; overflow: hidden; }
-.xspot .art::before { content: ''; position: absolute; inset: -20%; background: var(--img) center / cover; filter: blur(34px) saturate(1.4); opacity: .55; }
-.xspot .art img, .xspot .art .ph { position: relative; width: 150px; height: 150px; border-radius: 28px; object-fit: cover; box-shadow: 0 30px 60px -20px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 48px var(--head); background: var(--s3); color: var(--t2); }
-.xspot .info { padding: 26px 28px; display: flex; flex-direction: column; gap: 14px; min-width: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--tint, #3b82f6) 10%, transparent), transparent 60%); }
-.xspot .kick { font: 500 11.5px var(--mono); color: var(--tintl, var(--acc)); letter-spacing: .06em; text-transform: uppercase; display: flex; gap: 10px; align-items: center; }
-.xspot h3 { margin: 0; font: 500 clamp(26px, 3vw, 38px)/1.05 var(--head); letter-spacing: -.045em; } .xspot h3 small { font: 400 15px var(--mono); color: var(--t3); letter-spacing: 0; margin-left: 10px; }
-.plate { font: 500 13px var(--mono); color: var(--t3); word-break: break-all; line-height: 1.5; } .plate b { color: var(--ink); font-weight: 600; } .plate em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
-.xspot .plate { font-size: 15px; }
-.xspot .xfacts { display: flex; gap: 32px; flex-wrap: wrap; margin-top: auto; }
-.xspot .xfacts div span { display: block; font: 400 12px var(--ui); color: var(--t3); margin-bottom: 4px; } .xspot .xfacts div b { font: 500 18px var(--head); letter-spacing: -.02em; }
-.xspot .acts, .xcard .acts { display: flex; gap: 8px; flex-wrap: wrap; }
-.xgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 14px; }
-.xcard { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid var(--line); background: var(--card); display: flex; flex-direction: column; isolation: isolate; transition: transform .35s var(--ease), border-color .3s, box-shadow .35s; animation: rise .5s var(--ease) both; }
-.xcard:hover { transform: translateY(-4px); border-color: color-mix(in srgb, var(--tint, #3b82f6) 45%, transparent); box-shadow: 0 24px 60px -30px color-mix(in srgb, var(--tint, #3b82f6) 70%, transparent); }
-.xcard .art { position: relative; height: 128px; display: grid; place-items: center; overflow: hidden; }
-.xcard .art::before { content: ''; position: absolute; inset: -30%; background: var(--img, none) center / cover; filter: blur(26px) saturate(1.5); opacity: .5; transition: opacity .4s, transform .6s var(--ease); }
-.xcard:hover .art::before { opacity: .75; transform: scale(1.08); }
-.xcard .art::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 30%, var(--card) 100%); }
-.xcard .art img, .xcard .art .ph { position: relative; z-index: 1; width: 72px; height: 72px; border-radius: 18px; object-fit: cover; box-shadow: 0 16px 34px -12px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 26px var(--head); background: var(--s3); color: var(--t2); transition: transform .4s var(--ease); }
-.xcard:hover .art img { transform: scale(1.06) rotate(-2deg); }
-.xcard .tag-v { position: absolute; z-index: 2; left: 12px; top: 12px; font: 500 10.5px var(--mono); padding: 3px 7px; border-radius: 6px; background: rgba(0,0,0,.45); color: #e6e9f2; backdrop-filter: blur(6px); }
-.xcard .tag-a { position: absolute; z-index: 2; right: 12px; top: 12px; font: 400 10.5px var(--mono); color: rgba(230,233,242,.75); }
-.xcard .body { padding: 4px 16px 16px; display: flex; flex-direction: column; gap: 10px; flex: 1; }
-.xcard .nm { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
-.xcard .nm b { font: 500 16px var(--head); letter-spacing: -.025em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .xcard .nm small { font: 400 12px var(--mono); color: var(--t3); margin-left: 6px; }
-.xcard .nm .mc { font: 500 13px var(--mono); color: var(--ink); flex: none; }
-.xcard .end { font: 500 22px/1 var(--mono); letter-spacing: -.02em; color: var(--t3); }
+.xsearch input { all: unset; flex: 1; color: var(--ink); font: 400 13.5px var(--ui); } .xsearch input::placeholder { color: var(--t4); }
+.xspot { position: relative; display: grid; grid-template-columns: 168px minmax(0, 1fr); border-radius: 14px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 12px; background: var(--card); isolation: isolate; }
+.xspot .art { position: relative; display: grid; place-items: center; min-height: 150px; overflow: hidden; }
+.xspot .art::before { content: ''; position: absolute; inset: -20%; background: var(--img) center / cover; filter: blur(30px) saturate(1.4); opacity: .55; }
+.xspot .art img, .xspot .art .ph { position: relative; width: 96px; height: 96px; border-radius: 22px; object-fit: cover; box-shadow: 0 24px 50px -18px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 34px var(--head); background: var(--s3); color: var(--t2); }
+.xspot .info { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--tint, #3b82f6) 10%, transparent), transparent 60%); }
+.xspot .kick { font: 500 11px var(--mono); color: var(--tintl, var(--acc)); letter-spacing: .05em; text-transform: uppercase; display: flex; gap: 8px; align-items: center; }
+.xspot .kick .vlogo { width: 16px; height: 16px; }
+.xspot h3 { margin: 0; font: 500 clamp(20px, 2vw, 26px)/1.1 var(--head); letter-spacing: -.04em; } .xspot h3 small { font: 400 13px var(--mono); color: var(--t3); letter-spacing: 0; margin-left: 8px; }
+.plate { font: 500 12.5px var(--mono); color: var(--t3); word-break: break-all; line-height: 1.5; } .plate em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
+.xspot .bottom { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 2px; }
+.xspot .xfacts { display: flex; gap: 22px; }
+.xspot .xfacts div span { display: block; font: 400 11.5px var(--ui); color: var(--t3); margin-bottom: 2px; } .xspot .xfacts div b { font: 500 15px var(--head); letter-spacing: -.02em; display: block; } .xspot .xfacts .vb .vlogo { width: 20px; height: 20px; }
+.xspot .acts, .xcard .acts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+.xspot .acts { margin-left: auto; } .xspot .acts .btn { height: 30px; }
+.xspot .ca { height: 30px; }
+.xgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
+.xcard { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--card); display: flex; flex-direction: column; isolation: isolate; transition: transform .3s var(--ease), border-color .3s, box-shadow .3s; animation: rise .45s var(--ease) both; }
+.xcard:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--tint, #3b82f6) 45%, transparent); box-shadow: 0 18px 44px -26px color-mix(in srgb, var(--tint, #3b82f6) 70%, transparent); }
+.xcard .art { position: relative; height: 72px; display: flex; align-items: center; gap: 12px; padding: 0 12px; overflow: hidden; }
+.xcard .art::before { content: ''; position: absolute; inset: -40%; background: var(--img, none) center / cover; filter: blur(22px) saturate(1.5); opacity: .4; transition: opacity .4s; }
+.xcard:hover .art::before { opacity: .62; }
+.xcard .art img, .xcard .art .ph { position: relative; z-index: 1; width: 46px; height: 46px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 24px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 18px var(--head); background: var(--s3); color: var(--t2); flex: none; }
+.xcard .art .who { position: relative; z-index: 1; min-width: 0; flex: 1; }
+.xcard .art .who b { display: block; font: 500 14.5px var(--head); letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.xcard .art .who small { font: 400 11.5px var(--mono); color: var(--t3); }
+.xcard .tag-v { position: relative; z-index: 1; align-self: flex-start; margin-top: 10px; } .xcard .tag-v .vlogo { width: 18px; height: 18px; }
+.xcard .body { padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 6px; }
+.xcard .row2 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.xcard .end { font: 500 17px/1.1 var(--mono); letter-spacing: -.02em; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .xcard .end em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
-.xcard .acts { margin-top: auto; padding-top: 10px; border-top: 1px solid var(--line); align-items: center; }
-.xcard .acts { gap: 6px; } .xcard .acts .iconbtn.sm { width: 30px; height: 30px; border-radius: 8px; } .xcard .acts .iconbtn .ic { width: 15px; height: 15px; }
-.xcard .ca { height: 30px; margin-right: auto; min-width: 0; } .xcard .ca code { font-size: 11.5px; }
-@media (max-width: 760px) { .xspot { grid-template-columns: 1fr; } .xspot .art { min-height: 180px; } }
+.xcard .meta { font: 400 11.5px var(--mono); color: var(--t3); white-space: nowrap; } .xcard .meta b { color: var(--ink); font-weight: 500; margin-right: 6px; }
+.xcard .acts { padding-top: 8px; border-top: 1px solid var(--line); flex-wrap: nowrap; }
+.xcard .acts .iconbtn.sm { width: 28px; height: 28px; border-radius: 7px; } .xcard .acts .iconbtn .ic { width: 14px; height: 14px; }
+.xcard .ca { height: 28px; margin-right: auto; min-width: 0; flex: 1 1 auto; } .xcard .ca code { overflow: hidden; text-overflow: ellipsis; } .xcard .ca code { font-size: 11px; } .xcard .ca span { height: 20px; font-size: 11px; }
+@media (max-width: 760px) { .xspot { grid-template-columns: 1fr; } .xspot .art { min-height: 120px; } .xspot .acts { margin-left: 0; } }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
@@ -395,7 +402,7 @@ button.pav.editable:hover::after { opacity: 1; }
           <div class="card">
             <div class="card-h"><span class="step">03</span><h3>The market</h3></div>
             <div class="grid" style="gap:20px">
-              <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on">pump.fun</button><button data-v="meteora">Meteora</button></div></div>
+              <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button></div></div>
               <div class="fl" data-only="pump">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
                 <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden>
                 <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
@@ -454,10 +461,10 @@ button.pav.editable:hover::after { opacity: 1; }
 
     <!-- EXPLORE -->
     <section class="view" data-view="explore" hidden>
-      <div class="vh"><div><h2>Launched with <span class="grad">dzz</span></h2><p>Every coin here was launched at an address its creator chose, and checked on Solana before it was listed. <span id="pubN" class="muted"></span></p></div></div>
+      <div class="vh"><div><h2>Launched with <span class="grad">dzz</span></h2><p>Every coin launched at an address its creator chose. <span id="pubN" class="muted"></span></p></div></div>
       <div class="xbar">
         <label class="xsearch"><svg class="ic sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="xq" placeholder="Search name, ticker or address" spellcheck="false" autocomplete="off"></label>
-        <div class="seg" id="xven"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="pump">pump.fun</button><button data-v="meteora">Meteora</button></div>
+        <div class="seg" id="xven"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="pump" class="vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button></div>
         <div class="seg" id="xsort"><span class="thumb"></span><button data-v="new" class="on">Newest</button><button data-v="mc">Market cap</button></div>
       </div>
       <div id="xspot"></div>
@@ -1046,20 +1053,20 @@ function drawPublic() {
   list = [...list].sort(xsort === 'mc' ? (a, b) => (pubMcs[b.mint] || 0) - (pubMcs[a.mint] || 0) : (a, b) => (b.at || 0) - (a.at || 0))
   const pic = (c, cls = '') => (c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy"${cls}>` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`)
   const trade = (c) => (c.venue === 'meteora' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/') + c.mint
+  const vlogo = (c) => (c.venue === 'meteora' ? '<img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora" title="Meteora">' : '<img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun" title="pump.fun">')
   const spot = !q && xven === 'all' && xsort === 'new' ? list[0] : null
   $('xspot').innerHTML = spot ? (() => { const pl = plate(spot.mint, spot), t = tints[spot.mint]
     return `<div class="xspot" style="${tintVars(t)}${spot.image ? `--img:url('${esc(spot.image)}')` : ''}"><div class="art">${pic(spot)}</div>
-      <div class="info"><span class="kick">Latest launch · ${spot.venue === 'meteora' ? 'Meteora' : 'pump.fun'} · ${ago(spot.at)} ago</span>
+      <div class="info"><span class="kick">${vlogo(spot)}Latest launch · ${ago(spot.at)} ago</span>
         <h3>${esc(spot.name)}<small>$${esc(spot.symbol)}</small></h3>
         <div class="plate"><em>${esc(pl.pre)}</em>${esc(pl.mid)}<em>${esc(pl.tail)}</em></div>
-        <div class="xfacts"><div><span>Market cap</span><b>${usd(pubMcs[spot.mint])}</b></div><div><span>Launched</span><b>${new Date(spot.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</b></div><div><span>Venue</span><b>${spot.venue === 'meteora' ? 'Meteora' : 'pump.fun'}</b></div></div>
-        <div class="acts"><button class="ca" data-ca="${esc(spot.mint)}"><code>${esc(spot.mint.slice(0, 6))}…${esc(spot.mint.slice(-6))}</code><span>Copy CA</span></button><a class="btn sm" href="${trade(spot)}" target="_blank" rel="noopener">Trade ↗</a><a class="btn sm ghost" href="https://dexscreener.com/solana/${esc(spot.mint)}" target="_blank" rel="noopener">Chart ↗</a></div></div></div>` })() : ''
+        <div class="bottom"><div class="xfacts"><div><span>Market cap</span><b>${usd(pubMcs[spot.mint])}</b></div><div><span>Launched</span><b>${new Date(spot.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</b></div></div>
+        <div class="acts"><button class="ca" data-ca="${esc(spot.mint)}"><code>${esc(spot.mint.slice(0, 6))}…${esc(spot.mint.slice(-6))}</code><span>Copy CA</span></button><a class="btn sm" href="${trade(spot)}" target="_blank" rel="noopener">Trade ↗</a><a class="btn sm ghost" href="https://dexscreener.com/solana/${esc(spot.mint)}" target="_blank" rel="noopener">Chart ↗</a></div></div></div></div>` })() : ''
   const rest = spot ? list.slice(1) : list
   $('pub').innerHTML = rest.length ? rest.slice(0, 90).map((c, i) => { const pl = plate(c.mint, c), t = tints[c.mint]
-    return `<div class="xcard" style="animation-delay:${Math.min(i, 12) * 40}ms;${tintVars(t)}${c.image ? `--img:url('${esc(c.image)}')` : ''}" data-m="${esc(c.mint)}">
-      <div class="art">${pic(c)}<span class="tag-v">${c.venue === 'meteora' ? 'Meteora' : 'pump.fun'}</span><span class="tag-a">${ago(c.at)}</span></div>
-      <div class="body"><div class="nm"><b>${esc(c.name)}<small>$${esc(c.symbol)}</small></b><span class="mc">${usd(pubMcs[c.mint])}</span></div>
-        <div class="end">${pl.pre ? `<em>${esc(pl.pre)}</em>…` : '…'}<em>${esc(pl.tail)}</em></div>
+    return `<div class="xcard" style="animation-delay:${Math.min(i, 12) * 30}ms;${tintVars(t)}${c.image ? `--img:url('${esc(c.image)}')` : ''}" data-m="${esc(c.mint)}">
+      <div class="art">${pic(c)}<div class="who"><b>${esc(c.name)}</b><small>$${esc(c.symbol)}</small></div><span class="tag-v">${vlogo(c)}</span></div>
+      <div class="body"><div class="row2"><div class="end">${pl.pre ? `<em>${esc(pl.pre)}</em>…` : '…'}<em>${esc(pl.tail)}</em></div><span class="meta"><b>${usd(pubMcs[c.mint])}</b>${ago(c.at)}</span></div>
         <div class="acts"><button class="ca" data-ca="${esc(c.mint)}"><code>${esc(c.mint.slice(0, 5))}…${esc(c.mint.slice(-4))}</code><span>Copy</span></button><a class="iconbtn sm" href="${trade(c)}" target="_blank" rel="noopener" title="Trade"><svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a><a class="iconbtn sm" href="https://dexscreener.com/solana/${esc(c.mint)}" target="_blank" rel="noopener" title="Chart"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg></a></div></div></div>` }).join('')
     : (spot ? '' : '<div class="lempty">No coins match.</div>')
   // tint each card from its picture, once
