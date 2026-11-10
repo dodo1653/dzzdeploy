@@ -95,7 +95,7 @@ async function flows(address, isToken, dev) {
   let left = PER_RUN, changed = false, did = 0
   for (const x of todo) {
     if (!left-- || Date.now() > stopAt) break
-    const tx = await rpc('getTransaction', [x.signature, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]); if (!tx) { full = false; continue }
+    const tx = await rpc('getTransaction', [x.signature, { encoding: 'json', maxSupportedTransactionVersion: 1, commitment: 'confirmed' }]); if (!tx) { full = false; continue }
     const keys = [...tx.transaction.message.accountKeys, ...(tx.meta.loadedAddresses?.writable || []), ...(tx.meta.loadedAddresses?.readonly || [])], i = keys.indexOf(address)
     const held = (list) => Number((list || []).find((t) => t.accountIndex === i)?.uiTokenAmount.amount || 0)
     const paid = isToken ? null : claimEvents(tx, dev)
@@ -134,7 +134,7 @@ async function pumpRows(coins) {
   const devs = (await load('fees/devs.json')) || {}, seen = {}; let changed = false
   for (const c of coins) {
     if (!devs[c.mint] && c.dev) { devs[c.mint] = c.dev; changed = true }
-    if (!devs[c.mint]) { const tx = await rpc('getTransaction', [c.sig, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]); if (tx) { devs[c.mint] = tx.transaction.message.accountKeys[0]; changed = true } }
+    if (!devs[c.mint]) { const tx = await rpc('getTransaction', [c.sig, { encoding: 'json', maxSupportedTransactionVersion: 1, commitment: 'confirmed' }]); if (tx) { devs[c.mint] = tx.transaction.message.accountKeys[0]; changed = true } }
     const dev = devs[c.mint]; if (!dev) { rows.push({ ...base(c), note: 'could not read the launch' }); reading = true; continue }
     const v = (seen[dev] ??= await vaults(dev, coins.filter((x) => (devs[x.mint] || x.dev) === dev).map((x) => x.mint))); if (!v.done) reading = true
     rows.push({ ...base(c), dev, generated: v.generated, claimed: v.claimed, waiting: v.waiting, reading: !v.done, note: 'pump.fun keeps fees per wallet, so this covers everything this dev wallet launched' })

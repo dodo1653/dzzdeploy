@@ -49,7 +49,7 @@ export default async function handler(req, res) {
     if (list.some((c) => c.mint === mint)) return res.status(200).json({ ok: true, already: true })
     // the transaction, as Solana has it
     let tx = null
-    for (let i = 0; i < 6 && !tx; i++) { tx = await rpc('getTransaction', [sig, { encoding: 'json', commitment: 'confirmed', maxSupportedTransactionVersion: 0 }]); if (!tx) await new Promise((r) => setTimeout(r, 2500)) }
+    for (let i = 0; i < 6 && !tx; i++) { tx = await rpc('getTransaction', [sig, { encoding: 'json', commitment: 'confirmed', maxSupportedTransactionVersion: 1 }]); if (!tx) await new Promise((r) => setTimeout(r, 2500)) }
     if (!tx) return res.status(404).json({ error: 'transaction not found yet, try again in a minute' })
     if (tx.meta?.err) return res.status(400).json({ error: 'that transaction failed on chain' })
     const keys = [...tx.transaction.message.accountKeys, ...(tx.meta?.loadedAddresses?.writable || []), ...(tx.meta?.loadedAddresses?.readonly || [])]
