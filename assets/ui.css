@@ -146,3 +146,9 @@ textarea.in { resize: vertical; min-height: 76px; }
 @keyframes rise { to { opacity: 1; transform: none; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation-duration: .001s !important; transition-duration: .001s !important; } .rise { opacity: 1; transform: none; } }
 .ic.brand { stroke: none; }
+
+/* highlighted words in headlines: a soft light-to-accent sweep */
+.grad { background: linear-gradient(92deg, color-mix(in srgb, var(--ink) 92%, var(--acc)) 0%, var(--acc) 70%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.display { font: 500 clamp(40px, 5.4vw, 70px)/1 var(--ui); letter-spacing: -.055em; margin: 0; }
+.display.md { font-size: clamp(30px, 3.6vw, 44px); letter-spacing: -.045em; }
+.lead { color: var(--t2); font-size: 16.5px; line-height: 1.6; }

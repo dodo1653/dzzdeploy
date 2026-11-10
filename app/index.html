@@ -6,6 +6,10 @@
 <title>dzz · launch</title>
 <link rel="icon" href="/assets/icon.png">
 <meta name="description" content="Launch coins on pump.fun or Meteora at the contract address you choose. Found in your browser; the keys never leave it.">
+<script>
+// dzz needs an account: no session (and not just back from a provider) goes to the sign-in page first
+;(() => { let t = null; try { t = localStorage.getItem('dzz.profile') } catch {}; if (!t && !/dzz_(token|error)=/.test(location.hash)) location.replace('/login?next=' + encodeURIComponent(location.pathname + location.hash)) })()
+</script>
 <script src="/assets/theme.js"></script>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500;600&display=swap" rel="stylesheet">
@@ -53,7 +57,7 @@ body { min-height: 100vh; }
 
 .view { padding-top: 26px; animation: rise .5s var(--ease) both; }
 .vh { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; margin-bottom: 20px; flex-wrap: wrap; }
-.vh h2 { margin: 0; font: 600 26px/1.15 var(--ui); letter-spacing: -.03em; } .vh p { margin: 6px 0 0; color: var(--t2); max-width: 620px; }
+.vh h2 { margin: 0; font: 500 clamp(24px, 2.4vw, 30px)/1.15 var(--ui); letter-spacing: -.04em; } .vh p { margin: 6px 0 0; color: var(--t2); max-width: 620px; }
 
 /* ---------------------------------------------------------------- launch: form on the left, the launch itself on the right */
 .lgrid { display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px; align-items: start; }
@@ -176,7 +180,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 /* account view */
 .acc-head { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
 .acc-head .av { width: 56px; height: 56px; border-radius: 14px; font-size: 20px; }
-.acc-head h2 { margin: 0; font: 600 26px/1.1 var(--ui); letter-spacing: -.03em; } .acc-head p { margin: 4px 0 0; color: var(--t3); font: 400 12.5px var(--mono); }
+.acc-head h2 { margin: 0; font: 500 26px/1.1 var(--ui); letter-spacing: -.04em; } .acc-head p { margin: 4px 0 0; color: var(--t3); font: 400 12.5px var(--mono); }
 .acc-head .end { margin-left: auto; display: flex; gap: 8px; }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
 .idrow, .wrow { display: flex; align-items: center; gap: 12px; padding: 11px 0; border-top: 1px solid var(--line); min-height: 58px; }
@@ -213,7 +217,8 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
 <div class="shell">
   <aside class="side">
-    <a class="mark" href="/"><b>dz<i>z</i></b></a>
+    <a class="mark" href="/about"><b>dz<i>z</i></b></a>
+    <a class="nv" href="#dashboard" data-view="dashboard"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg>Dashboard</a>
     <a class="nv" href="#launch" data-view="launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch</a>
     <a class="nv" href="#coins" data-view="coins"><svg class="ic"><use href="/assets/icons.svg#coins"/></svg>My coins<span class="cnt" id="navCoins"></span></a>
     <a class="nv" href="#fees" data-view="fees"><svg class="ic"><use href="/assets/icons.svg#fees"/></svg>Creator fees</a>
@@ -230,13 +235,28 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
   <div class="main">
     <header class="topbar">
-      <a class="mark tmark" href="/"><b>dz<i>z</i></b></a>
+      <a class="mark tmark" href="/about"><b>dz<i>z</i></b></a>
       <h1 id="viewTitle">Launch</h1>
       <span class="crumb"><i class="live" id="live"></i><span class="st" id="state">idle</span></span>
       <div class="right">
         <button class="pill" id="wallet"><i></i><span>Connect wallet</span></button>
       </div>
     </header>
+
+    <!-- DASHBOARD -->
+    <section class="view" data-view="dashboard" hidden>
+      <div class="vh"><div><h2 class="dash-h">Welcome back, <span class="grad" id="dashName">…</span></h2><p id="dashSub">Your launches and creator fees from every wallet on your account.</p></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap"><a class="btn" href="#account"><svg class="ic"><use href="/assets/icons.svg#wallet"/></svg>Wallets</a><a class="btn primary" href="#launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a></div></div>
+        <div class="stats4">
+          <div><b id="aCoins">–</b><span>coins launched</span></div>
+          <div><b id="aClaimed">–</b><span>SOL collected <i id="aClaimedUsd"></i></span></div>
+          <div><b id="aWaiting">–</b><span>SOL waiting to collect <i id="aWaitingUsd"></i></span></div>
+          <div><b id="aGen">–</b><span>SOL earned in total <i id="aGenUsd"></i></span></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-h"><h3>Launches</h3><span class="sub">from every wallet on this account</span></div>
+          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Coin</th><th>Where</th><th>Wallet</th><th class="r">Collected</th><th class="r">Waiting</th></tr></thead><tbody id="accRows"></tbody></table></div>
+          <p class="hint" id="accNote" style="margin-top:14px"></p></div>
+    </section>
 
     <!-- LAUNCH -->
     <section class="view" data-view="launch">
@@ -351,19 +371,10 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
       </div>
       <div id="accIn" hidden>
         <div class="acc-head"><span class="av" id="accAv"></span><div><h2 id="accName">…</h2><p id="accSub"></p></div><div class="end"><button class="btn sm" id="accRename">Rename</button><button class="btn sm ghost" id="accOutBtn"><svg class="ic"><use href="/assets/icons.svg#out"/></svg>Sign out</button></div></div>
-        <div class="stats4">
-          <div><b id="aCoins">–</b><span>coins launched</span></div>
-          <div><b id="aClaimed">–</b><span>SOL collected <i id="aClaimedUsd"></i></span></div>
-          <div><b id="aWaiting">–</b><span>SOL waiting to collect <i id="aWaitingUsd"></i></span></div>
-          <div><b id="aGen">–</b><span>SOL earned in total <i id="aGenUsd"></i></span></div>
-        </div>
         <div class="two">
           <div class="card"><div class="card-h"><h3>Sign-in accounts</h3><span class="sub">use any of them to sign in</span></div><div id="accIds"></div></div>
           <div class="card"><div class="card-h"><h3>Wallets</h3><span class="end"><button class="btn sm" id="accLink"><svg class="ic"><use href="/assets/icons.svg#plus"/></svg>Link this wallet</button></span></div><div id="accWallets"></div><p class="hint" style="margin-top:12px">To add another wallet, switch to it in your wallet app, then press Link this wallet and sign. A wallet that already had launches brings them along.</p></div>
         </div>
-        <div class="card" style="margin-top:16px"><div class="card-h"><h3>Launches</h3><span class="sub">from every wallet on this account</span></div>
-          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Coin</th><th>Where</th><th>Wallet</th><th class="r">Collected</th><th class="r">Waiting</th></tr></thead><tbody id="accRows"></tbody></table></div>
-          <p class="hint" id="accNote" style="margin-top:14px"></p></div>
         <p class="amsg" id="amsg"></p>
       </div>
     </section>
@@ -907,14 +918,14 @@ summary(); stats()
 // ---------------------------------------------------------------- views: #launch #coins #fees #explore #account
 ;(() => {
   const $ = (id) => document.getElementById(id)
-  const TITLES = { launch: 'Launch', coins: 'My coins', fees: 'Creator fees', explore: 'Explore', account: 'Account' }
+  const TITLES = { dashboard: 'Dashboard', launch: 'Launch', coins: 'My coins', fees: 'Creator fees', explore: 'Explore', account: 'Account' }
   function show() {
-    const v = (location.hash.slice(1).split('&')[0] || 'launch'), id = TITLES[v] ? v : 'launch'
+    const v = (location.hash.slice(1).split('&')[0] || 'dashboard'), id = TITLES[v] ? v : 'dashboard'
     document.querySelectorAll('.view').forEach((s) => (s.hidden = s.dataset.view !== id))
     document.querySelectorAll('.nv').forEach((a) => a.classList.toggle('on', a.dataset.view === id))
     $('viewTitle').textContent = TITLES[id]; document.title = `dzz · ${TITLES[id].toLowerCase()}`
     dispatchEvent(new Event('resize'))                     // segmented controls measure themselves when shown
-    if (id === 'account') account()
+    if (id === 'account' || id === 'dashboard') account()
     if (id === 'fees') window.DzzFeesTotal?.refresh()
   }
   addEventListener('hashchange', () => { show(); scrollTo({ top: 0 }) })
@@ -934,21 +945,22 @@ summary(); stats()
     $('meName').textContent = p ? p.name : 'Sign in'
     $('meSub').textContent = p ? `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'}${p.identities?.length ? ' · ' + p.identities.map((i) => NAMES[i.provider]).join(', ') : ''}` : 'Google, Discord, X or wallet'
   }
-  addEventListener('dzz-auth', (e) => { meCard(e.detail); if (!$('accIn').closest('.view').hidden) account(); window.DzzFeesTotal?.refresh() })
+  addEventListener('dzz-auth', (e) => { if (!e.detail) return location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); meCard(e.detail); const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'account' || v === 'dashboard') account(); window.DzzFeesTotal?.refresh() })
   DzzAuth.me().then(meCard)
   DzzAuth.providers().then((p) => { providers = p; document.querySelectorAll('.gate .opt[data-p]').forEach((b) => { if (!p[b.dataset.p]) { b.disabled = true; b.querySelector('small').textContent = 'soon' } }) })
   if (DzzAuth.lastError) { location.hash = 'account'; setTimeout(() => toast(DzzAuth.lastError, true), 300) }
 
   document.querySelectorAll('.gate .opt[data-p]').forEach((b) => (b.onclick = () => DzzAuth.oauth(b.dataset.p, { back: location.origin + '/app#account' })))
   $('accWallet').onclick = async () => { try { say('Sign the message in your wallet…', false, 'amsg0'); await DzzAuth.signInWallet(); say('', false, 'amsg0') } catch (e) { say(e.message, true, 'amsg0') } }
-  $('accOutBtn').onclick = () => { DzzAuth.signOut(); toast('Signed out') }
+  $('accOutBtn').onclick = () => { DzzAuth.signOut(); location.replace('/login') }
   $('accRename').onclick = async () => { const n = prompt('Name on your account', $('accName').textContent); if (!n) return; try { await DzzAuth.rename(n) } catch (e) { toast(e.message, true) } }
   $('accLink').onclick = async () => { try { say('Sign the message in your wallet…'); await DzzAuth.linkWallet(); say(''); toast('Wallet linked') } catch (e) { say(e.message, true) } }
 
   async function account() {
     const p = await DzzAuth.me()
     $('accOut').hidden = !!p; $('accIn').hidden = !p
-    if (!p) return
+    if (!p) { if (!DzzAuth.token() && !DzzAuth.lastError) location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); return }
+    $('dashName').textContent = p.name
     $('accAv').innerHTML = avatar(p); $('accName').textContent = p.name
     $('accSub').textContent = `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'} · ${p.identities?.length || 0} sign-in account${p.identities?.length === 1 ? '' : 's'}`
     const ids = p.identities || [], canDrop = ids.length + p.wallets.length > 1

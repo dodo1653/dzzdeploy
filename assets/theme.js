@@ -3,6 +3,7 @@
 // can follow. Load it in <head> so the page never paints in the wrong theme.
 ;(() => {
   const T = {
+    night:   { name: 'Night',   dark: true,  acc: '#a9bfff', ink: '#0b0d16', g1: '#3b4a78', g2: '#a9bfff', bg: '#0b0b0c' },
     cobalt:  { name: 'Cobalt',  dark: true,  acc: '#6ea8ff', ink: '#041434', g1: '#1f4fd6', g2: '#5f9bff', bg: '#07080f' },
     glacier: { name: 'Glacier', dark: true,  acc: '#7fd8f5', ink: '#03222c', g1: '#0c6e8f', g2: '#7fd8f5', bg: '#060a0d' },
     jade:    { name: 'Jade',    dark: true,  acc: '#62e3b5', ink: '#03261a', g1: '#0b6e52', g2: '#4fd8a6', bg: '#060a09' },
@@ -12,7 +13,7 @@
     paper:   { name: 'Paper',   dark: false, acc: '#1d4ed8', ink: '#ffffff', g1: '#9db8ff', g2: '#dbe6ff', bg: '#f2f1ec' },
   }
   const rgb = (h) => { const n = parseInt(h.slice(1), 16); return `${n >> 16 & 255}, ${n >> 8 & 255}, ${n & 255}` }
-  const KEY = 'dzz-theme', DEF = 'cobalt'
+  const KEY = 'dzz-theme2', DEF = 'night'
   const css = Object.entries(T).map(([id, t]) => {
     const d = t.dark
     return `:root[data-theme="${id}"]{--acc:${t.acc};--acc-rgb:${rgb(t.acc)};--acc-ink:${t.ink};--bg:${t.bg};--g1:${t.g1};--g2:${t.g2};` + (d
