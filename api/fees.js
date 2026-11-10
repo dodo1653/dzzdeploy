@@ -1,8 +1,10 @@
 // What every coin launched with dzz has generated in fees for its dev, and how much the dev has claimed. All read from Solana.
 //   GET /api/fees → { coins: [{ mint, name, symbol, image, venue, dev, generated, claimed, waiting, note }], reading, at }   amounts in lamports
 // Meteora keeps running totals on the coin's pool, so those are exact and need no history. pump.fun keeps one fee vault per dev
-// wallet, not per coin: its figures are the wallet's, read from every movement through its vaults, a batch at a time, remembered
-// in dzz's store.
+// wallet, not per coin: its figures are the wallet's, read from every claim out of its vaults, a batch at a time, remembered
+// in dzz's store. pump.fun now keeps new creator fees inside each coin's bonding curve and sweeps them into the vault in the same
+// transaction as the claim, so a claim is read from pump.fun's own CollectCreatorFee event (the vault's net change misses the sweep),
+// and fees not swept yet count as waiting.
 import { put, getJson } from './_store.js'
 import { ed25519 } from '@noble/curves/ed25519'
 import crypto from 'node:crypto'
@@ -38,6 +40,17 @@ async function rpc(method, params) {
 const load = (name) => getJson(name)
 const save = async (name, v) => { try { await put(name, JSON.stringify(v)) } catch {} }
 const u64 = (d, o) => Number(d.readBigUInt64LE(o))
+// pump.fun's CollectCreatorFeeEvent: 8-byte tag, timestamp, creator, creator_fee (lamports actually paid to the creator)
+const CLAIM_EVT = '7a027f010ebf0caf'
+function claimEvents(tx, dev) {
+  let n = 0, seen = false
+  for (const l of tx.meta.logMessages || []) {
+    if (!l.startsWith('Program data: ')) continue
+    const b = Buffer.from(l.slice(14), 'base64')
+    if (b.length >= 56 && b.subarray(0, 8).toString('hex') === CLAIM_EVT && enc58(b.subarray(16, 48)) === dev) { n += u64(b, 48); seen = true }
+  }
+  return seen ? n : null
+}
 
 // a Meteora curve pool: total_trading_quote_fee is everything the dev side ever earned, the two fee fields are what's still unclaimed
 export function poolFees(d) {
@@ -50,18 +63,29 @@ async function meteoraRows(coins) {
   const rows = coins.map((c, i) => (accs[i] ? { c, ...poolFees(Buffer.from(accs[i].data[0], 'base64')) } : { c, missing: true }))
   const cfgKeys = [...new Set(rows.filter((r) => r.config).map((r) => r.config))]
   const cfgs = (await rpc('getMultipleAccounts', [cfgKeys, { encoding: 'base64' }]))?.value || [], quote = new Map(cfgKeys.map((k, i) => [k, cfgs[i] ? enc58(Buffer.from(cfgs[i].data[0], 'base64').subarray(8, 40)) : null]))
+  // a coin paired with another token earns its fees in that token: shown in SOL at today's price, with the raw amounts kept
+  const others = [...new Set([...quote.values()].filter((q) => q && q !== WSOL))], rate = {}
+  if (others.length) {
+    try {
+      const mints = (await rpc('getMultipleAccounts', [others, { encoding: 'base64' }]))?.value || []
+      const px = await (await fetch('https://lite-api.jup.ag/price/v3?ids=' + [WSOL, ...others].join(','), { signal: AbortSignal.timeout(5000) })).json()
+      others.forEach((q, i) => { const d = mints[i] && Buffer.from(mints[i].data[0], 'base64')[44], usd = px[q]?.usdPrice, solUsd = px[WSOL]?.usdPrice; if (d != null && usd && solUsd) rate[q] = { decimals: d, perUnit: (usd / solUsd) * 1e9 / 10 ** d } })
+    } catch {}
+  }
   return rows.map((r) => {
     if (r.missing) return { ...base(r.c), note: 'could not read this pool' }
-    const sol = quote.get(r.config) === WSOL
-    return { ...base(r.c), dev: r.dev, generated: sol ? r.generated : null, claimed: sol ? r.claimed : null, waiting: sol ? r.waiting : null, note: !sol ? 'fees are in its paired token, not SOL' : r.graduated ? 'graduated: fees from the locked pool aren’t counted' : '' }
+    const q = quote.get(r.config), sol = q === WSOL, grad = r.graduated ? 'graduated: fees from the locked pool aren’t counted' : ''
+    if (sol) return { ...base(r.c), dev: r.dev, generated: r.generated, claimed: r.claimed, waiting: r.waiting, note: grad }
+    const k = rate[q], conv = (n) => (k ? Math.round(n * k.perUnit) : null)
+    return { ...base(r.c), dev: r.dev, quote: q, raw: { generated: r.generated, claimed: r.claimed, waiting: r.waiting, decimals: k?.decimals ?? null }, generated: conv(r.generated), claimed: conv(r.claimed), waiting: conv(r.waiting), converted: !!k, note: k ? ['fees are in its paired token, shown in SOL at today’s price', grad].filter(Boolean).join('; ') : 'fees are in its paired token, not SOL' }
   })
 }
 const base = (c) => ({ mint: c.mint, name: c.name, symbol: c.symbol, image: c.image, venue: c.venue || 'pump', at: c.at })
 
 // every movement through a fee vault, kept by signature: money in is fees, money out is a claim, whoever made it. A stale read can
 // only repeat work, because a signature is never counted twice
-async function flows(address, isToken) {
-  const file = `fees/v-${address}.json`, s = (await load(file)) || { moves: {} }; let before, todo = [], full = true
+async function flows(address, isToken, dev) {
+  const file = `fees/c-${address}.json`, s = (await load(file)) || { moves: {} }; let before, todo = [], full = true
   for (let page = 0; page < 10; page++) {
     const sigs = await rpc('getSignaturesForAddress', [address, { limit: 1000, ...(before ? { before } : {}) }])
     if (!sigs) { full = false; break }
@@ -73,29 +97,45 @@ async function flows(address, isToken) {
     const tx = await rpc('getTransaction', [x.signature, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]); if (!tx) { full = false; continue }
     const keys = [...tx.transaction.message.accountKeys, ...(tx.meta.loadedAddresses?.writable || []), ...(tx.meta.loadedAddresses?.readonly || [])], i = keys.indexOf(address)
     const held = (list) => Number((list || []).find((t) => t.accountIndex === i)?.uiTokenAmount.amount || 0)
-    s.moves[x.signature] = i < 0 ? 0 : isToken ? held(tx.meta.postTokenBalances) - held(tx.meta.preTokenBalances) : tx.meta.postBalances[i] - tx.meta.preBalances[i]; changed = true; did++
+    const paid = isToken ? null : claimEvents(tx, dev)
+    s.moves[x.signature] = paid != null ? -paid : i < 0 ? 0 : isToken ? held(tx.meta.postTokenBalances) - held(tx.meta.preTokenBalances) : tx.meta.postBalances[i] - tx.meta.preBalances[i]; changed = true; did++
   }
   if (changed) await save(file, s)
   const v = Object.values(s.moves)
   return { out: v.filter((n) => n < 0).reduce((a, n) => a - n, 0), read: v.length, done: full && did === todo.length }
 }
 
-async function vaults(dev) {
+// fees still inside the dev's bonding curves: what a curve holds beyond its rent and its real SOL reserves
+async function unswept(mints) {
+  const keys = mints.map((m) => enc58(pda([Buffer.from('bonding-curve'), dec58(m)], PUMP)))
+  const accs = (await rpc('getMultipleAccounts', [keys, { encoding: 'base64' }]))?.value || [], rents = {}
+  let n = 0
+  for (const a of accs) {
+    if (!a) continue
+    const d = Buffer.from(a.data[0], 'base64'); if (d.length < 49) continue
+    rents[d.length] ??= (await rpc('getMinimumBalanceForRentExemption', [d.length])) || a.lamports
+    n += Math.max(0, a.lamports - rents[d.length] - u64(d, 32))
+  }
+  return n
+}
+
+async function vaults(dev, mints) {
   const key = dec58(dev), curve = enc58(pda([Buffer.from('creator-vault'), key], PUMP))
   const auth = pda([Buffer.from('creator_vault'), key], AMM), pool = enc58(pda([auth, dec58(TOKEN), dec58(WSOL)], ATA))
-  const [bal, tok, rent] = await Promise.all([rpc('getBalance', [curve]), rpc('getTokenAccountBalance', [pool]), rpc('getMinimumBalanceForRentExemption', [0])])
-  const [a, b] = await Promise.all([flows(curve, false), tok ? flows(pool, true) : { out: 0, done: true }])
-  const waiting = Math.max(0, (bal?.value || 0) - (rent || 0)) + Number(tok?.value?.amount || 0), claimed = a.out + b.out
+  const [bal, tok, rent, inCurves] = await Promise.all([rpc('getBalance', [curve]), rpc('getTokenAccountBalance', [pool]), rpc('getMinimumBalanceForRentExemption', [0]), unswept(mints)])
+  const [a, b] = await Promise.all([flows(curve, false, dev), tok ? flows(pool, true, dev) : { out: 0, done: true }])
+  const waiting = Math.max(0, (bal?.value || 0) - (rent || 0)) + Number(tok?.value?.amount || 0) + inCurves, claimed = a.out + b.out
   return { generated: claimed + waiting, claimed, waiting, done: a.done && b.done }
 }
 
 async function pumpRows(coins) {
   const rows = []; let reading = false
-  const devs = (await load('fees/devs.json')) || {}; let changed = false
+  const devs = (await load('fees/devs.json')) || {}, seen = {}; let changed = false
   for (const c of coins) {
+    if (!devs[c.mint] && c.dev) { devs[c.mint] = c.dev; changed = true }
     if (!devs[c.mint]) { const tx = await rpc('getTransaction', [c.sig, { encoding: 'json', maxSupportedTransactionVersion: 0, commitment: 'confirmed' }]); if (tx) { devs[c.mint] = tx.transaction.message.accountKeys[0]; changed = true } }
     const dev = devs[c.mint]; if (!dev) { rows.push({ ...base(c), note: 'could not read the launch' }); reading = true; continue }
-    const v = await vaults(dev); if (!v.done) reading = true
+    const v = (seen[dev] ??= await vaults(dev, coins.filter((x) => (devs[x.mint] || x.dev) === dev).map((x) => x.mint))); if (!v.done) reading = true
     rows.push({ ...base(c), dev, generated: v.generated, claimed: v.claimed, waiting: v.waiting, reading: !v.done, note: 'pump.fun keeps fees per wallet, so this covers everything this dev wallet launched' })
   }
   if (changed) await save('fees/devs.json', devs)

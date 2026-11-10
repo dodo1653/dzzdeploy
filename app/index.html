@@ -274,6 +274,7 @@ main { position: relative; z-index: 2; max-width: 1240px; margin: 0 auto; paddin
       <p class="note" id="note"></p>
       <div id="done"></div>
     </div>
+    <div class="card wide" id="feesCard"><h3>Your creator fees<em>every wallet you launch from</em></h3><div id="feesTotal"><div class="lempty">reading…</div></div></div>
     <div class="card wide" id="histCard" hidden><h3>Launched <small id="histN"></small><em>yours</em></h3><div id="hist"></div></div>
     <div class="card wide" id="pubCard"><h3>Launched with dzz <small id="pubN"></small><em>everyone's · <a href="/fees" style="color:inherit">fees</a></em></h3><div id="pub"><div class="lempty">loading…</div></div></div>
   </section>
@@ -613,6 +614,7 @@ function render(v) {
   $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>${venue === 'meteora' ? 'random address' : 'normal · …<b>pump</b>'}</code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
   // history
   $('histCard').hidden = !v.history.length; $('histN').textContent = v.history.length
+  { const ms = v.history.map((h) => h.mint).join(','); if (ms !== window.DZZ_MY_MINTS_KEY) { window.DZZ_MY_MINTS_KEY = ms; window.DZZ_MY_MINTS = v.history.map((h) => h.mint); window.DzzFeesTotal?.refresh() } }
   $('hist').innerHTML = v.history.map((h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`).join('')
   stats(); summary()
 }
@@ -802,5 +804,6 @@ async function registerLaunch(mint, signature) {
 loadPublic(); setInterval(loadPublic, 60000)
 summary(); stats()
 </script>
+<script src="/assets/feestotal.js" defer></script>
 </body>
 </html>

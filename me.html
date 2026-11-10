@@ -129,6 +129,10 @@ async function coins() {
       claimed += x.claimed || 0; waiting += x.waiting || 0; gen += x.generated || 0
     }
     $('fClaimed').textContent = sol(claimed); $('fWaiting').textContent = sol(waiting); $('fGen').textContent = sol(gen)
+    fetch('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => {
+      const p = j.So11111111111111111111111111111111111111112?.usdPrice; if (!p) return
+      for (const [id, l] of [['fClaimed', claimed], ['fWaiting', waiting], ['fGen', gen]]) $(id).nextElementSibling.textContent = $(id).nextElementSibling.textContent.replace(/ · \$.*$/, '') + ' · $' + ((l / 1e9) * p).toFixed(2)
+    }).catch(() => {})
     $('rows').innerHTML = list.length ? list.map((c) => {
       const x = fees.get(c.mint) || {}, pump = c.venue !== 'meteora'
       return `<tr><td><a class="coin" href="https://solscan.io/token/${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : '<i></i>'}<div>${esc(c.name)} <span>$${esc(c.symbol)}</span></div></a></td>
