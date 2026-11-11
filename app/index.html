@@ -1102,6 +1102,8 @@ async function copyCa(b) {
 }
 // after a launch: hand the coin to the public list (the server checks it on chain before listing it)
 async function registerLaunch(mint, signature) {
+  // signed in, but this wallet is not on the account yet: add it now (one signature), so the coin and its fees show on every device
+  ;(async () => { try { const me = await window.DzzAuth?.me(); if (me && typeof sol === 'string' && sol && !me.wallets.includes(sol)) { await DzzAuth.linkWallet(); window.dzzToast?.('This wallet is now on your account') } } catch {} })()
   for (let i = 0; i < 3; i++) {
     try { const r = await (await fetch(DZZ_API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mint, signature }) })).json(); if (r.ok) break } catch {}
     await new Promise((ok) => setTimeout(ok, 8000))
