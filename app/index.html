@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>dzz · launch</title>
 <link rel="icon" href="/assets/icon.png">
-<meta name="description" content="Launch coins on pump.fun or Meteora at the contract address you choose. Found in your browser; the keys never leave it.">
+<meta name="description" content="Launch coins on pump.fun, Meteora or Float at the contract address you choose. Found in your browser; the keys never leave it.">
 <script>
 // dzz needs an account: no session (and not just back from a provider) goes to the sign-in page first
 ;(() => { let t = null; try { t = localStorage.getItem('dzz.profile') } catch {}; if (!t && !/dzz_(token|error)=/.test(location.hash)) location.replace('/login?next=' + encodeURIComponent(location.pathname + location.hash)) })()
@@ -124,6 +124,7 @@ body { min-height: 100vh; background: radial-gradient(1200px 520px at 60% -180px
 .tp .tok span { font: 400 12px var(--mono); color: var(--t3); text-align: right; }
 .tp .empty { color: var(--t3); font: 400 12.5px var(--mono); padding: 10px; }
 .split { display: grid; grid-template-columns: minmax(0, 1fr) 84px 38px; gap: 8px; align-items: center; animation: rise .4s var(--ease) both; }
+#splits.one .split { grid-template-columns: minmax(0, 1fr) 38px; } #splits.one .split input[type=number] { display: none; }
 button.ghost { border: 1px dashed var(--line2); background: none; border-radius: 9px; padding: 8px 12px; color: var(--t2); font: 500 12.5px var(--ui); cursor: pointer; transition: color .2s, border-color .2s; }
 button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 
@@ -404,7 +405,7 @@ button.pav.editable:hover::after { opacity: 1; }
           <div class="card">
             <div class="card-h"><span class="step">03</span><h3>The market</h3></div>
             <div class="grid" style="gap:20px">
-              <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button></div></div>
+              <div class="fl" id="venueRow" hidden>Launch on<div class="seg" id="venue" style="justify-self:start"><span class="thumb"></span><button data-v="pump" class="on vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button><button data-v="float" class="vbtn" title="Float" aria-label="Float"><img class="vlogo" src="/assets/venues/float.png" alt="Float"></button></div></div>
               <div class="fl" data-only="pump">Paired with<div class="seg" id="pair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="HYPE">HYPE</button><button data-v="TOKEN">Any token</button><button data-v="COIN">A pump.fun coin</button></div>
                 <input class="in mono" id="qc" placeholder="that coin's CA" spellcheck="false" hidden>
                 <div class="tp" id="tp" hidden><div class="tbar"><input class="in" id="tq" placeholder="search stocks, pre-IPO, crypto · Tesla, SpaceX, WIF…" spellcheck="false"><div class="seg" id="tk"><span class="thumb"></span><button data-v="All" class="on">All</button><button data-v="Stocks">Stocks</button><button data-v="Pre-IPO">Pre-IPO</button><button data-v="Crypto">Crypto</button></div></div>
@@ -414,6 +415,8 @@ button.pav.editable:hover::after { opacity: 1; }
               <div class="fl" data-only="meteora" hidden>Trading fee<div class="seg" id="mfee" style="justify-self:start"><span class="thumb"></span><button data-v="50">0.5%</button><button data-v="100" class="on">1%</button><button data-v="200">2%</button><button data-v="300">3%</button></div><p class="hint">Paid on every trade. Meteora keeps 20% of it, the rest is yours to claim. It is not sent to you by itself.</p></div>
               <div class="fl" data-only="meteora" hidden>Graduates at<div class="seg" id="mgrad" style="justify-self:start"><span class="thumb"></span><button data-v="200">200 SOL</button><button data-v="400" class="on">400 SOL</button><button data-v="800">800 SOL</button></div><p class="hint" id="mgradNote"></p></div>
               <div class="fl" data-only="meteora" hidden>Anti-snipe<div class="seg" id="msnipe" style="justify-self:start"><span class="thumb"></span><button data-v="1" class="on">On</button><button data-v="0">Off</button></div><p class="hint" id="msnipeNote"></p></div>
+              <div class="fl" data-only="float" hidden>Paired with<div class="seg" id="fpair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="USDC">USDC</button><button data-v="HYPE">HYPE</button></div><p class="hint" id="fpairNote"></p></div>
+              <div class="fl" data-only="float" hidden>Trading fee<p class="hint">2.5% on every trade, Float's top tier. Float splits it: 5% to the creator, 15% to holders, 35% to traders, 35% buys and burns FLOAT, 10% to Float.</p></div>
               <div class="row2">
                 <label class="fl" style="width:180px"><span>Dev buy, <span id="unit">SOL</span></span><input class="in mono" id="buy" type="number" min="0" step="0.01" value="0"></label>
                 <p class="hint" id="buyNote" style="flex:1;min-width:200px;padding-top:26px">0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.</p>
@@ -454,10 +457,10 @@ button.pav.editable:hover::after { opacity: 1; }
       <div class="vh"><div><h2>Creator fees</h2><p>What your coins earned, across every wallet on your account. Read from Solana.</p></div><a class="btn" href="/fees">Everyone's fees<svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a></div>
       <div id="feesCard"><div id="feesTotal"><div class="lempty">reading…</div></div></div>
       <div class="card" id="claimCard" style="margin-top:16px">
-        <div class="card-h"><h3>Claim</h3><span class="sub">Meteora coins you launched</span><span class="end"><button class="btn sm" id="claimReload" type="button">Refresh</button></span></div>
+        <div class="card-h"><h3>Claim</h3><span class="sub">Meteora and Float coins you launched</span><span class="end"><button class="btn sm" id="claimReload" type="button">Refresh</button></span></div>
         <div id="claimRows"><div class="lempty">reading…</div></div>
         <div class="claim-any"><input class="in mono" id="claimCa" placeholder="Or paste a coin's contract address" spellcheck="false" autocomplete="off"><button class="btn" id="claimFind" type="button">Find</button></div>
-        <p class="hint" id="claimMsg" style="margin-top:12px">Connect the wallet that launched the coin to claim. pump.fun coins are claimed on pump.fun: your profile, Creator rewards.</p>
+        <p class="hint" id="claimMsg" style="margin-top:12px">Connect the wallet that launched the coin to claim. On Float anyone can press Claim: the fees always go to the coin's fee wallet. pump.fun coins are claimed on pump.fun: your profile, Creator rewards.</p>
       </div>
     </section>
 
@@ -466,7 +469,7 @@ button.pav.editable:hover::after { opacity: 1; }
       <div class="vh"><div><h2>Launched with <span class="grad">dzz</span></h2><p>Every coin launched at an address its creator chose. <span id="pubN" class="muted"></span></p></div></div>
       <div class="xbar">
         <label class="xsearch"><svg class="ic sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="xq" placeholder="Search name, ticker or address" spellcheck="false" autocomplete="off"></label>
-        <div class="seg" id="xven"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="pump" class="vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button></div>
+        <div class="seg" id="xven"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="pump" class="vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button><button data-v="float" class="vbtn" title="Float" aria-label="Float"><img class="vlogo" src="/assets/venues/float.png" alt="Float"></button></div>
         <div class="seg" id="xsort"><span class="thumb"></span><button data-v="new" class="on">Newest</button><button data-v="mc">Market cap</button></div>
       </div>
       <div id="xspot"></div>
@@ -770,6 +773,16 @@ function anyResolve() {
 }
 const GRAD_NOTE = { 200: 'The curve fills after about 56 SOL of buying.', 400: 'The curve fills after about 86 SOL of buying, about the same as pump.fun.', 800: 'The curve fills after about 130 SOL of buying.' }
 const meteora = () => (meteoraLib ||= new Promise((ok, no) => { const t = document.createElement('script'); t.src = METEORA_JS; t.onload = () => ok(window.MeteoraLaunch); t.onerror = () => { meteoraLib = null; no(new Error('the Meteora launcher did not load, try again')) }; document.head.append(t) }))
+// Float: the third place a coin can launch (Raydium LaunchLab through Float's program). Always the 2.5% tier.
+const FLOAT_JS = '/assets/float.js'
+let floatLib = null, fPair = 'SOL'
+const floatL = () => (floatLib ||= new Promise((ok, no) => { const t = document.createElement('script'); t.src = FLOAT_JS; t.onload = () => ok(window.FloatLaunch); t.onerror = () => { floatLib = null; no(new Error('the Float launcher did not load, try again')) }; document.head.append(t) }))
+const F_PAIR_NOTE = { SOL: 'Priced in SOL.', USDC: 'Priced in USDC. Every trade’s fees are paid in USDC. Buyers pay in USDC, or in SOL through Jupiter.', HYPE: 'Priced in HYPE, Hyperliquid’s token on Solana. Every trade’s fees are paid in HYPE. Buyers pay in HYPE, or in SOL through Jupiter.' }
+const fWallet = () => $('splits').children[0]?.querySelector('input')?.value.trim() || ''   // on Float the one split row is the wallet the creator share goes to
+const fNotes = () => {
+  $('fpairNote').textContent = F_PAIR_NOTE[fPair] + ' A ticker can be used once on Float.'
+  $('buyNote').textContent = fPair === 'SOL' ? '0 means no dev buy. On Float the buy is a second transaction right after the launch, in the same approval.' : 'A dev buy on Float needs the SOL pair. Leave this at 0.'
+}
 // the first launch with a set of settings creates the shared config; later ones skip its rent
 const mCheck = async () => { try { const M = await meteora(); mShared = mPair === 'SOL' && await M.sharedReady({ feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad }); if (mQuote()) { mRate = await M.perSolOf(mQuote()); mNotes() } } catch { mShared = false } lowCheck(); summary() }
 const mNotes = () => {
@@ -783,13 +796,17 @@ const mNotes = () => {
   $('msnipeNote').textContent = mSnipe ? `For the first 2 minutes the fee starts at 50% and falls to ${mFee / 100}%. Your dev buy pays the normal fee.` : `Every trade pays ${mFee / 100}% from the first second.`
 }
 function setVenue(v) {
-  venue = v; const met = v === 'meteora'
+  venue = v; const met = v === 'meteora', flo = v === 'float'
   document.querySelectorAll('[data-only]').forEach((d) => { d.hidden = d.dataset.only !== v })
-  $('splitNote').textContent = met ? 'optional · one wallet on Meteora · it claims its own share' : 'optional · written on chain at launch · the rest is yours'
-  if (met) { meteora().catch((e) => note(e.message, true)); mNotes(); mCheck(); [...$('splits').children].slice(1).forEach((d) => d.remove()) }
-  $('addSplit').hidden = met && $('splits').children.length > 0
+  $('splitNote').textContent = met ? 'optional · one wallet on Meteora · it claims its own share' : flo ? 'optional · the wallet that gets the creator share · empty means your wallet' : 'optional · written on chain at launch · the rest is yours'
+  if (met || flo) [...$('splits').children].slice(1).forEach((d) => d.remove())
+  if (met) { meteora().catch((e) => note(e.message, true)); mNotes(); mCheck() }
+  $('addSplit').hidden = (met || flo) && $('splits').children.length > 0
+  $('splits').classList.toggle('one', flo)              // Float pays the whole creator share to one wallet: no % to type
   $('buyNote').textContent = met ? '0 means no dev buy. It lands in the same transaction as the pool, so nobody can buy before you.' : '0 means no dev buy. On a token pair the buy is paid in SOL in the same approval.'
-  document.querySelector('.timeline [data-k="live"]').textContent = met ? 'Live on Meteora' : 'Live on pump.fun'
+  if (flo) { floatL().catch((e) => note(e.message, true)); fNotes() }
+  if (v === 'pump') pairUi(); else $('unit').textContent = 'SOL'
+  document.querySelector('.timeline [data-k="live"]').textContent = met ? 'Live on Meteora' : flo ? 'Live on Float' : 'Live on pump.fun'
   if (st) render(st)
   requestAnimationFrame(() => dispatchEvent(new Event('resize'))); lowCheck(); summary()
 }
@@ -801,6 +818,7 @@ if (METEORA_JS) {
   seg('msnipe', (v) => { mSnipe = v === '1'; mNotes(); summary(); mCheck() })
   seg('mpair', (v) => { mPair = v; if (v === 'ANY') { mRate = anyQ?.rate || 0; setTimeout(() => $('manyMint').focus(), 50) } mNotes(); summary(); if (v !== 'ANY') mCheck() })
   $('manyMint').addEventListener('input', anyResolve)
+  seg('fpair', (v) => { fPair = v; fNotes(); lowCheck(); summary() })
 }
 
 // ---------------------------------------------------------------- odds and the live meter
@@ -845,7 +863,7 @@ function render(v) {
   if (running && j.rate) { lastRate = j.rate; try { localStorage.setItem('dzz-rate', j.rate) } catch {} }
   $('grind').innerHTML = running ? 'Stop' : 'Find address <kbd>↵</kbd>'; $('grind').classList.toggle('stop', !!running)
   $('live').classList.toggle('run', !!running); $('state').classList.toggle('run', !!running)
-  $('state').textContent = running ? (j.auto ? 'finding a normal …pump address' : `searching · ${big(j.rate)}/s`) : v.selected ? 'custom · ' + v.selected.slice(0, 4) + '…' + v.selected.slice(-5) : venue === 'meteora' ? 'random address' : 'normal · …pump'
+  $('state').textContent = running ? (j.auto ? 'finding a normal …pump address' : `searching · ${big(j.rate)}/s`) : v.selected ? 'custom · ' + v.selected.slice(0, 4) + '…' + v.selected.slice(-5) : venue !== 'pump' ? 'random address' : 'normal · …pump'
   window.DZZBG?.activity(running ? 1 : 0)
   // live: the middle rolls through real addresses the grinder just checked
   if (running && j.sample && j.sample !== lastSample) {
@@ -861,7 +879,7 @@ function render(v) {
   if (j && j.done && mode === 'run') { mode = 'idle'; layout() }
   // your addresses
   const prev = new Set([...$('found').children].map((c) => c.dataset.m))
-  $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>${venue === 'meteora' ? 'random address' : 'normal · …<b>pump</b>'}</code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
+  $('found').innerHTML = `<div class="chip ${v.selected ? '' : 'on'}" data-m=""><code>${venue !== 'pump' ? 'random address' : 'normal · …<b>pump</b>'}</code></div>` + v.keys.slice().reverse().map((k) => `<div class="chip ${k.mint === v.selected ? 'on' : ''} ${prev.has(k.mint) || first ? '' : 'new'}" data-m="${esc(k.mint)}"><code>${mark(k.mint, k.pattern)}</code><button class="x" title="Forget">×</button></div>`).join('')
   // history
   window.dzzLocalHist = v.history
   { const ms = v.history.map((h) => h.mint).join(','); if (ms !== window.DZZ_MY_MINTS_KEY) { window.DZZ_MY_MINTS_KEY = ms; window.DZZ_MY_MINTS = v.history.map((h) => h.mint); window.DzzFeesTotal?.refresh() } }
@@ -894,14 +912,14 @@ $('addSplit').onclick = () => {
   const d = document.createElement('div'); d.className = 'split'
   d.innerHTML = '<input class="in mono" placeholder="wallet address" spellcheck="false"><input class="in mono" type="number" min="1" max="99" placeholder="%"><button class="ghost" title="Remove" style="padding:9px 0">×</button>'
   d.querySelector('button').onclick = () => { d.remove(); $('addSplit').hidden = false; S.soft(); summary() }; d.querySelectorAll('input').forEach((i) => (i.oninput = summary))
-  if (venue === 'meteora') { d.querySelectorAll('input')[1].max = 100; $('addSplit').hidden = true }
+  if (venue !== 'pump') { d.querySelectorAll('input')[1].max = 100; $('addSplit').hidden = true }
   $('splits').appendChild(d); S.click(); summary()
 }
 const splits = () => [...$('splits').children].map((d) => { const [a, p] = d.querySelectorAll('input'); return { address: a.value.trim(), shareBps: Math.round(+p.value * 100) } }).filter((s) => s.address && s.shareBps > 0)
 function summary() {
   const sp = splits(), others = sp.reduce((a, s) => a + s.shareBps, 0) / 100, m = st?.selected, k = st?.keys.find((x) => x.mint === m)
   const name = $('name').value.trim(), sym = $('sym').value.trim()
-  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : venue === 'meteora' ? 'random address · made at launch' : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>${venue === 'meteora' ? `on <b>Meteora</b> · paired with <b>${esc(mLabel())}</b> · paired with <b>SOL</b> · <b>${mFee / 100}%</b> trading fee · anti-snipe <b>${mSnipe ? 'on' : 'off'}</b>` : `paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee`}${sp.length ? ` · you keep <b>${100 - others}%</b>` : ''} · ${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
+  $('sum').innerHTML = `<span class="nm">${name ? esc(name) : 'Unnamed coin'}</span> ${sym ? '<b>$' + esc(sym) + '</b>' : ''}<br>${m ? mark(m, k?.pattern, 'span class="a"') : venue !== 'pump' ? 'random address · made at launch' : 'normal pump.fun address · …<span class="a">pump</span> · found at launch'}<br>${venue === 'meteora' ? `on <b>Meteora</b> · paired with <b>${esc(mLabel())}</b> · <b>${mFee / 100}%</b> trading fee · anti-snipe <b>${mSnipe ? 'on' : 'off'}</b>` : venue === 'float' ? `on <b>Float</b> · paired with <b>${fPair}</b> · <b>2.5%</b> trading fee${/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(fWallet()) ? ` · creator share to <b>${esc(fWallet().slice(0, 4))}…${esc(fWallet().slice(-4))}</b>` : ''}` : `paired with <b>${esc(pairLabel())}</b> · <b>${feeBps ? feeBps / 100 + '%' : 'default'}</b> creator fee`}${sp.length && venue !== 'float' ? ` · you keep <b>${100 - others}%</b>` : ''} ·${+$('buy').value > 0 ? 'dev buy <b>' + esc($('buy').value) + '</b>' : 'no dev buy'}<br>needs about <b>${needSol().toFixed(4)} SOL</b>${bal != null ? ` · wallet <b class="${bal < needSol() ? 'low' : ''}">${bal.toFixed(4)} SOL</b>${bal < needSol() ? ' <span class="low">· not enough SOL</span>' : ''}` : ''}`
 }
 
 // ---------------------------------------------------------------- hold to launch
@@ -918,7 +936,7 @@ async function balance() {
 }
 setInterval(balance, 20000)
 // what this launch needs: account rent (measured: SOL pair 0.0055, HYPE 0.0070, a fee split +0.0059), fees, a margin, the dev buy
-const needSol = () => { if (venue === 'meteora') { const b = +$('buy').value || 0; return (mShared && !splits().length ? 0.0105 : 0.017) + (b > 0 ? 0.003 + b + (mQuote() ? 0.0045 : 0) : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
+const needSol = () => { if (venue === 'float') { const b = fPair === 'SOL' ? +$('buy').value || 0 : 0; return 0.0235 + 0.002 + (b > 0 ? b + 0.0045 : 0) } if (venue === 'meteora') { const b = +$('buy').value || 0; return (mShared && !splits().length ? 0.0105 : 0.017) + (b > 0 ? 0.003 + b + (mQuote() ? 0.0045 : 0) : 0) } const buy = +$('buy').value || 0, tokSol = pair === 'TOKEN' && tokenPick && solUsd ? tokenPick.price / solUsd : 0; return (pair === 'HYPE' ? 0.0071 : pair === 'TOKEN' ? 0.0078 : 0.0056) + (splits().length ? 0.0060 : 0) + 0.0012 + 0.001 + (pair === 'SOL' ? buy : pair === 'HYPE' ? buy * 0.95 : pair === 'TOKEN' ? buy * tokSol * 1.01 : 0) }
 // running out of SOL is its own, plainly named error: a banner with what the launch needs and what the wallet has
 const SHORT_RE = /"Custom":1}|insufficient (funds|lamports)|InsufficientFunds|no record of a prior credit|AccountNotFound|ResultWithNegativeLamports/i
 function showShort(need, have) {
@@ -940,6 +958,12 @@ function check() {
     if (mPair === 'ANY' && !anyQ) return anyErr && !/checking/.test(anyErr) ? anyErr : 'paste the mint address of the token to pair with'
     if (sp[0] && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(sp[0].address)) return 'that fee wallet is not a Solana address'
     if (sp[0] && (sp[0].shareBps % 100 || sp[0].shareBps > 10000)) return 'the fee wallet takes a whole percent, 1 to 100'
+    return
+  }
+  if (venue === 'float') {
+    if (fWallet() && !/^[1-9A-HJ-NP-Za-km-z]{32,44}$/.test(fWallet())) return 'that fee wallet is not a Solana address'
+    if (buy > 0 && fPair !== 'SOL') return 'a dev buy on Float needs the SOL pair'
+    if ($('name').value.trim().length > 32) return 'a name on Float is 1 to 32 characters'
     return
   }
   if (sp.reduce((a, s) => a + s.shareBps, 0) >= 10000) return 'the split has to leave you something'
@@ -978,12 +1002,14 @@ async function launch() {
     const coin = { owner: sol, image: pic64, name, symbol, description: $('desc').value.trim(), twitter: $('x').value, website: $('web').value, telegram: $('tg').value }
     const r = venue === 'meteora'
       ? await (await meteora()).launch({ ...coin, ...meteoraMint(), quote: mQuote(), buySol: +$('buy').value || 0, feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad, feeWallet: sp[0]?.address, feeShare: sp[0] ? sp[0].shareBps / 100 : 0 }, prog)
+      : venue === 'float' ? await (await floatL()).launch({ ...coin, ...meteoraMint(), pair: fPair, buySol: +$('buy').value || 0, feeWallet: fWallet() || undefined }, prog)
       : await pumpLaunch({ ...coin, pair: pair === 'COIN' ? 'SOL' : pair === 'TOKEN' ? tokenPick.mint : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, prog)
     ;['meta', 'sign', 'live'].forEach((k) => step(k, 'ok')); note(''); S.launched(); L.launched(r.mint, r.signature, { name, symbol, image: r.image, venue: r.venue, pool: r.pool })
     const k = st?.keys.find((x) => x.mint === r.mint)
     $('done').innerHTML = `<div class="done"><div class="t">$${esc(symbol)} is live.</div><code>${mark(r.mint, k?.pattern)}</code>
-      ${r.venue === 'meteora' ? `<a href="https://jup.ag/tokens/${esc(r.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(r.pool || r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
+      ${r.venue === 'meteora' || r.venue === 'float' ? `<a href="https://jup.ag/tokens/${esc(r.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(r.pool || r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
     if (r.venue === 'meteora') $('done').insertAdjacentHTML('beforeend', '<p class="hint" style="margin-top:12px">Trading fees wait until you claim them. Press <b>fees</b> on your coin in the Launched list, before or after graduation.</p>')
+    if (r.venue === 'float') $('done').insertAdjacentHTML('beforeend', `<p class="hint" style="margin-top:12px">The creator share of the fees goes to the fee wallet. If it has not arrived, press Claim under <a class="link" href="#fees">Creator fees</a>.</p>${r.buyError ? `<p class="hint low" style="margin-top:8px">The coin is live, but the dev buy did not go through: ${esc(String(r.buyError).slice(0, 160))}. You can buy it on Jupiter.</p>` : ''}`)
     registerLaunch(r.mint, r.signature)
     $('copyCa').onclick = (e) => { e.preventDefault(); navigator.clipboard.writeText(r.mint); e.target.textContent = 'Copied'; S.click() }
   } catch (e) {
@@ -998,7 +1024,7 @@ async function launch() {
 }
 
 // my coins: launched from this browser, plus every coin from the wallets on your account
-var histRow = (h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' ? `<a href="#fees" style="color:var(--acc)">Claim fees</a><a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`
+var histRow = (h) => `<div class="hrow">${h.image ? `<img src="${esc(h.image)}" alt="">` : '<img alt="">'}<div><b>${esc(h.name || '')}<span>$${esc(h.symbol || '')}</span></b><code>${esc(h.mint)}</code></div><div>${h.venue === 'meteora' || h.venue === 'float' ? `<a href="#fees" style="color:var(--acc)">Claim fees</a><a href="https://jup.ag/tokens/${esc(h.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(h.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(h.pool || h.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://solscan.io/tx/${esc(h.signature)}" target="_blank" rel="noopener">tx ↗</a></div></div>`
 function drawHist() {
   if (!histRow) return                       // called by the first render before this part of the script has run: the next render draws it
   const seen = new Set(), list = []
@@ -1051,11 +1077,11 @@ async function loadPublic() {
 }
 function drawPublic() {
   const q = xq.trim().toLowerCase()
-  let list = pubCoins.filter((c) => (xven === 'all' || (xven === 'meteora' ? c.venue === 'meteora' : c.venue !== 'meteora')) && (!q || `${c.name} ${c.symbol} ${c.mint}`.toLowerCase().includes(q)))
+  let list = pubCoins.filter((c) => (xven === 'all' || (c.venue || 'pump') === xven) && (!q || `${c.name} ${c.symbol} ${c.mint}`.toLowerCase().includes(q)))
   list = [...list].sort(xsort === 'mc' ? (a, b) => (pubMcs[b.mint] || 0) - (pubMcs[a.mint] || 0) : (a, b) => (b.at || 0) - (a.at || 0))
   const pic = (c, cls = '') => (c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy"${cls}>` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`)
-  const trade = (c) => (c.venue === 'meteora' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/') + c.mint
-  const vlogo = (c) => (c.venue === 'meteora' ? '<img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora" title="Meteora">' : '<img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun" title="pump.fun">')
+  const trade = (c) => (c.venue === 'meteora' || c.venue === 'float' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/') + c.mint
+  const vlogo = (c) => (c.venue === 'meteora' ? '<img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora" title="Meteora">' : c.venue === 'float' ? '<img class="vlogo" src="/assets/venues/float.png" alt="Float" title="Float">' : '<img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun" title="pump.fun">')
   const spot = !q && xven === 'all' && xsort === 'new' ? list[0] : null
   $('xspot').innerHTML = spot ? (() => { const pl = plate(spot.mint, spot), t = tints[spot.mint]
     return `<div class="xspot" style="${tintVars(t)}${spot.image ? `--img:url('${esc(spot.image)}')` : ''}"><div class="art">${pic(spot)}</div>
@@ -1305,7 +1331,7 @@ summary(); stats()
       let claimed = 0, waiting = 0, other = 0; const pumpSeen = new Set()
       for (const c of list) {
         const x = fees.get(c.mint); if (!x) continue; if (x.generated == null) { other++; continue }
-        if (c.venue !== 'meteora') { if (pumpSeen.has(x.dev)) continue; pumpSeen.add(x.dev) }
+        if ((c.venue || 'pump') === 'pump') { if (pumpSeen.has(x.dev)) continue; pumpSeen.add(x.dev) }
         claimed += x.claimed || 0; waiting += x.waiting || 0
       }
       const usd = (v) => (px ? '$' + ((v / 1e9) * px).toFixed(2) : '')
@@ -1314,9 +1340,9 @@ summary(); stats()
       $('aWaiting').innerHTML = `${sol(waiting)}<small>SOL</small>`; $('aWaitingUsd').textContent = usd(waiting)
       $('aGen').innerHTML = `${sol(claimed + waiting)}<small>SOL</small>`; $('aGenUsd').textContent = usd(claimed + waiting)
       $('accRows').innerHTML = list.length ? list.map((c) => {
-        const x = fees.get(c.mint) || {}, pump = c.venue !== 'meteora', solic = '<img class="solic" src="/assets/venues/sol.svg" alt="SOL" title="SOL">'
+        const x = fees.get(c.mint) || {}, pump = (c.venue || 'pump') === 'pump', solic = '<img class="solic" src="/assets/venues/sol.svg" alt="SOL" title="SOL">'
         return `<tr><td><a class="coinc" href="${pump ? 'https://pump.fun/coin/' : 'https://jup.ag/tokens/'}${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}</b><small>$${esc(c.symbol)}</small></div></a></td>
-          <td class="dim">${pump ? 'pump.fun' : 'Meteora'}</td><td class="num muted">${short(c.dev)}</td>
+          <td class="dim">${pump ? 'pump.fun' : c.venue === 'float' ? 'Float' : 'Meteora'}</td><td class="num muted">${short(c.dev)}</td>
           <td class="r num">${x.generated == null ? '—' : `<span class="amt">${sol(x.claimed)}${solic}</span>`}</td><td class="r num" style="color:${x.waiting ? 'var(--acc)' : 'var(--t3)'}">${x.generated == null ? '—' : `<span class="amt">${sol(x.waiting)}${solic}</span>`}</td></tr>`
       }).join('') : '<tr><td colspan="5" class="muted">No launches from these wallets yet.</td></tr>'
       $('accNote').textContent = 'Amounts are your creator share in SOL, read from Solana; coins paired with another token are shown in SOL at today\'s price. pump.fun keeps fees per wallet, not per coin, so a pump.fun row shows that whole wallet, and the totals count each wallet once.' + (other ? ` ${other} coin${other > 1 ? 's have' : ' has'} no SOL price yet.` : '') + (f.reading ? ' Some wallets are still being read; this updates by itself.' : '')
@@ -1326,7 +1352,7 @@ summary(); stats()
 })()
 </script>
 <script>
-// ---------------------------------------------------------------- claim: every Meteora coin you launched, one button each
+// ---------------------------------------------------------------- claim: every Meteora and Float coin you launched, one button each
 ;(() => {
   const $ = (id) => document.getElementById(id), esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
   const short = (a) => (a ? `${a.slice(0, 4)}…${a.slice(-4)}` : '—')
@@ -1339,7 +1365,7 @@ summary(); stats()
     const wallets = new Set(p?.wallets || []), pub = l.coins || [], fees = new Map((f.coins || []).map((x) => [x.mint, x])), seen = new Set()
     list = []
     for (const c of [...mine.map((h) => ({ ...h, dev: pub.find((x) => x.mint === h.mint)?.dev })), ...pub.filter((c) => wallets.has(c.dev))]) {
-      if (c.venue !== 'meteora' || !c.pool || seen.has(c.mint)) continue
+      if (!(c.venue === 'float' || (c.venue === 'meteora' && c.pool)) || seen.has(c.mint)) continue
       seen.add(c.mint); list.push({ ...c, fee: fees.get(c.mint) })
     }
     draw()
@@ -1349,20 +1375,21 @@ summary(); stats()
       const w = c.fee?.waiting, amt = w == null ? '—' : (w / 1e9).toFixed(w < 1e8 ? 4 : 3)
       return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">launched from ${short(c.dev)}</span></div></div>
         <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'SOL waiting'}</small></div>${w === 0 ? '<span class="nothing">Nothing to claim</span>' : `<button class="btn acc" type="button" data-i="${i}">Claim</button>`}</div>`
-    }).join('') : '<div class="lempty">No Meteora coins found for this browser or your account. Paste a contract address below.</div>'
+    }).join('') : '<div class="lempty">No Meteora or Float coins found for this browser or your account. Paste a contract address below.</div>'
   }
   async function claim(b) {
     const c = list[+b.dataset.i]; if (!c || b.disabled) return
     b.disabled = true; const label = (t) => (b.textContent = t)
     try {
       label('Connecting…'); await connect()
-      if (c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
-      label('Reading…'); const M = await meteora(), v = await M.feesOf(c.pool, sol)
-      if (!v.yours) { say(`This wallet is not the creator of ${c.symbol}.`, true); label('Claim'); b.disabled = false; return }
+      const fl = c.venue === 'float'                // on Float anyone can send the claim: the fees go to the coin's fee wallet
+      if (!fl && c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
+      label('Reading…'); const M = fl ? await floatL() : await meteora(), v = await M.feesOf(fl ? c.mint : c.pool, sol)
+      if (!fl && !v.yours) { say(`This wallet is not the creator of ${c.symbol}.`, true); label('Claim'); b.disabled = false; return }
       if (!(v.sol > 0)) { say(`Nothing to claim on ${c.symbol} yet.`); label('Nothing yet'); setTimeout(() => { label('Claim'); b.disabled = false }, 2500); return }
-      label('Approve…'); say(`Approve the claim of ${v.sol.toFixed(4)} ${v.unit} in your wallet.`)
+      label('Approve…'); say(`Approve the claim of ${v.sol.toFixed(4)} ${v.unit} in your wallet.${fl && !v.yours ? ` It goes to the coin's fee wallet, ${short(v.receiver)}.` : ''}`)
       const amt = `${v.sol.toFixed(4)} ${v.unit}`
-      const sig = await M.claim({ owner: sol, pool: c.pool, note: (k, x) => {
+      const sig = await M.claim({ owner: sol, ...(fl ? { mint: c.mint } : { pool: c.pool }), note: (k, x) => {
         if (k === 'sending') { label('Sending…'); say('Sending the claim…') }
         if (k === 'sent') { label('Confirming…'); $('claimMsg').innerHTML = `Sent. Confirming on Solana… <a class="link" href="https://solscan.io/tx/${esc(x)}" target="_blank" rel="noopener">view ↗</a>`; $('claimMsg').style.color = '' }
       } })
@@ -1380,9 +1407,9 @@ summary(); stats()
     const ca = $('claimCa').value.trim(); if (!ca) return
     const pub = (await fetch('/api/launched').then((r) => r.json()).catch(() => ({ coins: [] }))).coins || [], c = pub.find((x) => x.mint === ca)
     if (!c) return say('That coin is not on the dzz list. Only coins launched with dzz can be claimed here.', true)
-    if (c.venue !== 'meteora') return say(`${c.symbol} is a pump.fun coin: claim it on pump.fun, from your profile's Creator rewards.`, true)
+    if (c.venue !== 'meteora' && c.venue !== 'float') return say(`${c.symbol} is a pump.fun coin: claim it on pump.fun, from your profile's Creator rewards.`, true)
     if (!list.some((x) => x.mint === ca)) { list.unshift(c); draw() }
-    say(`${c.symbol} added. Press Claim with ${short(c.dev)} connected.`)
+    say(c.venue === 'float' ? `${c.symbol} added. Press Claim with any wallet: the fees go to the coin's fee wallet.` : `${c.symbol} added. Press Claim with ${short(c.dev)} connected.`)
   }
   addEventListener('hashchange', () => { if (location.hash.startsWith('#fees')) load() })
   if (location.hash.startsWith('#fees')) load()

@@ -1,8 +1,8 @@
 // The public list of coins launched with dzz.
 //   GET  /api/launched                 → { coins: [{ mint, name, symbol, image, uri, sig, at, dev, venue?, pool? }] } newest first (cached ~15 s)
 //   POST /api/launched { mint, signature }
-// A POST is only listed after it checks out on Solana: the transaction succeeded, it ran pump.fun's or Meteora's create for
-// exactly that mint, and the coin's metadata lives where dzz puts it (this project's Blob store, or the desktop app's
+// A POST is only listed after it checks out on Solana: the transaction succeeded, it ran pump.fun's, Meteora's or Float's create
+// for exactly that mint, and the coin's metadata lives where dzz puts it (this project's Blob store, or the desktop app's
 // jsDelivr-served dzzdeploy repo, or the old Blob store). `dev` is the wallet that signed and paid for the launch (profiles
 // group coins by it). The list is one JSON file in dzz's store (launched.json).
 import { put, getJson, STORE } from './_store.js'
@@ -10,6 +10,8 @@ import { put, getJson, STORE } from './_store.js'
 const PUMP = '6EF8rrecthR5Dkzon8Nwu78hRvfCKubJ14M5uBEwF6P'
 const DBC = 'dbcij3LWUppWqq96dh6gJWwBifmcGfLSB5D4DuSMaqN'                  // Meteora's bonding curve program
 const DBC_CREATE = [[140, 85, 215, 176, 102, 54, 104, 79], [169, 118, 51, 78, 145, 110, 220, 155]].map((d) => Buffer.from(d))   // initialize_virtual_pool_with_spl_token / _token2022: accounts 3 = mint, 5 = pool
+const FLOAT = '3KguFi7YYzLgttG46fRism16CfcuNCkDh6U7td9JTqxX'                // Float (launches on Raydium LaunchLab)
+const FLOAT_LAUNCH = Buffer.from([16, 34, 186, 164, 179, 227, 101, 126])    // launch_keyed: accounts 6 = mint, 12 = pool
 const RPCS = [process.env.RPC_URL, 'https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com'].filter(Boolean)   // a null transaction falls through to the next
 const OURS = new RegExp('^(https://([a-z0-9]+\.public\.blob\.vercel-storage\.com|cdn\.jsdelivr\.net/gh/dodo1653/dzzdeploy@)|' + STORE.replace(/[.*+?^${}()|[\]\/]/g, '\$&') + '/s/m/)', 'i')
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
@@ -27,7 +29,7 @@ async function rpc(method, params) {
   }
   throw last
 }
-// pump.fun's and Meteora's create arguments both start with three borsh strings: name, symbol, uri
+// pump.fun's, Meteora's and Float's create arguments all start with three borsh strings: name, symbol, uri
 function createArgs(data) {
   let o = 8; const str = () => { const n = data.readUInt32LE(o); o += 4; if (n > 400) throw new Error('not a create'); const s = data.subarray(o, o + n).toString('utf8'); o += n; return s }
   return { name: str(), symbol: str(), uri: str() }
@@ -60,9 +62,10 @@ export default async function handler(req, res) {
       try {
         if (prog === PUMP) { const a = createArgs(b58dec(ix.data)); if (keys[ix.accounts[0]] === mint) { meta = a; break } }
         if (prog === DBC) { const d = b58dec(ix.data); if (DBC_CREATE.some((x) => d.subarray(0, 8).equals(x)) && keys[ix.accounts[3]] === mint) { meta = createArgs(d); extra = { venue: 'meteora', pool: keys[ix.accounts[5]] }; break } }
+        if (prog === FLOAT) { const d = b58dec(ix.data); if (d.subarray(0, 8).equals(FLOAT_LAUNCH) && keys[ix.accounts[6]] === mint) { meta = createArgs(d); extra = { venue: 'float', pool: keys[ix.accounts[12]] }; break } }
       } catch {}
     }
-    if (!meta) return res.status(400).json({ error: 'no pump.fun or Meteora create for this mint in that transaction' })
+    if (!meta) return res.status(400).json({ error: 'no pump.fun, Meteora or Float create for this mint in that transaction' })
     if (!OURS.test(meta.uri)) return res.status(400).json({ error: 'not launched with dzz' })
     let image = ''; try { image = (await (await fetch(meta.uri)).json()).image || '' } catch {}
     const coin = { mint, name: meta.name.slice(0, 32), symbol: meta.symbol.slice(0, 10), image, uri: meta.uri, sig, at: (tx.blockTime || Math.floor(Date.now() / 1000)) * 1000, dev: keys[0], ...extra }

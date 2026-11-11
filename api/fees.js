@@ -1,6 +1,7 @@
 // What every coin launched with dzz has generated in fees for its dev, and how much the dev has claimed. All read from Solana.
 //   GET /api/fees → { coins: [{ mint, name, symbol, image, venue, dev, generated, claimed, waiting, note }], reading, at }   amounts in lamports
-// Meteora keeps running totals on the coin's pool, so those are exact and need no history. pump.fun keeps one fee vault per dev
+// Meteora keeps running totals on the coin's pool, so those are exact and need no history. Float coins are read from the coin's
+// launch account and its fee vault (see floatRows). pump.fun keeps one fee vault per dev
 // wallet, not per coin: its figures are the wallet's, read from every claim out of its vaults, a batch at a time, remembered
 // in dzz's store. pump.fun now keeps new creator fees inside each coin's bonding curve and sweeps them into the vault in the same
 // transaction as the claim, so a claim is read from pump.fun's own CollectCreatorFee event (the vault's net change misses the sweep),
@@ -81,6 +82,51 @@ async function meteoraRows(coins) {
     return { ...base(r.c), dev: r.dev, quote: q, raw: { generated: r.generated, claimed: r.claimed, waiting: r.waiting, decimals: k?.decimals ?? null }, generated: conv(r.generated), claimed: conv(r.claimed), waiting: conv(r.waiting), converted: !!k, note: k ? ['fees are in its paired token, shown in SOL at today’s price', grad].filter(Boolean).join('; ') : 'fees are in its paired token, not SOL' }
   })
 }
+// a Float coin (Raydium LaunchLab through Float's program): the coin's fees wait in LaunchLab's creator fee vault until anyone
+// sweeps them into Float's split, then the creator's part waits on the launch account (dev_owed) until it is paid out. Float keeps
+// no total of what it paid the creator, so generated is worked out from everything swept so far, and claimed is the rest.
+const FLOAT = '3KguFi7YYzLgttG46fRism16CfcuNCkDh6U7td9JTqxX', LAUNCHLAB = 'LanMV9sAd7wArD4vJFi2qDdfnVhFxYSUg6eADduJ3uj'
+async function floatRows(all) {
+  const out = []; for (let i = 0; i < all.length; i += 45) out.push(...(await floatChunk(all.slice(i, i + 45)))); return out   // an RPC reads 100 accounts a call
+}
+async function floatChunk(coins) {
+  const cfgKey = enc58(pda([Buffer.from('config')], FLOAT)), keys = coins.map((c) => enc58(pda([Buffer.from('launch'), dec58(c.mint)], FLOAT)))
+  const accs = (await rpc('getMultipleAccounts', [[cfgKey, ...keys], { encoding: 'base64' }]))?.value || []
+  const cfg = accs[0] && Buffer.from(accs[0].data[0], 'base64'), holders = cfg ? cfg.readUInt16LE(72) : 1500, devBps = cfg ? cfg.readUInt16LE(74) : 500
+  const share = (n) => Math.floor((n * devBps) / (holders + devBps))
+  const rows = coins.map((c, i) => {
+    const a = accs[i + 1]; if (!a) return { c, missing: true }
+    const d = Buffer.from(a.data[0], 'base64'); if (d.length < 209) return { c, missing: true }
+    const q = d.subarray(104, 136), vault = enc58(pda([pda([Buffer.from('coin'), dec58(c.mint)], FLOAT), q], LAUNCHLAB))
+    return { c, dev: enc58(d.subarray(8, 40)), receiver: enc58(d.subarray(40, 72)), quote: enc58(q), pool: enc58(d.subarray(136, 168)), vault, swept: u64(d, 177), owed: u64(d, 201) }
+  })
+  const live = rows.filter((r) => !r.missing)
+  const more = live.length ? (await rpc('getMultipleAccounts', [live.flatMap((r) => [r.pool, r.vault]), { encoding: 'base64' }]))?.value || [] : []
+  live.forEach((r, i) => {
+    const pool = more[2 * i] && Buffer.from(more[2 * i].data[0], 'base64'), v = more[2 * i + 1] && Buffer.from(more[2 * i + 1].data[0], 'base64')
+    r.graduated = !!pool && pool[17] !== 0
+    const pending = !r.graduated && v && v.length >= 72 ? share(u64(v, 64)) : 0
+    r.waiting = r.owed + Math.max(0, pending - 1); r.generated = Math.max(share(r.swept) + pending, r.waiting); r.claimed = r.generated - r.waiting
+  })
+  const rate = await rates([...new Set(live.map((r) => r.quote).filter((q) => q !== WSOL))])
+  return rows.map((r) => {
+    if (r.missing) return { ...base(r.c), note: 'could not read this coin on Float' }
+    const grad = r.graduated ? 'graduated: fees from the pool aren’t counted' : ''
+    if (r.quote === WSOL) return { ...base(r.c), dev: r.dev, receiver: r.receiver, generated: r.generated, claimed: r.claimed, waiting: r.waiting, note: grad }
+    const k = rate[r.quote], conv = (n) => (k ? Math.round(n * k.perUnit) : null)
+    return { ...base(r.c), dev: r.dev, receiver: r.receiver, quote: r.quote, raw: { generated: r.generated, claimed: r.claimed, waiting: r.waiting, decimals: k?.decimals ?? null }, generated: conv(r.generated), claimed: conv(r.claimed), waiting: conv(r.waiting), converted: !!k, note: k ? ['fees are in its paired token, shown in SOL at today’s price', grad].filter(Boolean).join('; ') : 'fees are in its paired token, not SOL' }
+  })
+}
+// a paired token's worth in lamports per base unit, at today's price
+async function rates(others) {
+  const rate = {}; if (!others.length) return rate
+  try {
+    const mints = (await rpc('getMultipleAccounts', [others, { encoding: 'base64' }]))?.value || []
+    const px = await (await fetch('https://lite-api.jup.ag/price/v3?ids=' + [WSOL, ...others].join(','), { signal: AbortSignal.timeout(5000) })).json()
+    others.forEach((q, i) => { const d = mints[i] && Buffer.from(mints[i].data[0], 'base64')[44], usd = px[q]?.usdPrice, solUsd = px[WSOL]?.usdPrice; if (d != null && usd && solUsd) rate[q] = { decimals: d, perUnit: (usd / solUsd) * 1e9 / 10 ** d } })
+  } catch {}
+  return rate
+}
 const base = (c) => ({ mint: c.mint, name: c.name, symbol: c.symbol, image: c.image, venue: c.venue || 'pump', at: c.at })
 
 // every movement through a fee vault, kept by signature: money in is fees, money out is a claim, whoever made it. A stale read can
@@ -149,9 +195,9 @@ const SNAP = 'fees/snapshot.json'
 async function readAll(budget) {
   stopAt = Date.now() + budget
   const coins = (await load('launched.json'))?.coins || (await (await fetch('https://dzzdeploy.vercel.app/api/launched')).json()).coins || []
-  const met = coins.filter((c) => c.venue === 'meteora' && c.pool), pump = coins.filter((c) => c.venue !== 'meteora')
-  const [m, p] = await Promise.all([met.length ? meteoraRows(met) : [], pump.length ? pumpRows(pump) : { rows: [], reading: false }])
-  const snap = { coins: [...m, ...p.rows].sort((a, b) => b.at - a.at), reading: p.reading, at: Date.now() }
+  const met = coins.filter((c) => c.venue === 'meteora' && c.pool), flo = coins.filter((c) => c.venue === 'float'), pump = coins.filter((c) => c.venue !== 'meteora' && c.venue !== 'float')
+  const [m, f, p] = await Promise.all([met.length ? meteoraRows(met) : [], flo.length ? floatRows(flo).catch(() => flo.map((c) => ({ ...base(c), note: 'could not read this coin on Float' }))) : [], pump.length ? pumpRows(pump) : { rows: [], reading: false }])
+  const snap = { coins: [...m, ...f, ...p.rows].sort((a, b) => b.at - a.at), reading: p.reading, at: Date.now() }
   await save(SNAP, snap); return snap
 }
 
