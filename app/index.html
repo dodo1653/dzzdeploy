@@ -301,6 +301,11 @@ button.pav.editable:hover::after { opacity: 1; }
 .opt .ic { width: 19px; height: 19px; }
 .amsg { min-height: 20px; margin: 14px 0 0; font-size: 13px; color: var(--t2); } .amsg.err { color: var(--bad); }
 
+/* dashboard: launches whose wallet is not on the account yet */
+.linkcard { display: flex; align-items: center; gap: 16px; padding: 14px 18px; margin-bottom: 12px; border: 1px solid rgba(var(--acc-rgb), .35); border-radius: var(--r2); background: rgba(var(--acc-rgb), .06); }
+.linkcard > div { flex: 1; min-width: 0; } .linkcard b { display: block; font: 500 13.5px var(--ui); } .linkcard span { display: block; font-size: 12.5px; color: var(--t2); margin-top: 2px; }
+.linkcard code { font: 500 12px var(--mono); color: var(--ink); }
+@media (max-width: 640px) { .linkcard { flex-direction: column; align-items: flex-start; } }
 /* dashboard: launches table */
 .ltbl td { padding-top: 13px; padding-bottom: 13px; }
 .ltbl .coinc small { display: inline-flex; align-items: center; gap: 6px; }
@@ -430,10 +435,11 @@ button.pav.editable:hover::after { opacity: 1; }
         <div class="pbanner" data-banner></div>
         <div class="pbody">
           <span class="pav" data-avatar></span>
-          <div class="pname"><h2 class="dash-h">Welcome back, <span class="grad" id="dashName">…</span></h2><p id="dashSub">Your launches and creator fees from every wallet on your account.</p></div>
+          <div class="pname"><h2 class="dash-h"><span class="grad" id="dashName">…</span></h2><p id="dashSub">Your launches and creator fees from every wallet on your account.</p></div>
           <div class="pend"><a class="btn" href="#account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Edit profile</a><a class="btn primary" href="#launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a></div>
         </div>
       </div>
+        <div class="linkcard" id="aLink" hidden><div><b>Launches from wallets not on your account</b><span id="aLinkTxt"></span></div><button class="btn sm" id="aLinkBtn" type="button"><svg class="ic sm"><use href="/assets/icons.svg#wallet"/></svg>Link wallet</button></div>
         <div class="figs">
           <div><span class="k"><i class="ok"></i>Collected</span><span class="v" id="aClaimed"><span class="solv none">–</span></span><span class="s" id="aClaimedS"></span></div>
           <div><span class="k"><i class="acc"></i>Waiting to collect</span><span class="v" id="aWaiting"><span class="solv none">–</span></span><span class="s" id="aWaitingS"></span></div>
@@ -1456,8 +1462,14 @@ summary(); stats()
         fetch('/api/fees').then((r) => r.json()).catch(() => ({ coins: [] })),
         fetch('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => j.So11111111111111111111111111111111111111112?.usdPrice).catch(() => 0),
       ])
-      const list = (l.coins || []).filter((c) => mine.has(c.dev)), fees = new Map((f.coins || []).map((x) => [x.mint, x]))
+      // coins launched in this browser count too, even before their wallet is linked; those wallets are offered for linking
+      let local = []; try { local = JSON.parse(localStorage.getItem('dzz-history') || '[]').map((h) => h.mint) } catch {}
+      const here = new Set(local), list = (l.coins || []).filter((c) => mine.has(c.dev) || here.has(c.mint)), fees = new Map((f.coins || []).map((x) => [x.mint, x]))
       D = { list, fees, px, ev: eventsOf(list, fees), reading: !!(f.reading || f.histReading), wallets: p.wallets.length }
+      const loose = new Map(); for (const c of list) if (c.dev && !mine.has(c.dev)) loose.set(c.dev, [...(loose.get(c.dev) || []), '$' + c.symbol])
+      $('aLink').hidden = !loose.size
+      if (loose.size) $('aLinkTxt').innerHTML = [...loose].map(([w, s]) => `${esc(s.join(', '))} from <code>${short(w)}</code>`).join(' · ') + '. They show here because they were launched in this browser. To see them on every device, switch your wallet app to that wallet and press Link wallet.'
+      $('aLinkBtn').onclick = async () => { try { const np = await DzzAuth.linkWallet(); toast('Wallet linked'); launches(np) } catch (e) { toast(e.message, true) } }
       dashboard(); drawCal(); drawHistory()
       clearTimeout(launches.t); if (D.reading) launches.t = setTimeout(() => { const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'dashboard' || v === 'history') launches(p) }, 20000)
     } catch { say('Could not read your launches just now. Try again in a moment.', true); if (!D) $('hList').innerHTML = '<div class="lempty">Could not read your history just now. Try again in a moment.</div>' }
@@ -1650,6 +1662,7 @@ summary(); stats()
 })()
 </script>
 <script src="/assets/statusbar.js"></script>
+<script>try { window.DZZ_MY_MINTS ||= JSON.parse(localStorage.getItem('dzz-history') || '[]').map((h) => h.mint) } catch {}   // the fees card counts coins launched in this browser too</script>
 <script src="/assets/feestotal.js" defer></script>
 </body>
 </html>
