@@ -7,7 +7,10 @@
   const root = document.getElementById('feesTotal'); if (!root) return
   const local = location.origin !== SITE && !/dzzdeploy/.test(location.hostname)
   const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[c])
-  const sol = (l) => (!l ? '0' : (l / 1e9).toFixed(l < 1e8 ? 4 : 3)), usd = (l, p) => (p ? '$' + ((l / 1e9) * p).toLocaleString(undefined, { maximumFractionDigits: 2, minimumFractionDigits: 2 }) : '')
+  // a SOL figure: the Solana mark, the whole part in full, the decimals a step quieter (same look as assets/figures.js, kept here so the desktop app needs nothing else)
+  const MARK = `<img class="m" src="${local ? SITE : ''}/assets/venues/sol.svg" alt="" aria-hidden="true">`
+  const sol = (l) => { if (!l) return `<span class="v">${MARK}<b>0</b></span>`; const [w, d] = (l / 1e9).toFixed(l >= 1e9 ? 3 : l >= 1e5 ? 4 : 6).split('.'); return `<span class="v">${MARK}<b>${Number(w).toLocaleString('en-US')}</b><em>.${d}</em></span>` }
+  const usd = (l, p) => (p ? '$' + ((l / 1e9) * p).toLocaleString('en-US', { maximumFractionDigits: 2, minimumFractionDigits: 2 }) : '')
   const A58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
   const enc58 = (b) => { let n = 0n; for (const x of b) n = n * 256n + BigInt(x); let s = ''; while (n > 0n) { s = A58[Number(n % 58n)] + s; n /= 58n } for (const x of b) { if (x) break; s = '1' + s } return s }
   const token = { get: () => { try { return localStorage.getItem('dzz.profile') } catch { return null } }, set: (t) => { try { t ? localStorage.setItem('dzz.profile', t) : localStorage.removeItem('dzz.profile') } catch {} } }
@@ -19,8 +22,12 @@
 
   const css = document.createElement('style')
   css.textContent = `#feesTotal .ft { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1px; background: var(--line, rgba(255,255,255,.08)); border: 1px solid var(--line, rgba(255,255,255,.08)); border-radius: 10px; overflow: hidden; }
-#feesTotal .ft div { background: var(--bg2, var(--bg, #0b0d14)); padding: 14px 16px; min-width: 0; } #feesTotal .ft b { display: block; font: 500 22px/1.2 var(--mono, ui-monospace, monospace); letter-spacing: -.02em; } #feesTotal .ft b small { font-size: 13px; color: var(--t3, #6c707b); margin-left: 4px; }
-#feesTotal .ft span { display: block; font-size: 12.5px; color: var(--t3, #6c707b); margin-top: 3px; } #feesTotal .ft i { font-style: normal; color: var(--t2, #a7abb5); font: 400 12.5px var(--mono, ui-monospace, monospace); }
+#feesTotal .ft > div { background: var(--bg2, var(--bg, #0b0d14)); padding: 18px 20px 16px; min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+#feesTotal .ft .k { font: 500 11.5px var(--mono, ui-monospace, monospace); color: var(--t3, #6c707b); letter-spacing: .05em; text-transform: uppercase; }
+#feesTotal .ft .v { display: inline-flex; align-items: baseline; gap: 0; font: 500 clamp(24px, 2.6vw, 32px)/1 var(--head, var(--ui, system-ui)); letter-spacing: -.03em; font-variant-numeric: tabular-nums; color: var(--ink, #eef0f4); white-space: nowrap; }
+#feesTotal .ft .v .m { width: .74em; height: .62em; align-self: center; flex: none; display: inline-block; margin-right: .34em; } #feesTotal .ft .v b { font-weight: 500; } #feesTotal .ft .v em { font-style: normal; font-weight: 400; color: var(--t3, #6c707b); }
+#feesTotal .ft .wait .v b { color: var(--acc, #6ea8ff); }
+#feesTotal .ft span.s { display: flex; gap: 10px; flex-wrap: wrap; font: 400 12.5px var(--mono, ui-monospace, monospace); color: var(--t3, #6c707b); } #feesTotal .ft span.s i { font-style: normal; color: var(--t2, #a7abb5); font-weight: 500; }
 #feesTotal .fx { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; margin-top: 10px; font-size: 12.5px; color: var(--t3, #6c707b); }
 #feesTotal .fx a, #feesTotal .fx button { all: unset; cursor: pointer; color: var(--acc, #6ea8ff); } #feesTotal .fx a:hover, #feesTotal .fx button:hover { text-decoration: underline; }
 @media (max-width: 640px) { #feesTotal .ft { grid-template-columns: 1fr; } }`
@@ -67,9 +74,9 @@
       const who = name ? `profile ${esc(name)} · ${mine.size} wallet${mine.size === 1 ? '' : 's'}` : mine.size ? `${mine.size} wallet${mine.size === 1 ? '' : 's'} from this app's launches` : 'no wallets yet'
       const act = token.get() ? `<a href="${local ? SITE + '/app' : ''}#account"${local ? ' target="_blank" rel="noopener"' : ''}>Account ↗</a>` : local ? '<button type="button" data-signin>Sign in to add all your wallets</button>' : '<a href="/app#account">Sign in to add all your wallets</a>'
       root.innerHTML = `<div class="ft">
-  <div><b>${sol(claimed)}<small>SOL</small></b><span>collected <i>${usd(claimed, px)}</i></span></div>
-  <div><b>${sol(waiting)}<small>SOL</small></b><span>waiting to collect <i>${usd(waiting, px)}</i></span></div>
-  <div><b>${sol(claimed + waiting)}<small>SOL</small></b><span>earned in total, ${coins} coin${coins === 1 ? '' : 's'} <i>${usd(claimed + waiting, px)}</i></span></div>
+  <div><span class="k">Collected</span>${sol(claimed)}<span class="s"><i>${usd(claimed, px)}</i></span></div>
+  <div class="${waiting ? 'wait' : ''}"><span class="k">Waiting to collect</span>${sol(waiting)}<span class="s"><i>${usd(waiting, px)}</i></span></div>
+  <div><span class="k">Earned in total</span>${sol(claimed + waiting)}<span class="s"><i>${usd(claimed + waiting, px)}</i>${coins} coin${coins === 1 ? '' : 's'}</span></div>
 </div><div class="fx"><span>${who}${other ? ` · ${other} coin${other > 1 ? 's' : ''} not priced` : ''}${f.reading ? ' · still reading some wallets, updates by itself' : ''}</span>${act}</div>`
       root.querySelector('[data-signin]')?.addEventListener('click', signIn)
   }

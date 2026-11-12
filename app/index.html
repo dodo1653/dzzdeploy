@@ -182,7 +182,7 @@ button.ghost:hover { color: var(--ink); border-color: var(--t4); }
 /* claim */
 .crow { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 16px; align-items: center; padding: 12px 0; border-top: 1px solid var(--line); }
 .crow:first-child { border-top: 0; }
-.crow .amt { font: 500 14px var(--mono); text-align: right; } .crow .amt small { display: block; font: 400 11.5px var(--mono); color: var(--t3); }
+.crow .amt { text-align: right; } .crow .amt .solv { font-size: 17px; } .crow .amt small { display: block; font: 400 11.5px var(--mono); color: var(--t3); margin-top: 5px; white-space: nowrap; }
 .crow .btn { min-width: 108px; } .crow .btn.acc[disabled] { opacity: .5; }
 .crow .who { font: 400 11.5px var(--mono); color: var(--t3); }
 .crow .nothing { min-width: 108px; text-align: center; font: 400 12.5px var(--ui); color: var(--t3); }
@@ -301,6 +301,83 @@ button.pav.editable:hover::after { opacity: 1; }
 .opt .ic { width: 19px; height: 19px; }
 .amsg { min-height: 20px; margin: 14px 0 0; font-size: 13px; color: var(--t2); } .amsg.err { color: var(--bad); }
 
+/* dashboard: launches table */
+.ltbl td { padding-top: 13px; padding-bottom: 13px; }
+.ltbl .coinc small { display: inline-flex; align-items: center; gap: 6px; }
+.ltbl .coinc small .vlogo { width: 13px; height: 13px; }
+.ltbl .solv { font-size: 15px; }
+.when b { display: block; font: 500 13px/1.3 var(--ui); color: var(--ink); white-space: nowrap; }
+.when small { display: block; font: 400 11.5px/1.4 var(--mono); color: var(--t3); white-space: nowrap; }
+.when small span { color: var(--t4); }
+.when.never b { color: var(--t3); font-weight: 400; }
+/* PnL calendar */
+.calc .card-h { flex-wrap: wrap; }
+.calnav { display: inline-flex; align-items: center; gap: 4px; }
+.calnav b { min-width: 128px; text-align: center; font: 500 13.5px var(--head); letter-spacing: -.01em; }
+.calnav button { all: unset; cursor: pointer; width: 30px; height: 30px; border-radius: 8px; display: grid; place-items: center; color: var(--t2); border: 1px solid var(--line); transition: background .2s, color .2s, border-color .2s; }
+.calnav button:hover { background: var(--s2); color: var(--ink); border-color: var(--line2); } .calnav button:disabled { opacity: .3; cursor: default; background: none; }
+.calnav svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.calwrap { display: grid; grid-template-columns: minmax(0, 1.65fr) minmax(250px, 1fr); gap: 22px; align-items: start; }
+.calsum { display: flex; align-items: flex-end; gap: 26px; flex-wrap: wrap; margin-bottom: 16px; }
+.calsum .net { font-size: clamp(26px, 2.8vw, 34px); }
+.calsum .net + small { display: block; font: 400 11.5px var(--mono); color: var(--t3); margin-top: 6px; letter-spacing: .04em; text-transform: uppercase; }
+.calsum dl { display: flex; gap: 22px; margin: 0 0 2px; flex-wrap: wrap; }
+.calsum dl div { display: grid; gap: 5px; } .calsum dt { font: 400 11.5px var(--mono); color: var(--t3); } .calsum dd { margin: 0; font-size: 15px; }
+.calsum dd .plain { font: 500 15px/1 var(--head); font-variant-numeric: tabular-nums; }
+.calgrid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)) minmax(0, .95fr); gap: 4px; }
+.calgrid .h { font: 500 10.5px var(--mono); color: var(--t3); letter-spacing: .06em; text-transform: uppercase; padding: 0 2px 6px; }
+.calgrid .h.wk { text-align: right; }
+.cday { all: unset; box-sizing: border-box; position: relative; min-height: 66px; border-radius: 9px; padding: 7px 8px; display: flex; flex-direction: column; justify-content: space-between; background: var(--s1); border: 1px solid transparent; cursor: pointer; transition: border-color .2s, transform .15s; overflow: hidden; }
+.cday:hover { border-color: var(--line2); }
+.cday.out { background: none; cursor: default; } .cday.out .d { color: var(--t4); }
+.cday.today .d { color: var(--acc); font-weight: 600; }
+.cday.sel { border-color: color-mix(in srgb, var(--ink) 55%, transparent); }
+.cday.pos { background: color-mix(in srgb, var(--up) var(--a), transparent); } .cday.neg { background: color-mix(in srgb, var(--down) var(--a), transparent); }
+.cday .d { font: 500 11.5px var(--mono); color: var(--t2); }
+.cday .n { font: 500 12px/1 var(--head); font-variant-numeric: tabular-nums; letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.cday.pos .n { color: var(--up); } .cday.neg .n { color: var(--down); }
+.cday .marks { position: absolute; top: 8px; right: 8px; display: flex; gap: 3px; }
+.cday .marks i { width: 5px; height: 5px; border-radius: 50%; background: var(--acc); }
+.cday .marks i.c { background: var(--up); }
+.cwk { display: flex; flex-direction: column; justify-content: center; align-items: flex-end; gap: 4px; padding: 0 2px; min-height: 66px; border-left: 1px solid var(--line); }
+.cwk small { font: 400 10.5px var(--mono); color: var(--t4); }
+.cwk .n { font: 500 12px/1 var(--head); font-variant-numeric: tabular-nums; color: var(--t3); }
+.cwk .n.pos { color: var(--up); } .cwk .n.neg { color: var(--down); }
+.calkey { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; font: 400 11.5px var(--mono); color: var(--t3); }
+.calkey span { display: inline-flex; align-items: center; gap: 6px; } .calkey i { width: 6px; height: 6px; border-radius: 50%; background: var(--acc); } .calkey i.c { background: var(--up); }
+.calday { border: 1px solid var(--line); border-radius: 12px; padding: 16px; background: var(--s1); min-height: 100%; }
+.calday h4 { margin: 0; font: 500 14px var(--head); letter-spacing: -.01em; }
+.calday .dn { margin: 10px 0 14px; font-size: 26px; }
+.calday .none { color: var(--t3); font-size: 13px; margin: 6px 0 0; }
+.ev { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 10px 0; border-top: 1px solid var(--line); }
+.ev .t { font: 400 11.5px var(--mono); color: var(--t3); }
+.ev .w { min-width: 0; } .ev .w b { display: block; font: 500 13px var(--ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .ev .w small { font: 400 11.5px var(--mono); color: var(--t3); }
+.ev .solv { font-size: 14px; }
+.kind { display: inline-block; font: 500 10.5px var(--mono); letter-spacing: .05em; text-transform: uppercase; padding: 3px 6px; border-radius: 5px; background: var(--s2); color: var(--t2); }
+.kind.launch { color: var(--acc); background: rgba(var(--acc-rgb), .1); } .kind.claim { color: var(--up); background: color-mix(in srgb, var(--up) 12%, transparent); }
+/* history */
+.hbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 16px 0 14px; }
+.hday { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; padding: 18px 0 8px; border-bottom: 1px solid var(--line); }
+.hday:first-child { padding-top: 0; }
+.hday b { font: 500 13.5px var(--head); letter-spacing: -.01em; } .hday b small { font: 400 12px var(--mono); color: var(--t3); margin-left: 8px; letter-spacing: 0; }
+.hday .solv { font-size: 13.5px; }
+.hx { display: grid; grid-template-columns: 76px 74px minmax(0, 1.5fr) minmax(0, 1fr) minmax(120px, auto) 70px; gap: 14px; align-items: center; padding: 11px 0; border-bottom: 1px solid var(--line); }
+.hx:last-child { border-bottom: 0; }
+.hx .t { font: 400 12.5px var(--mono); color: var(--t2); }
+.hx .wl { font: 400 12px var(--mono); color: var(--t3); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.hx .wl span { color: var(--t4); }
+.hx .amt { text-align: right; } .hx .amt .solv { font-size: 15px; } .hx .amt small { display: block; font: 400 11px var(--mono); color: var(--t3); margin-top: 4px; }
+.hx .tx { text-align: right; font: 400 12px var(--mono); }
+.hx .tx a { color: var(--t3); text-decoration: none; } .hx .tx a:hover { color: var(--acc); }
+.hx .coinc img, .hx .coinc .ph { width: 30px; height: 30px; border-radius: 8px; }
+.hx .coinc small { display: inline-flex; gap: 6px; align-items: center; } .hx .coinc small .vlogo { width: 13px; height: 13px; }
+@media (max-width: 1180px) { .calwrap { grid-template-columns: 1fr; } }
+@media (max-width: 760px) {
+  .calgrid { grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 3px; } .calgrid .wk, .cwk { display: none; }
+  .cday { min-height: 44px; padding: 5px 6px; border-radius: 7px; } .cday .n { display: none; } .cday .marks { top: auto; bottom: 6px; right: 6px; }
+  .hx { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 4px 10px; } .hx .k { display: none; } .hday b small, .when small span { display: none; } .card-h .sub.hide-s { display: none; } .hx .wl { grid-column: 2; grid-row: 2; } .hx .tx { grid-column: 3; grid-row: 2; } .hx .t { grid-row: 1 / 3; align-self: start; padding-top: 6px; }
+  .ltbl .hide-s { display: none; }
+}
 @media (max-width: 1180px) { .lgrid { grid-template-columns: 1fr; } .rail { position: static; } }
 @media (max-width: 900px) {
   .shell { grid-template-columns: 1fr; }
@@ -325,6 +402,7 @@ button.pav.editable:hover::after { opacity: 1; }
     <a class="nv" href="#launch" data-view="launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch</a>
     <a class="nv" href="#coins" data-view="coins"><svg class="ic"><use href="/assets/icons.svg#coins"/></svg>My coins<span class="cnt" id="navCoins"></span></a>
     <a class="nv" href="#fees" data-view="fees"><svg class="ic"><use href="/assets/icons.svg#fees"/></svg>Creator fees</a>
+    <a class="nv" href="#history" data-view="history"><svg class="ic"><use href="/assets/icons.svg#clock"/></svg>History</a>
     <a class="nv" href="#explore" data-view="explore"><svg class="ic"><use href="/assets/icons.svg#explore"/></svg>Explore<span class="cnt" id="navPub"></span></a>
     <a class="nv" href="#account" data-view="account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Account</a>
     <div class="fill"></div>
@@ -356,14 +434,19 @@ button.pav.editable:hover::after { opacity: 1; }
           <div class="pend"><a class="btn" href="#account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Edit profile</a><a class="btn primary" href="#launch"><svg class="ic"><use href="/assets/icons.svg#launch"/></svg>Launch a coin</a></div>
         </div>
       </div>
-        <div class="stats4">
-          <div><b id="aCoins">–</b><span>coins launched</span></div>
-          <div><b id="aClaimed">–</b><span>SOL collected <i id="aClaimedUsd"></i></span></div>
-          <div><b id="aWaiting">–</b><span>SOL waiting to collect <i id="aWaitingUsd"></i></span></div>
-          <div><b id="aGen">–</b><span>SOL earned in total <i id="aGenUsd"></i></span></div>
+        <div class="figs">
+          <div><span class="k"><i class="ok"></i>Collected</span><span class="v" id="aClaimed"><span class="solv none">–</span></span><span class="s" id="aClaimedS"></span></div>
+          <div><span class="k"><i class="acc"></i>Waiting to collect</span><span class="v" id="aWaiting"><span class="solv none">–</span></span><span class="s" id="aWaitingS"></span></div>
+          <div><span class="k"><i></i>Earned in total</span><span class="v" id="aGen"><span class="solv none">–</span></span><span class="s" id="aGenS"></span></div>
+          <div><span class="k"><i></i>Net after launch costs</span><span class="v" id="aNet"><span class="solv none">–</span></span><span class="s" id="aNetS"></span></div>
         </div>
-        <div class="card" style="margin-top:16px"><div class="card-h"><h3>Launches</h3><span class="sub">from every wallet on this account</span></div>
-          <div style="overflow-x:auto"><table class="tbl"><thead><tr><th>Coin</th><th>Where</th><th>Wallet</th><th class="r">Collected</th><th class="r">Waiting</th></tr></thead><tbody id="accRows"></tbody></table></div>
+        <div class="card calc" style="margin-top:16px"><div class="card-h"><h3>PnL calendar</h3><span class="sub">fees collected minus launch costs, per day</span><span class="end calnav"><button type="button" id="calPrev" aria-label="Previous month"><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><b id="calMonth">–</b><button type="button" id="calNext" aria-label="Next month"><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></span></div>
+          <div class="calwrap"><div><div class="calsum" id="calSum"></div><div class="calgrid" id="calGrid"></div>
+            <div class="calkey"><span><i></i>launch</span><span><i class="c"></i>fee claim</span><span id="calZone"></span></div></div>
+            <div class="calday" id="calDay"></div></div>
+        </div>
+        <div class="card" style="margin-top:16px"><div class="card-h"><h3>Launches</h3><span class="sub hide-s" id="aCoins">from every wallet on this account</span><span class="end"><a class="btn sm" href="#history"><svg class="ic sm"><use href="/assets/icons.svg#clock"/></svg>Full history</a></span></div>
+          <div style="overflow-x:auto"><table class="tbl ltbl"><thead><tr><th>Coin</th><th>Launched</th><th class="hide-s">Last claim</th><th class="r hide-s">Launch cost</th><th class="r">Collected</th><th class="r">Waiting</th></tr></thead><tbody id="accRows"></tbody></table></div>
           <p class="hint" id="accNote" style="margin-top:14px"></p></div>
     </section>
 
@@ -462,6 +545,23 @@ button.pav.editable:hover::after { opacity: 1; }
         <div class="claim-any"><input class="in mono" id="claimCa" placeholder="Or paste a coin's contract address" spellcheck="false" autocomplete="off"><button class="btn" id="claimFind" type="button">Find</button></div>
         <p class="hint" id="claimMsg" style="margin-top:12px">Connect the wallet that launched the coin to claim. On Float anyone can press Claim: the fees always go to the coin's fee wallet. pump.fun coins are claimed on pump.fun: your profile, Creator rewards.</p>
       </div>
+    </section>
+
+    <!-- HISTORY -->
+    <section class="view" data-view="history" hidden>
+      <div class="vh"><div><h2>History</h2><p>Every launch and every fee claim from the wallets on your account, to the second, read from Solana. Times are in your time zone<span id="hZone"></span>.</p></div><button class="btn" id="hCsv" type="button"><svg class="ic" viewBox="0 0 24 24"><path d="M12 4v11m0 0-4.5-4.5M12 15l4.5-4.5M5 19.5h14"/></svg>Download CSV</button></div>
+      <div class="figs" id="hFigs">
+        <div><span class="k"><i class="acc"></i>Launches</span><span class="v" id="hLaunches"><span class="plain">–</span></span><span class="s" id="hLaunchesS"></span></div>
+        <div><span class="k"><i class="ok"></i>Claims</span><span class="v" id="hClaims"><span class="plain">–</span></span><span class="s" id="hClaimsS"></span></div>
+        <div><span class="k"><i></i>Launch costs</span><span class="v" id="hCost"><span class="solv none">–</span></span><span class="s" id="hCostS"></span></div>
+        <div><span class="k"><i></i>Net</span><span class="v" id="hNet"><span class="solv none">–</span></span><span class="s" id="hNetS"></span></div>
+      </div>
+      <div class="hbar">
+        <label class="xsearch"><svg class="ic sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="hq" placeholder="Search coin, ticker, wallet or transaction" spellcheck="false" autocomplete="off"></label>
+        <div class="seg" id="hkind"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="launch">Launches</button><button data-v="claim">Claims</button></div>
+      </div>
+      <div class="card"><div id="hList"><div class="lempty">reading…</div></div></div>
+      <p class="hint" id="hNote" style="margin-top:14px"></p>
     </section>
 
     <!-- EXPLORE -->
@@ -1139,12 +1239,13 @@ async function registerLaunch(mint, signature) {
 loadPublic(); setInterval(loadPublic, 60000)
 summary(); stats()
 </script>
+<script src="/assets/figures.js"></script>
 <script src="/assets/account.js"></script>
 <script>
 // ---------------------------------------------------------------- views: #launch #coins #fees #explore #account
 ;(() => {
   const $ = (id) => document.getElementById(id)
-  const TITLES = { dashboard: 'Dashboard', launch: 'Launch', coins: 'My coins', fees: 'Creator fees', explore: 'Explore', account: 'Account' }
+  const TITLES = { dashboard: 'Dashboard', launch: 'Launch', coins: 'My coins', fees: 'Creator fees', history: 'History', explore: 'Explore', account: 'Account' }
   function show() {
     const v = (location.hash.slice(1).split('&')[0] || 'dashboard'), id = TITLES[v] ? v : 'dashboard'
     document.querySelectorAll('.view').forEach((s) => (s.hidden = s.dataset.view !== id))
@@ -1152,7 +1253,7 @@ summary(); stats()
     $('viewTitle').textContent = TITLES[id]; document.title = `dzz · ${TITLES[id].toLowerCase()}`
     document.querySelector('.topbar .crumb').hidden = id !== 'launch'   // the address search state only means something on Launch
     dispatchEvent(new Event('resize'))                     // segmented controls measure themselves when shown
-    if (id === 'account' || id === 'dashboard') account()
+    if (id === 'account' || id === 'dashboard' || id === 'history') account()
     if (id === 'fees') window.DzzFeesTotal?.refresh()
   }
   addEventListener('hashchange', () => { show(); scrollTo({ top: 0 }) })
@@ -1178,7 +1279,7 @@ summary(); stats()
     try { const l = await (await fetch('/api/launched')).json(), w = new Set(p.wallets); window.dzzAccountCoins = (l.coins || []).filter((c) => w.has(c.dev)); drawHist() } catch {}
   }
   DzzAuth.me().then(accountCoins)
-  addEventListener('dzz-auth', (e) => { if (!e.detail) return location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); meCard(e.detail); accountCoins(e.detail); const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'account' || v === 'dashboard') account(); window.DzzFeesTotal?.refresh() })
+  addEventListener('dzz-auth', (e) => { if (!e.detail) return location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); meCard(e.detail); accountCoins(e.detail); const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'account' || v === 'dashboard' || v === 'history') account(); window.DzzFeesTotal?.refresh() })
   DzzAuth.me().then(meCard)
   DzzAuth.providers().then((p) => { providers = p; document.querySelectorAll('.gate .opt[data-p]').forEach((b) => { if (!p[b.dataset.p]) { b.disabled = true; b.querySelector('small').textContent = 'soon' } }) })
   if (DzzAuth.lastError) { location.hash = 'account'; setTimeout(() => toast(DzzAuth.lastError, true), 300) }
@@ -1319,6 +1420,34 @@ summary(); stats()
   }
 
   // launches and fees of every wallet on the account. pump.fun keeps fees per wallet, so a wallet's pump.fun total counts once
+  const F = window.DzzFig, plural = (n, w) => `${n} ${w}${n === 1 ? '' : 's'}`
+  const VENUE = { pump: ['pump.fun', '/assets/venues/pump.png'], meteora: ['Meteora', '/assets/venues/meteora.svg'], float: ['Float', '/assets/venues/float.png'] }
+  const venueOf = (c) => VENUE[c.venue || 'pump'] || VENUE.pump
+  const coinUrl = (c) => ((c.venue || 'pump') === 'pump' ? 'https://pump.fun/coin/' : 'https://jup.ag/tokens/') + c.mint
+  const pic = (c) => (c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`)
+  const vlogo = (c) => { const [n, src] = venueOf(c); return `<img class="vlogo" src="${src}" alt="${n}" title="${n}">` }
+  const whenCell = (t, none = 'never') => (t ? `<div class="when"><b>${F.date(t)}</b><small>${F.time(t)} <span>· ${F.ago(t)}</span></small></div>` : `<div class="when never"><b>${none}</b></div>`)
+  const WEEKDAY = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'], MONTH = ['January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December']
+  let D = null   // { list, fees, px, ev, reading }: the last read, drawn by the dashboard, the calendar and History
+
+  // every launch and every claim as one list, newest first. A pump.fun claim takes the whole wallet's rewards, so it is listed once
+  function eventsOf(list, fees) {
+    const ev = [], seen = new Set(), pumpN = {}
+    for (const c of list) if ((c.venue || 'pump') === 'pump') pumpN[c.dev] = (pumpN[c.dev] || 0) + 1
+    for (const c of list) {
+      const x = fees.get(c.mint) || {}, pump = (c.venue || 'pump') === 'pump'
+      ev.push({ kind: 'launch', t: x.born || c.at || 0, c, n: x.spent != null ? -x.spent : null, sig: c.sig, wallet: c.dev })
+      for (const k of x.claims || []) {
+        if (seen.has(k.sig)) continue; seen.add(k.sig)
+        ev.push({ kind: 'claim', t: k.at || 0, c, n: k.n, raw: k.raw, sig: k.sig, wallet: x.dev || c.dev, shared: pump && pumpN[c.dev] > 1 ? pumpN[c.dev] : 0 })
+      }
+    }
+    return ev.sort((a, b) => b.t - a.t)
+  }
+  const evName = (e) => (e.shared ? 'pump.fun creator rewards' : `${e.c.name}`)
+  const evSub = (e) => (e.shared ? `${vlogo(e.c)}${e.shared} coins on ${short(e.wallet)}` : `${vlogo(e.c)}$${esc(e.c.symbol)}`)
+  const evAmt = (e, o = {}) => (e.n != null ? F.sol(e.n, { sign: true, tone: e.kind === 'claim', ...o }) : `<span class="solv none">${e.kind === 'claim' ? 'in its token' : '—'}</span>`)
+
   async function launches(p) {
     const mine = new Set(p.wallets)
     try {
@@ -1328,26 +1457,129 @@ summary(); stats()
         fetch('https://lite-api.jup.ag/price/v3?ids=So11111111111111111111111111111111111111112').then((r) => r.json()).then((j) => j.So11111111111111111111111111111111111111112?.usdPrice).catch(() => 0),
       ])
       const list = (l.coins || []).filter((c) => mine.has(c.dev)), fees = new Map((f.coins || []).map((x) => [x.mint, x]))
-      let claimed = 0, waiting = 0, other = 0; const pumpSeen = new Set()
-      for (const c of list) {
-        const x = fees.get(c.mint); if (!x) continue; if (x.generated == null) { other++; continue }
-        if ((c.venue || 'pump') === 'pump') { if (pumpSeen.has(x.dev)) continue; pumpSeen.add(x.dev) }
-        claimed += x.claimed || 0; waiting += x.waiting || 0
+      D = { list, fees, px, ev: eventsOf(list, fees), reading: !!(f.reading || f.histReading), wallets: p.wallets.length }
+      dashboard(); drawCal(); drawHistory()
+      clearTimeout(launches.t); if (D.reading) launches.t = setTimeout(() => { const v = document.querySelector('.view:not([hidden])')?.dataset.view; if (v === 'dashboard' || v === 'history') launches(p) }, 20000)
+    } catch { say('Could not read your launches just now. Try again in a moment.', true); if (!D) $('hList').innerHTML = '<div class="lempty">Could not read your history just now. Try again in a moment.</div>' }
+  }
+
+  function dashboard() {
+    const { list, fees, px, ev } = D
+    let claimed = 0, waiting = 0, other = 0, cost = 0; const pumpSeen = new Set()
+    for (const c of list) {
+      const x = fees.get(c.mint); if (!x) continue
+      if (x.spent != null) cost += x.spent
+      if (x.generated == null) { other++; continue }
+      if ((c.venue || 'pump') === 'pump') { if (pumpSeen.has(x.dev)) continue; pumpSeen.add(x.dev) }
+      claimed += x.claimed || 0; waiting += x.waiting || 0
+    }
+    const claims = ev.filter((e) => e.kind === 'claim'), last = claims.find((e) => e.t), net = claimed - cost
+    $('aClaimed').innerHTML = F.sol(claimed); $('aClaimedS').innerHTML = `<b>${F.usd(claimed, px)}</b><span>${plural(claims.length, 'claim')}${last ? ', last ' + F.ago(last.t) : ''}</span>`
+    $('aWaiting').innerHTML = F.sol(waiting); $('aWaitingS').innerHTML = `<b>${F.usd(waiting, px)}</b>${waiting ? '<a class="link" href="#fees">Claim it</a>' : '<span>nothing waiting</span>'}`
+    $('aGen').innerHTML = F.sol(claimed + waiting); $('aGenS').innerHTML = `<b>${F.usd(claimed + waiting, px)}</b><span>from ${plural(list.length, 'coin')}</span>`
+    $('aNet').innerHTML = F.sol(net, { sign: true, tone: true }); $('aNetS').innerHTML = `<b>${F.usd(net, px)}</b><span>launches cost ${F.text(cost)} SOL</span>`
+    $('aCoins').textContent = `${plural(list.length, 'coin')} from ${plural(D.wallets, 'wallet')} on this account`
+    $('accRows').innerHTML = list.length ? list.map((c) => {
+      const x = fees.get(c.mint) || {}, lastClaim = (x.claims || []).find((k) => k.at)
+      return `<tr><td><a class="coinc" href="${esc(coinUrl(c))}" target="_blank" rel="noopener">${pic(c)}<div style="min-width:0"><b>${esc(c.name)}</b><small>${vlogo(c)}$${esc(c.symbol)} · ${short(c.dev)}</small></div></a></td>
+        <td>${whenCell(x.born || c.at)}</td><td class="hide-s">${whenCell(lastClaim?.at, x.claimed ? '—' : 'never')}</td>
+        <td class="r hide-s">${x.spent != null ? F.sol(x.spent) : '<span class="solv none">—</span>'}</td>
+        <td class="r">${x.generated == null ? '<span class="solv none">—</span>' : F.sol(x.claimed)}</td><td class="r" style="color:${x.waiting ? 'var(--acc)' : 'var(--t3)'}">${x.generated == null ? '<span class="solv none">—</span>' : F.sol(x.waiting)}</td></tr>`
+    }).join('') : '<tr><td colspan="6" class="muted">No launches from these wallets yet.</td></tr>'
+    $('accNote').textContent = 'Amounts are your creator share in SOL, read from Solana; coins paired with another token are shown in SOL at today\'s price. Launch cost is what the launch transaction took from the wallet: network fees, rent and any first buy. pump.fun keeps fees per wallet, not per coin, so a pump.fun row shows that whole wallet, and the totals count each wallet once.' + (other ? ` ${other} coin${other > 1 ? 's have' : ' has'} no SOL price yet.` : '') + (D.reading ? ' Some wallets are still being read; this updates by itself.' : '')
+  }
+
+  // ---------------------------------------------------------------- PnL calendar: per day, fees collected minus launch costs
+  let calM = null, calSel = null
+  function dayMap() {
+    const m = new Map()
+    for (const e of D.ev) {
+      if (!e.t) continue
+      const k = F.dayKey(e.t), d = m.get(k) || { net: 0, in: 0, out: 0, l: 0, c: 0, ev: [] }
+      if (e.n != null) { d.net += e.n; if (e.n > 0) d.in += e.n; else d.out -= e.n }
+      if (e.kind === 'launch') d.l++; else d.c++
+      d.ev.push(e); m.set(k, d)
+    }
+    return m
+  }
+  function drawCal() {
+    if (!D) return
+    const days = dayMap(), times = D.ev.filter((e) => e.t).map((e) => e.t), now = new Date()
+    const lo = times.length ? new Date(Math.min(...times)) : now, minM = new Date(lo.getFullYear(), lo.getMonth(), 1), maxM = new Date(now.getFullYear(), now.getMonth(), 1)
+    if (!calM) { const hi = times.length ? new Date(Math.max(...times)) : now; calM = new Date(hi.getFullYear(), hi.getMonth(), 1) }
+    if (calM < minM) calM = minM; if (calM > maxM) calM = maxM
+    const y = calM.getFullYear(), mo = calM.getMonth(), nDays = new Date(y, mo + 1, 0).getDate(), lead = (new Date(y, mo, 1).getDay() + 6) % 7, pre = `${y}-${String(mo + 1).padStart(2, '0')}-`
+    $('calPrev').disabled = calM <= minM; $('calNext').disabled = calM >= maxM
+    $('calMonth').textContent = `${MONTH[mo]} ${y}`
+    $('calZone').textContent = F.zone ? `times in ${F.zone}` : ''
+    let net = 0, inn = 0, out = 0, nl = 0, nc = 0, max = 0
+    for (const [k, x] of days) if (k.startsWith(pre)) { net += x.net; inn += x.in; out += x.out; nl += x.l; nc += x.c; max = Math.max(max, Math.abs(x.net)) }
+    $('calSum').innerHTML = `<div><div class="net">${F.sol(net, { sign: true, tone: true })}</div><small>net in ${MONTH[mo]}</small></div>
+      <dl><div><dt>collected</dt><dd>${F.sol(inn)}</dd></div><div><dt>launch costs</dt><dd>${F.sol(out)}</dd></div><div><dt>launches</dt><dd><span class="plain">${nl}</span></dd></div><div><dt>claims</dt><dd><span class="plain">${nc}</span></dd></div></dl>`
+    if (!calSel || !calSel.startsWith(pre) || !days.has(calSel)) { const ks = [...days.keys()].filter((k) => k.startsWith(pre)).sort(); calSel = calSel?.startsWith(pre) ? calSel : ks.at(-1) || null }
+    const today = F.dayKey(Date.now())
+    let h = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => `<div class="h">${d}</div>`).join('') + '<div class="h wk">Week</div>', wk = 0, wkHas = false
+    for (let i = 0, cells = Math.ceil((lead + nDays) / 7) * 7; i < cells; i++) {
+      const dn = i - lead + 1
+      if (dn < 1 || dn > nDays) h += '<div class="cday out"></div>'
+      else {
+        const key = pre + String(dn).padStart(2, '0'), x = days.get(key), v = x?.net || 0, a = v ? Math.round(10 + 32 * Math.sqrt(Math.abs(v) / (max || 1))) : 0
+        h += `<button type="button" class="cday${v > 0 ? ' pos' : v < 0 ? ' neg' : ''}${key === today ? ' today' : ''}${key === calSel ? ' sel' : ''}" data-k="${key}" style="--a:${a}%" title="${dn} ${MONTH[mo]}${x ? ': ' + F.text(v, { sign: true }) + ' SOL' : ''}"><span class="d">${dn}</span>${x ? `<span class="marks">${'<i></i>'.repeat(Math.min(x.l, 3))}${'<i class="c"></i>'.repeat(Math.min(x.c, 3))}</span>` : ''}<span class="n">${v ? F.text(v, { sign: true, short: true }) : ''}</span></button>`
+        if (x) { wk += v; wkHas = true }
       }
-      const usd = (v) => (px ? '$' + ((v / 1e9) * px).toFixed(2) : '')
-      $('aCoins').textContent = list.length
-      $('aClaimed').innerHTML = `${sol(claimed)}<small>SOL</small>`; $('aClaimedUsd').textContent = usd(claimed)
-      $('aWaiting').innerHTML = `${sol(waiting)}<small>SOL</small>`; $('aWaitingUsd').textContent = usd(waiting)
-      $('aGen').innerHTML = `${sol(claimed + waiting)}<small>SOL</small>`; $('aGenUsd').textContent = usd(claimed + waiting)
-      $('accRows').innerHTML = list.length ? list.map((c) => {
-        const x = fees.get(c.mint) || {}, pump = (c.venue || 'pump') === 'pump', solic = '<img class="solic" src="/assets/venues/sol.svg" alt="SOL" title="SOL">'
-        return `<tr><td><a class="coinc" href="${pump ? 'https://pump.fun/coin/' : 'https://jup.ag/tokens/'}${esc(c.mint)}" target="_blank" rel="noopener">${c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)}</b><small>$${esc(c.symbol)}</small></div></a></td>
-          <td class="dim">${pump ? 'pump.fun' : c.venue === 'float' ? 'Float' : 'Meteora'}</td><td class="num muted">${short(c.dev)}</td>
-          <td class="r num">${x.generated == null ? '—' : `<span class="amt">${sol(x.claimed)}${solic}</span>`}</td><td class="r num" style="color:${x.waiting ? 'var(--acc)' : 'var(--t3)'}">${x.generated == null ? '—' : `<span class="amt">${sol(x.waiting)}${solic}</span>`}</td></tr>`
-      }).join('') : '<tr><td colspan="5" class="muted">No launches from these wallets yet.</td></tr>'
-      $('accNote').textContent = 'Amounts are your creator share in SOL, read from Solana; coins paired with another token are shown in SOL at today\'s price. pump.fun keeps fees per wallet, not per coin, so a pump.fun row shows that whole wallet, and the totals count each wallet once.' + (other ? ` ${other} coin${other > 1 ? 's have' : ' has'} no SOL price yet.` : '') + (f.reading ? ' Some wallets are still being read; this updates by itself.' : '')
-      if (f.reading) setTimeout(() => { if (!$('accIn').hidden) launches(p) }, 20000)
-    } catch { say('Could not read your launches just now. Try again in a moment.', true) }
+      if (i % 7 === 6) { h += `<div class="cwk"><small>week</small><span class="n${wk > 0 ? ' pos' : wk < 0 ? ' neg' : ''}">${wkHas ? F.text(wk, { sign: true, short: true }) : '–'}</span></div>`; wk = 0; wkHas = false }
+    }
+    $('calGrid').innerHTML = h
+    if (!calSel) { $('calDay').innerHTML = `<h4>${MONTH[mo]} ${y}</h4><p class="none">No launches or claims this month.</p>`; return }
+    const x = days.get(calSel), [yy, mm, dd] = calSel.split('-').map(Number)
+    $('calDay').innerHTML = `<h4>${WEEKDAY[new Date(yy, mm - 1, dd).getDay()]} ${dd} ${MONTH[mm - 1]} ${yy}</h4><div class="dn">${F.sol(x?.net || 0, { sign: true, tone: true })}</div>` +
+      (x ? x.ev.slice().sort((a, b) => a.t - b.t).map((e) => `<div class="ev"><span class="t">${F.time(e.t).slice(0, 5)}</span><div class="w"><b>${e.kind === 'launch' ? 'Launched' : 'Claimed'} ${esc(e.shared ? 'creator rewards' : '$' + e.c.symbol)}</b><small>${e.kind === 'launch' ? esc(e.c.name) + ' · ' + venueOf(e.c)[0] : e.shared ? `pump.fun · ${short(e.wallet)}` : esc(e.c.name)}</small></div>${evAmt(e)}</div>`).join('') : '<p class="none">No launches or claims on this day.</p>')
+  }
+  $('calGrid').addEventListener('click', (e) => { const b = e.target.closest('.cday[data-k]'); if (b) { calSel = b.dataset.k; drawCal() } })
+  $('calPrev').onclick = () => { calM = new Date(calM.getFullYear(), calM.getMonth() - 1, 1); calSel = null; drawCal() }
+  $('calNext').onclick = () => { calM = new Date(calM.getFullYear(), calM.getMonth() + 1, 1); calSel = null; drawCal() }
+
+  // ---------------------------------------------------------------- History: every launch and claim, grouped by day
+  let hKind = 'all'
+  const hShown = () => {
+    const q = $('hq').value.trim().toLowerCase()
+    return D.ev.filter((e) => (hKind === 'all' || e.kind === hKind) && (!q || [e.c.name, e.c.symbol, '$' + e.c.symbol, e.c.mint, e.wallet, e.sig].some((s) => String(s || '').toLowerCase().includes(q))))
+  }
+  function drawHistory() {
+    if (!D) return
+    const { ev, px } = D, L = ev.filter((e) => e.kind === 'launch'), C = ev.filter((e) => e.kind === 'claim')
+    const cost = L.reduce((a, e) => a - (e.n || 0), 0), got = C.reduce((a, e) => a + (e.n || 0), 0), first = L.filter((e) => e.t).at(-1)
+    $('hZone').textContent = F.zone ? ` (${F.zone})` : ''
+    $('hLaunches').innerHTML = `<span class="plain">${L.length}</span>`; $('hLaunchesS').innerHTML = first ? `<span>since ${F.date(first.t)}</span>` : ''
+    $('hClaims').innerHTML = `<span class="plain">${C.length}</span>`; $('hClaimsS').innerHTML = `<b>${F.text(got)} SOL</b><span>collected</span>`
+    $('hCost').innerHTML = F.sol(cost); $('hCostS').innerHTML = `<b>${F.usd(cost, px)}</b><span>fees, rent, first buys</span>`
+    $('hNet').innerHTML = F.sol(got - cost, { sign: true, tone: true }); $('hNetS').innerHTML = `<b>${F.usd(got - cost, px)}</b><span>collected minus launch costs</span>`
+    const rows = hShown(); let h = '', day = null
+    const dayNet = new Map(); for (const e of rows) { const k = e.t ? F.dayKey(e.t) : '-'; dayNet.set(k, (dayNet.get(k) || 0) + (e.n || 0)) }
+    for (const e of rows) {
+      const k = e.t ? F.dayKey(e.t) : '-'
+      if (k !== day) {
+        day = k; const d = e.t ? new Date(e.t) : null, n = dayNet.get(k)
+        h += `<div class="hday"><b>${d ? `${WEEKDAY[d.getDay()]} ${d.getDate()} ${MONTH[d.getMonth()]} ${d.getFullYear()}` : 'Time not read yet'}${d ? `<small>${F.ago(e.t)}</small>` : ''}</b>${n ? F.sol(n, { sign: true, tone: true }) : ''}</div>`
+      }
+      const usd = e.n != null && px ? F.usd(Math.abs(e.n), px) : e.kind === 'launch' && e.n == null ? 'not read yet' : ''
+      h += `<div class="hx"><span class="t">${e.t ? F.time(e.t) : '—'}</span><span class="k"><span class="kind ${e.kind}">${e.kind}</span></span>
+        <a class="coinc" href="${esc(coinUrl(e.c))}" target="_blank" rel="noopener">${pic(e.c)}<div style="min-width:0"><b>${esc(evName(e))}</b><small>${evSub(e)}</small></div></a>
+        <span class="wl"><span>${e.kind === 'launch' ? 'from' : 'to'}</span> ${short(e.wallet)}</span>
+        <span class="amt">${evAmt(e)}${usd ? `<small>${usd}</small>` : ''}</span>
+        <span class="tx">${e.sig ? `<a href="https://solscan.io/tx/${esc(e.sig)}" target="_blank" rel="noopener">${esc(e.sig.slice(0, 4))}… ↗</a>` : ''}</span></div>`
+    }
+    $('hList').innerHTML = h || `<div class="lempty">${ev.length ? 'Nothing matches.' : 'No launches from the wallets on this account yet.'}</div>`
+    $('hNote').textContent = 'Launch cost is what the launch transaction took from the wallet: network fees, rent and any first buy. Buying or selling coins later is not counted. A pump.fun claim collects the whole wallet\'s rewards at once, so it is listed once per wallet. Claims on coins paired with another token are shown in SOL at today\'s price.' + (D.reading ? ' Some claims are still being read from Solana; this updates by itself.' : '')
+  }
+  $('hq').addEventListener('input', drawHistory)
+  seg('hkind', (v) => { hKind = v; drawHistory() })
+  $('hCsv').onclick = () => {
+    if (!D) return
+    const q = (s) => `"${String(s ?? '').replace(/"/g, '""')}"`
+    const lines = [['time_utc', 'date_local', 'time_local', 'type', 'coin', 'ticker', 'mint', 'venue', 'wallet', 'amount_sol', 'usd_today', 'transaction'].join(',')]
+    for (const e of hShown()) lines.push([e.t ? new Date(e.t).toISOString() : '', e.t ? F.dayKey(e.t) : '', e.t ? F.time(e.t) : '', e.kind, evName(e), e.c.symbol, e.c.mint, venueOf(e.c)[0], e.wallet, e.n != null ? (e.n / 1e9).toFixed(9) : '', e.n != null && D.px ? ((e.n / 1e9) * D.px).toFixed(2) : '', e.sig || ''].map(q).join(','))
+    const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })); a.download = `dzz-history-${F.dayKey(Date.now())}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000)
   }
 })()
 </script>
@@ -1372,9 +1604,10 @@ summary(); stats()
   }
   function draw() {
     $('claimRows').innerHTML = list.length ? list.map((c, i) => {
-      const w = c.fee?.waiting, amt = w == null ? '—' : (w / 1e9).toFixed(w < 1e8 ? 4 : 3)
-      return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">launched from ${short(c.dev)}</span></div></div>
-        <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'SOL waiting'}</small></div>${w === 0 ? '<span class="nothing">Nothing to claim</span>' : `<button class="btn acc" type="button" data-i="${i}">Claim</button>`}</div>`
+      const w = c.fee?.waiting, F = window.DzzFig, born = c.fee?.born || c.at, lastC = (c.fee?.claims || []).find((k) => k.at)
+      const amt = w == null ? '<span class="solv none">—</span>' : F.sol(w)
+      return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">from ${short(c.dev)}${born ? ` · launched ${F.date(born)} ${F.time(born).slice(0, 5)}` : ''}${lastC ? ` · last claim ${F.ago(lastC.at)}` : ''}</span></div></div>
+        <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'waiting'}${c.fee?.claimed ? ` · ${F.text(c.fee.claimed)} collected` : ''}</small></div>${w === 0 ? '<span class="nothing">Nothing to claim</span>' : `<button class="btn acc" type="button" data-i="${i}">Claim</button>`}</div>`
     }).join('') : '<div class="lempty">No Meteora or Float coins found for this browser or your account. Paste a contract address below.</div>'
   }
   async function claim(b) {
@@ -1396,7 +1629,7 @@ summary(); stats()
       // done: say so at once, zero the row, then re-read the real figures
       label('Claimed ✓'); b.classList.remove('acc'); $('claimMsg').innerHTML = `Claimed ${esc(amt)} from ${esc(c.symbol)}. <a class="link" href="https://solscan.io/tx/${esc(sig)}" target="_blank" rel="noopener">view ↗</a>`; $('claimMsg').style.color = 'var(--ok)'
       window.dzzToast?.(`Claimed ${amt} from ${c.symbol}`)
-      const row = b.closest('.crow'); if (row) { row.querySelector('.amt').innerHTML = `0<small>SOL waiting</small>`; setTimeout(() => b.replaceWith(Object.assign(document.createElement('span'), { className: 'nothing', textContent: 'Claimed ✓' })), 1500) }
+      const row = b.closest('.crow'); if (row) { row.querySelector('.amt').innerHTML = `${window.DzzFig.sol(0)}<small>waiting</small>`; setTimeout(() => b.replaceWith(Object.assign(document.createElement('span'), { className: 'nothing', textContent: 'Claimed ✓' })), 1500) }
       S.click(); balance()
       fetch('/api/fees?fresh=1').then(() => { window.DzzFeesTotal?.refresh(); setTimeout(() => { b.disabled = false; b.classList.add('acc'); label('Claim'); load() }, 2500) }).catch(() => {})
     } catch (x) { const m = String(x?.message || x); say(/reject/i.test(m) ? 'Cancelled in the wallet. Nothing was sent.' : m.slice(0, 220), !/reject/i.test(m)); label('Claim'); b.disabled = false }

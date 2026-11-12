@@ -125,6 +125,30 @@ textarea.in { resize: vertical; min-height: 76px; }
 .stats4 i { font-style: normal; color: var(--t2); font: 400 12px var(--mono); }
 @media (max-width: 760px) { .stats4 { grid-template-columns: 1fr 1fr; } .stats4 > div:nth-child(3) { border-left: 0; } .stats4 > div:nth-child(n+3) { border-top: 1px solid var(--line); } }
 
+/* SOL figures (assets/figures.js): the Solana mark, the whole part in full, the decimals a step quieter */
+:root { --up: #6fdc9c; --down: #ff8a7a; }
+:root[data-theme="paper"] { --up: #138a4b; --down: #c7402c; }
+.solv { display: inline-flex; align-items: baseline; gap: 0; white-space: nowrap; font-family: var(--head); font-variant-numeric: tabular-nums; font-feature-settings: 'tnum', 'ss01'; letter-spacing: -.025em; line-height: 1; }
+.solv .solm { width: .74em; height: .62em; flex: none; align-self: center; margin-right: .34em; }
+.solv b { font-weight: 500; color: inherit; }
+.solv em { font-style: normal; font-weight: 400; color: var(--t3); }
+.solv u { text-decoration: none; font: 500 max(10px, .42em)/1 var(--mono); color: var(--t3); letter-spacing: .06em; margin-left: .25em; align-self: center; }
+.solv.gain b, .solv.gain em { color: var(--up); } .solv.gain em { opacity: .62; }
+.solv.loss b, .solv.loss em { color: var(--down); } .solv.loss em { opacity: .62; }
+.solv.none { color: var(--t3); }
+/* the big figure tiles */
+.figs { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line); border-radius: var(--r3); background: var(--card); overflow: hidden; }
+.figs > div { position: relative; padding: 20px 22px 18px; border-left: 1px solid var(--line); min-width: 0; display: flex; flex-direction: column; gap: 10px; }
+.figs > div:first-child { border-left: 0; }
+.figs .k { font: 500 11.5px var(--mono); color: var(--t3); letter-spacing: .05em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+.figs .k i { width: 6px; height: 6px; border-radius: 2px; background: var(--t4); flex: none; }
+.figs .k i.acc { background: var(--acc); } .figs .k i.ok { background: var(--up); }
+.figs .v { font-size: clamp(24px, 2.7vw, 34px); color: var(--ink); min-height: 1.1em; display: flex; align-items: baseline; }
+.figs .v .plain { font: 500 1em/1 var(--head); letter-spacing: -.04em; font-variant-numeric: tabular-nums; }
+.figs .s { font: 400 12.5px var(--mono); color: var(--t3); display: flex; gap: 10px; flex-wrap: wrap; min-height: 18px; }
+.figs .s b { font-weight: 500; color: var(--t2); }
+@media (max-width: 760px) { .figs { grid-template-columns: 1fr 1fr; } .figs > div:nth-child(3) { border-left: 0; } .figs > div:nth-child(n+3) { border-top: 1px solid var(--line); } .figs > div { padding: 16px; } }
+
 /* toast */
 .toast { position: fixed; left: 50%; bottom: 24px; z-index: 60; transform: translate(-50%, 16px); opacity: 0; pointer-events: none; padding: 10px 14px; border-radius: 10px; border: 1px solid var(--line2); background: var(--pop); font: 500 13px var(--ui); box-shadow: 0 20px 50px rgba(0,0,0,.45); transition: opacity .25s, transform .35s var(--ease); }
 .toast.on { opacity: 1; transform: translate(-50%, 0); }
