@@ -34,7 +34,7 @@
     return j
   }
   const emit = () => dispatchEvent(new CustomEvent('dzz-auth', { detail: cached }))
-  const set = (p) => { cached = p || null; emit(); return cached }
+  const set = (p) => { if (p && !p.boardKey && cached?.id === p.id) p.boardKey = cached.boardKey; cached = p || null; emit(); return cached }   // boardKey only comes with /p/me
   const provider = () => window.phantom?.solana || window.solflare || window.backpack?.solana || window.backpack || window.solana || null
   async function activeWallet() { const p = provider(); if (!p) throw new Error('No Solana wallet in this browser. Install Phantom, Solflare or Backpack.'); const r = await p.connect(); return { p, w: (r?.publicKey || p.publicKey).toString() } }
   async function sign(p, text) { const s = await p.signMessage(new TextEncoder().encode(text), 'utf8'); return enc58(s.signature || s) }
@@ -71,6 +71,7 @@
     async unlinkWallet(wallet) { return set((await api('/p/unlink', { wallet })).profile) },
     async unlinkIdentity(provider) { return set((await api('/p/unlink-identity', { provider })).profile) },
     async rename(name) { return set((await api('/p/name', { name })).profile) },
+    async setBoard(show) { return set((await api('/p/board', { show })).profile) },
     // kind 'avatar' | 'banner'; one of { data: 'data:image/...' } | { preset: 'preset:id' } | { url: <a connected account's picture> } | { clear: true }
     async setImage(kind, v) { return set((await api('/p/image', { kind, ...v })).profile) },
     signOut() { tok.set(null); set(null) },

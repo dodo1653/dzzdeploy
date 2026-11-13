@@ -233,51 +233,58 @@ button.pav.editable:hover::after { opacity: 1; }
 .nm-form { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
 .nm-form .in { width: min(320px, 100%); font: 500 20px var(--head); letter-spacing: -.03em; padding: 6px 10px; }
 .nm-form small { color: var(--t3); font-size: 12px; width: 100%; }
-/* explore: address plates, compact */
+/* venue logos */
 .vlogo { width: 20px; height: 20px; border-radius: 50%; display: block; flex: none; }
 .seg button.vbtn { padding: 5px 10px; display: inline-grid; place-items: center; }
 .seg button.vbtn .vlogo { width: 20px; height: 20px; opacity: .55; filter: grayscale(.6); transition: opacity .2s, filter .2s; }
 .seg button.vbtn.on .vlogo, .seg button.vbtn:hover .vlogo { opacity: 1; filter: none; }
 #venue button.vbtn { padding: 6px 14px; } #venue button.vbtn .vlogo { width: 22px; height: 22px; }
-.xbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 14px; }
-.xsearch { flex: 1; min-width: 200px; display: flex; align-items: center; gap: 9px; height: 36px; padding: 0 12px; border-radius: 9px; border: 1px solid var(--line); background: var(--s1); color: var(--t3); transition: border-color .2s; }
-.xsearch:focus-within { border-color: rgba(var(--acc-rgb), .55); }
-.xsearch input { all: unset; flex: 1; color: var(--ink); font: 400 13.5px var(--ui); } .xsearch input::placeholder { color: var(--t4); }
-.xspot { position: relative; display: grid; grid-template-columns: 168px minmax(0, 1fr); border-radius: 14px; overflow: hidden; border: 1px solid var(--line); margin-bottom: 12px; background: var(--card); isolation: isolate; }
-.xspot .art { position: relative; display: grid; place-items: center; min-height: 150px; overflow: hidden; }
-.xspot .art::before { content: ''; position: absolute; inset: -20%; background: var(--img) center / cover; filter: blur(30px) saturate(1.4); opacity: .55; }
-.xspot .art img, .xspot .art .ph { position: relative; width: 96px; height: 96px; border-radius: 22px; object-fit: cover; box-shadow: 0 24px 50px -18px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 34px var(--head); background: var(--s3); color: var(--t2); }
-.xspot .info { padding: 16px 20px; display: flex; flex-direction: column; gap: 8px; min-width: 0; background: linear-gradient(90deg, color-mix(in srgb, var(--tint, #3b82f6) 10%, transparent), transparent 60%); }
-.xspot .kick { font: 500 11px var(--mono); color: var(--tintl, var(--acc)); letter-spacing: .05em; text-transform: uppercase; display: flex; gap: 8px; align-items: center; }
-.xspot .kick .vlogo { width: 16px; height: 16px; }
-.xspot h3 { margin: 0; font: 500 clamp(20px, 2vw, 26px)/1.1 var(--head); letter-spacing: -.04em; } .xspot h3 small { font: 400 13px var(--mono); color: var(--t3); letter-spacing: 0; margin-left: 8px; }
 .plate { font: 500 12.5px var(--mono); color: var(--t3); word-break: break-all; line-height: 1.5; } .plate em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
-.xspot .bottom { display: flex; align-items: center; gap: 22px; flex-wrap: wrap; margin-top: 2px; }
-.xspot .xfacts { display: flex; gap: 22px; }
-.xspot .xfacts div span { display: block; font: 400 11.5px var(--ui); color: var(--t3); margin-bottom: 2px; } .xspot .xfacts div b { font: 500 15px var(--head); letter-spacing: -.02em; display: block; } .xspot .xfacts .vb .vlogo { width: 20px; height: 20px; }
-.xspot .acts, .xcard .acts { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
-.xspot .acts { margin-left: auto; } .xspot .acts .btn { height: 30px; }
-.xspot .ca { height: 30px; }
-.xgrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 10px; }
-.xcard { position: relative; border-radius: 12px; overflow: hidden; border: 1px solid var(--line); background: var(--card); display: flex; flex-direction: column; isolation: isolate; transition: transform .3s var(--ease), border-color .3s, box-shadow .3s; animation: rise .45s var(--ease) both; }
-.xcard:hover { transform: translateY(-3px); border-color: color-mix(in srgb, var(--tint, #3b82f6) 45%, transparent); box-shadow: 0 18px 44px -26px color-mix(in srgb, var(--tint, #3b82f6) 70%, transparent); }
-.xcard .art { position: relative; height: 72px; display: flex; align-items: center; gap: 12px; padding: 0 12px; overflow: hidden; }
-.xcard .art::before { content: ''; position: absolute; inset: -40%; background: var(--img, none) center / cover; filter: blur(22px) saturate(1.5); opacity: .4; transition: opacity .4s; }
-.xcard:hover .art::before { opacity: .62; }
-.xcard .art img, .xcard .art .ph { position: relative; z-index: 1; width: 46px; height: 46px; border-radius: 12px; object-fit: cover; box-shadow: 0 10px 24px -10px rgba(0,0,0,.7), 0 0 0 1px rgba(255,255,255,.12); display: grid; place-items: center; font: 600 18px var(--head); background: var(--s3); color: var(--t2); flex: none; }
-.xcard .art .who { position: relative; z-index: 1; min-width: 0; flex: 1; }
-.xcard .art .who b { display: block; font: 500 14.5px var(--head); letter-spacing: -.02em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.xcard .art .who small { font: 400 11.5px var(--mono); color: var(--t3); }
-.xcard .tag-v { position: relative; z-index: 1; align-self: flex-start; margin-top: 10px; } .xcard .tag-v .vlogo { width: 18px; height: 18px; }
-.xcard .body { padding: 8px 12px 10px; display: flex; flex-direction: column; gap: 6px; }
-.xcard .row2 { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
-.xcard .end { font: 500 17px/1.1 var(--mono); letter-spacing: -.02em; color: var(--t3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.xcard .end em { font-style: normal; color: var(--tintl, var(--acc)); font-weight: 600; }
-.xcard .meta { font: 400 11.5px var(--mono); color: var(--t3); white-space: nowrap; } .xcard .meta b { color: var(--ink); font-weight: 500; margin-right: 6px; }
-.xcard .acts { padding-top: 8px; border-top: 1px solid var(--line); flex-wrap: nowrap; }
-.xcard .acts .iconbtn.sm { width: 28px; height: 28px; border-radius: 7px; } .xcard .acts .iconbtn .ic { width: 14px; height: 14px; }
-.xcard .ca { height: 28px; margin-right: auto; min-width: 0; flex: 1 1 auto; } .xcard .ca code { overflow: hidden; text-overflow: ellipsis; } .xcard .ca code { font-size: 11px; } .xcard .ca span { height: 20px; font-size: 11px; }
-@media (max-width: 760px) { .xspot { grid-template-columns: 1fr; } .xspot .art { min-height: 120px; } .xspot .acts { margin-left: 0; } }
+/* leaderboard */
+@keyframes lbin { from { opacity: 0; transform: translateY(8px); } }
+.lbstats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: 14px; overflow: hidden; margin-bottom: 14px; }
+.lbstats > div { background: var(--card); padding: 15px 18px 14px; display: flex; flex-direction: column; gap: 9px; min-width: 0; }
+.lbstats span { font: 500 11px var(--mono); color: var(--t3); letter-spacing: .06em; text-transform: uppercase; }
+.lbstats .solv, .lbstats b.n { font: 500 23px/1 var(--head); letter-spacing: -.03em; } .lbstats small { font: 400 12px var(--mono); color: var(--t3); min-height: 1em; }
+.lbbar { display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; margin: 0 2px 12px; min-height: 18px; }
+.lbme { font: 500 12.5px var(--mono); color: var(--t2); } .lbme b { color: var(--acc); font-weight: 600; }
+.podium { display: grid; grid-template-columns: 1fr 1.14fr 1fr; gap: 12px; align-items: end; margin-bottom: 12px; }
+.pod { position: relative; border-radius: 16px; overflow: hidden; border: 1px solid color-mix(in srgb, var(--medal) 26%, var(--line)); background: var(--card); isolation: isolate; animation: lbin .55s var(--ease) both; transition: transform .35s var(--ease), box-shadow .35s; }
+.pod:hover { transform: translateY(-3px); box-shadow: 0 22px 50px -30px color-mix(in srgb, var(--medal) 80%, transparent); }
+.pod .bn { position: relative; height: 70px; background: var(--bn); }
+.pod .bn::after { content: ''; position: absolute; inset: 0; background: linear-gradient(to bottom, transparent 20%, var(--card) 100%); }
+.pod.r1 .bn { height: 96px; }
+.pod.r1::before { content: ''; position: absolute; inset: 0; z-index: 3; pointer-events: none; border-radius: inherit; background: linear-gradient(115deg, transparent 38%, color-mix(in srgb, var(--medal) 22%, transparent) 50%, transparent 62%) 0 0 / 260% 100%; animation: lbsheen 5.5s ease-in-out 1s infinite; }
+@keyframes lbsheen { 0% { background-position: 130% 0; } 45%, 100% { background-position: -30% 0; } }
+.pod .rk { position: absolute; top: 10px; left: 12px; z-index: 2; font: 600 10.5px var(--mono); letter-spacing: .1em; text-transform: uppercase; padding: 4px 8px; border-radius: 6px; background: rgba(0, 0, 0, .5); color: var(--medal); backdrop-filter: blur(8px); }
+.pod .big { position: absolute; right: 12px; top: 4px; z-index: 1; font: 700 112px/1 var(--head); letter-spacing: -.06em; color: transparent; -webkit-text-stroke: 1.2px color-mix(in srgb, var(--medal) 30%, transparent); pointer-events: none; }
+.pod .pb { position: relative; z-index: 1; padding: 0 18px 16px; display: flex; flex-direction: column; gap: 4px; }
+.pod .av { width: 62px; height: 62px; margin-top: -34px; margin-bottom: 8px; }
+.pod.r1 .av { width: 76px; height: 76px; margin-top: -42px; }
+.pod h3 { margin: 0; font: 500 18px/1.2 var(--head); letter-spacing: -.03em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .pod.r1 h3 { font-size: 21px; }
+.pod .sub { margin: 0; font: 400 12px var(--mono); color: var(--t3); }
+.pod .amt { margin-top: 12px; } .pod .amt .solv { font-size: 28px; } .pod.r1 .amt .solv { font-size: 34px; }
+.pod .amt small { display: block; margin-top: 7px; font: 400 12px var(--mono); color: var(--t3); }
+.pod .ft2 { display: flex; gap: 16px; flex-wrap: wrap; margin-top: 12px; padding-top: 11px; border-top: 1px solid var(--line); font: 400 11.5px var(--mono); color: var(--t3); } .pod .ft2 b { color: var(--t2); font-weight: 500; }
+.lbav, .pod .av { position: relative; display: grid; place-items: center; border-radius: 50%; overflow: hidden; flex: none; box-shadow: 0 0 0 3px var(--card), 0 0 0 4.5px var(--medal, var(--line)); background: var(--s3); }
+.lbav img, .lbav > span, .pod .av img, .pod .av > span { width: 100%; height: 100%; object-fit: cover; display: grid; place-items: center; font: 600 15px var(--head); color: #fff; }
+.pod .av > span { font-size: 26px; }
+.lblist { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--card); } .lblist:empty { display: none; }
+.lbrow { display: grid; grid-template-columns: 34px minmax(0, 1.5fr) minmax(70px, 1fr) 84px 92px minmax(128px, auto); align-items: center; gap: 16px; padding: 11px 18px; border-top: 1px solid var(--line); animation: lbin .45s var(--ease) both; transition: background .2s; }
+.lbrow:first-child { border-top: 0; } .lbrow:not(.lbhead):hover { background: var(--s1); }
+.lbhead { padding-top: 10px; padding-bottom: 10px; font: 500 10.5px var(--mono); color: var(--t3); letter-spacing: .07em; text-transform: uppercase; animation: none; }
+.lbrow .n { font: 500 13px var(--mono); color: var(--t3); font-variant-numeric: tabular-nums; }
+.lbrow .who { display: flex; align-items: center; gap: 12px; min-width: 0; } .lbrow .lbav { width: 34px; height: 34px; box-shadow: none; }
+.lbrow .who div { min-width: 0; } .lbrow .who b { display: block; font: 500 14px var(--ui); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .lbrow .who small { display: block; font: 400 11.5px var(--mono); color: var(--t3); margin-top: 2px; }
+.lbrow .share { height: 5px; border-radius: 3px; background: var(--s2); overflow: hidden; } .lbrow .share i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, color-mix(in srgb, var(--acc) 35%, transparent), var(--acc)); }
+.lbrow .vs { display: flex; gap: 4px; } .lbrow .vs .vlogo { width: 18px; height: 18px; }
+.lbrow .last { font: 400 12px var(--mono); color: var(--t2); white-space: nowrap; } .lbhead .last { font: inherit; color: inherit; } .lbhead .share { background: none; height: auto; }
+.lbrow .amt { justify-self: end; text-align: right; } .lbrow .amt .solv { font-size: 16px; } .lbrow .amt small { display: block; margin-top: 4px; font: 400 11px var(--mono); color: var(--t3); }
+.lbrow.me, .pod.me .pb { background: color-mix(in srgb, var(--acc) 7%, transparent); } .lbrow.me { box-shadow: inset 2px 0 0 var(--acc); }
+.who i, .pod h3 i { font: 400 .78em var(--mono); font-style: normal; color: var(--t3); margin-left: 4px; }
+.tagme { font: 600 9.5px var(--mono); font-style: normal; letter-spacing: .1em; text-transform: uppercase; color: var(--acc); border: 1px solid color-mix(in srgb, var(--acc) 45%, transparent); padding: 2px 6px; border-radius: 5px; margin-left: 8px; vertical-align: 3px; }
+@media (max-width: 900px) { .lbstats { grid-template-columns: 1fr 1fr; } .lbrow { grid-template-columns: 30px minmax(0, 1fr) auto; } .lbrow .share, .lbrow .vs, .lbrow .last { display: none; } }
+@media (max-width: 760px) { .podium { grid-template-columns: 1fr; } .pod.r1 { order: -1; } }
 .solic { width: 13px; height: 11px; vertical-align: -1px; margin-left: 6px; display: inline-block; }
 .tbl .amt { display: inline-flex; align-items: center; justify-content: flex-end; }
 /* account view */
@@ -408,7 +415,7 @@ button.pav.editable:hover::after { opacity: 1; }
     <a class="nv" href="#coins" data-view="coins"><svg class="ic"><use href="/assets/icons.svg#coins"/></svg>My coins<span class="cnt" id="navCoins"></span></a>
     <a class="nv" href="#fees" data-view="fees"><svg class="ic"><use href="/assets/icons.svg#fees"/></svg>Creator fees</a>
     <a class="nv" href="#history" data-view="history"><svg class="ic"><use href="/assets/icons.svg#clock"/></svg>History</a>
-    <a class="nv" href="#explore" data-view="explore"><svg class="ic"><use href="/assets/icons.svg#explore"/></svg>Explore<span class="cnt" id="navPub"></span></a>
+    <a class="nv" href="#board" data-view="board"><svg class="ic"><use href="/assets/icons.svg#board"/></svg>Leaderboard</a>
     <a class="nv" href="#account" data-view="account"><svg class="ic"><use href="/assets/icons.svg#user"/></svg>Account</a>
     <div class="fill"></div>
     <a class="me" href="#account" id="meCard"><span class="av" id="meAv"><svg class="ic sm"><use href="/assets/icons.svg#user"/></svg></span><div><b id="meName">Sign in</b><small id="meSub">Discord, X or wallet</small></div></a>
@@ -570,16 +577,15 @@ button.pav.editable:hover::after { opacity: 1; }
       <p class="hint" id="hNote" style="margin-top:14px"></p>
     </section>
 
-    <!-- EXPLORE -->
-    <section class="view" data-view="explore" hidden>
-      <div class="vh"><div><h2>Launched with <span class="grad">dzz</span></h2><p>Every coin launched at an address its creator chose. <span id="pubN" class="muted"></span></p></div></div>
-      <div class="xbar">
-        <label class="xsearch"><svg class="ic sm" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="m16 16 4 4"/></svg><input id="xq" placeholder="Search name, ticker or address" spellcheck="false" autocomplete="off"></label>
-        <div class="seg" id="xven"><span class="thumb"></span><button data-v="all" class="on">All</button><button data-v="pump" class="vbtn" title="pump.fun" aria-label="pump.fun"><img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun"></button><button data-v="meteora" class="vbtn" title="Meteora" aria-label="Meteora"><img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora"></button><button data-v="float" class="vbtn" title="Float" aria-label="Float"><img class="vlogo" src="/assets/venues/float.png" alt="Float"></button></div>
-        <div class="seg" id="xsort"><span class="thumb"></span><button data-v="new" class="on">Newest</button><button data-v="mc">Market cap</button></div>
-      </div>
-      <div id="xspot"></div>
-      <div class="xgrid" id="pub"><div class="lempty">loading…</div></div>
+    <!-- LEADERBOARD -->
+    <section class="view" data-view="board" hidden>
+      <div class="vh"><div><h2>Top <span class="grad">earners</span></h2><p>dzz profiles ranked by the creator fees they have collected, across every wallet on the profile. Read from Solana.</p></div>
+        <div class="seg" id="lbBy"><span class="thumb"></span><button data-v="claimed" class="on">Collected</button><button data-v="generated">Earned</button><button data-v="waiting">Waiting</button></div></div>
+      <div class="lbstats" id="lbStats"></div>
+      <div class="lbbar"><span class="lbme" id="lbMe"></span></div>
+      <div class="podium" id="lbPod"><div class="lempty">loading…</div></div>
+      <div class="lblist" id="lbList"></div>
+      <p class="hint" id="lbNote" style="margin-top:14px"></p>
     </section>
 
     <!-- ACCOUNT -->
@@ -609,6 +615,7 @@ button.pav.editable:hover::after { opacity: 1; }
           <div class="card"><div class="card-h"><h3>Sign-in accounts</h3><span class="sub">use any of them to sign in</span></div><div id="accIds"></div></div>
           <div class="card"><div class="card-h"><h3>Wallets</h3><span class="end"><button class="btn sm" id="accLink"><svg class="ic"><use href="/assets/icons.svg#plus"/></svg>Link this wallet</button></span></div><div id="accWallets"></div><p class="hint" style="margin-top:12px">To add another wallet, switch to it in your wallet app, then press Link this wallet and sign. A wallet that already had launches brings them along.</p></div>
         </div>
+        <div class="card" style="margin-top:12px"><div class="card-h"><h3>Leaderboard</h3><span class="end"><button class="btn sm" id="accBoard" type="button">…</button></span></div><p class="hint" id="accBoardP"></p></div>
         <p class="amsg" id="amsg"></p>
       </div>
     </section>
@@ -1162,70 +1169,6 @@ function tintOf(c) {
 }
 const tintVars = (t) => (t ? `--tint: rgb(${t}); --tintl: rgb(${t.map((v) => Math.round(v + (255 - v) * .62))});` : '')
 // the address, with the part its creator chose picked out: the ending (pump.fun's own "pump" counts as plain)
-function plate(k, c = {}) {
-  const lk = k.toLowerCase(), words = [c.symbol, ...(String(c.name || '').split(/\s+/))].filter(Boolean).map((w) => w.toLowerCase().replace(/[^a-z0-9]/g, ''))
-  let pre = 0, suf = 0
-  for (const w of words) for (let n = Math.min(9, w.length); n >= 2; n--) { if (n > pre && lk.startsWith(w.slice(0, n))) pre = n; if (n >= 3 && n > suf && (lk.endsWith(w.slice(0, n)) || lk.endsWith(w.slice(-n)))) suf = n }
-  if (!suf && /pump$/.test(k)) suf = 4
-  if (!suf && !pre) suf = 4
-  return { pre: k.slice(0, pre), mid: k.slice(pre, k.length - suf), tail: k.slice(k.length - suf) }
-}
-let pubCoins = [], pubMcs = {}, xq = '', xven = 'all', xsort = 'new'
-async function loadPublic() {
-  let coins = []
-  try { coins = (await (await fetch(DZZ_API, { cache: 'no-store' })).json()).coins || [] } catch { $('pub').innerHTML = '<div class="lempty">could not load the list right now</div>'; return }
-  $('pubN').textContent = coins.length ? coins.length + ' listed.' : ''; $('navPub').textContent = coins.length || ''
-  pubCoins = coins; drawPublic()
-  for (let i = 0; i < Math.min(coins.length, 90); i += 30) {
-    try { const pairs = await (await fetch('https://api.dexscreener.com/tokens/v1/solana/' + coins.slice(i, i + 30).map((c) => c.mint).join(','))).json(); for (const p of pairs || []) { const m = p.baseToken?.address; if (m && (pubMcs[m] == null || (p.marketCap || 0) > pubMcs[m])) pubMcs[m] = p.marketCap || p.fdv } } catch {}
-  }
-  drawPublic()
-}
-function drawPublic() {
-  const q = xq.trim().toLowerCase()
-  let list = pubCoins.filter((c) => (xven === 'all' || (c.venue || 'pump') === xven) && (!q || `${c.name} ${c.symbol} ${c.mint}`.toLowerCase().includes(q)))
-  list = [...list].sort(xsort === 'mc' ? (a, b) => (pubMcs[b.mint] || 0) - (pubMcs[a.mint] || 0) : (a, b) => (b.at || 0) - (a.at || 0))
-  const pic = (c, cls = '') => (c.image ? `<img src="${esc(c.image)}" alt="" loading="lazy"${cls}>` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`)
-  const trade = (c) => (c.venue === 'meteora' || c.venue === 'float' ? 'https://jup.ag/tokens/' : 'https://pump.fun/coin/') + c.mint
-  const vlogo = (c) => (c.venue === 'meteora' ? '<img class="vlogo" src="/assets/venues/meteora.svg" alt="Meteora" title="Meteora">' : c.venue === 'float' ? '<img class="vlogo" src="/assets/venues/float.png" alt="Float" title="Float">' : '<img class="vlogo" src="/assets/venues/pump.png" alt="pump.fun" title="pump.fun">')
-  const spot = !q && xven === 'all' && xsort === 'new' ? list[0] : null
-  $('xspot').innerHTML = spot ? (() => { const pl = plate(spot.mint, spot), t = tints[spot.mint]
-    return `<div class="xspot" style="${tintVars(t)}${spot.image ? `--img:url('${esc(spot.image)}')` : ''}"><div class="art">${pic(spot)}</div>
-      <div class="info"><span class="kick">${vlogo(spot)}Latest launch · ${ago(spot.at)} ago</span>
-        <h3>${esc(spot.name)}<small>$${esc(spot.symbol)}</small></h3>
-        <div class="plate"><em>${esc(pl.pre)}</em>${esc(pl.mid)}<em>${esc(pl.tail)}</em></div>
-        <div class="bottom"><div class="xfacts"><div><span>Market cap</span><b>${usd(pubMcs[spot.mint])}</b></div><div><span>Launched</span><b>${new Date(spot.at).toLocaleDateString(undefined, { day: 'numeric', month: 'short' })}</b></div></div>
-        <div class="acts"><button class="ca" data-ca="${esc(spot.mint)}"><code>${esc(spot.mint.slice(0, 6))}…${esc(spot.mint.slice(-6))}</code><span>Copy CA</span></button><a class="btn sm" href="${trade(spot)}" target="_blank" rel="noopener">Trade ↗</a><a class="btn sm ghost" href="https://dexscreener.com/solana/${esc(spot.mint)}" target="_blank" rel="noopener">Chart ↗</a></div></div></div></div>` })() : ''
-  const rest = spot ? list.slice(1) : list
-  $('pub').innerHTML = rest.length ? rest.slice(0, 90).map((c, i) => { const pl = plate(c.mint, c), t = tints[c.mint]
-    return `<div class="xcard" style="animation-delay:${Math.min(i, 12) * 30}ms;${tintVars(t)}${c.image ? `--img:url('${esc(c.image)}')` : ''}" data-m="${esc(c.mint)}">
-      <div class="art">${pic(c)}<div class="who"><b>${esc(c.name)}</b><small>$${esc(c.symbol)}</small></div><span class="tag-v">${vlogo(c)}</span></div>
-      <div class="body"><div class="row2"><div class="end">${pl.pre ? `<em>${esc(pl.pre)}</em>…` : '…'}<em>${esc(pl.tail)}</em></div><span class="meta"><b>${usd(pubMcs[c.mint])}</b>${ago(c.at)}</span></div>
-        <div class="acts"><button class="ca" data-ca="${esc(c.mint)}"><code>${esc(c.mint.slice(0, 5))}…${esc(c.mint.slice(-4))}</code><span>Copy</span></button><a class="iconbtn sm" href="${trade(c)}" target="_blank" rel="noopener" title="Trade"><svg class="ic"><use href="/assets/icons.svg#ext"/></svg></a><a class="iconbtn sm" href="https://dexscreener.com/solana/${esc(c.mint)}" target="_blank" rel="noopener" title="Chart"><svg class="ic"><use href="/assets/icons.svg#chart"/></svg></a></div></div></div>` }).join('')
-    : (spot ? '' : '<div class="lempty">No coins match.</div>')
-  // tint each card from its picture, once
-  list.forEach((c) => { if (tints[c.mint] === undefined && c.image) tintOf(c).then((t) => { if (!t) return; document.querySelectorAll(`[data-m="${c.mint}"]`).forEach((el) => el.setAttribute('style', el.getAttribute('style') + tintVars(t))); if (spot?.mint === c.mint) drawPublic() }) })
-}
-$('xq').addEventListener('input', (e) => { xq = e.target.value; drawPublic() })
-seg('xven', (v) => { xven = v; drawPublic() }); seg('xsort', (v) => { xsort = v; drawPublic() })
-$('xspot').addEventListener('click', (e) => { const b = e.target.closest('.ca'); if (b) copyCa(b) })
-$('pub').addEventListener('click', async (e) => {
-  const f = e.target.closest('.fees')
-  if (f) {
-    if (f.disabled) return; f.disabled = true
-    try {
-      const M = await meteora(); if (!sol) await connect()
-      if (f.dataset.ready) { f.textContent = 'claiming…'; await M.claim({ owner: sol, pool: f.dataset.pool }); f.textContent = 'claimed'; delete f.dataset.ready; S.click(); balance() }
-      else {
-        f.textContent = 'reading…'; const v = await M.feesOf(f.dataset.pool, sol)
-        if (v.sol > 0) { f.dataset.ready = '1'; f.textContent = `claim ${v.sol.toFixed(4)} ${v.unit}` }
-        else f.textContent = v.yours ? 'nothing to claim yet' : 'not your coin'
-      }
-    } catch (x) { f.textContent = 'fees'; delete f.dataset.ready; if (!/rejected/i.test(x.message)) window.dzzToast?.(String(x.message).slice(0, 200), true) }
-    f.disabled = false; return
-  }
-  const b = e.target.closest('.ca'); if (b) copyCa(b)
-})
 async function copyCa(b) {
   const was = b.querySelector('span').textContent
   try { await navigator.clipboard.writeText(b.dataset.ca) } catch { const t = document.createElement('textarea'); t.value = b.dataset.ca; document.body.appendChild(t); t.select(); document.execCommand('copy'); t.remove() }
@@ -1240,9 +1183,7 @@ async function registerLaunch(mint, signature) {
     try { const r = await (await fetch(DZZ_API, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ mint, signature }) })).json(); if (r.ok) break } catch {}
     await new Promise((ok) => setTimeout(ok, 8000))
   }
-  loadPublic()
 }
-loadPublic(); setInterval(loadPublic, 60000)
 summary(); stats()
 </script>
 <script src="/assets/figures.js"></script>
@@ -1251,9 +1192,10 @@ summary(); stats()
 // ---------------------------------------------------------------- views: #launch #coins #fees #explore #account
 ;(() => {
   const $ = (id) => document.getElementById(id)
-  const TITLES = { dashboard: 'Dashboard', launch: 'Launch', coins: 'My coins', fees: 'Creator fees', history: 'History', explore: 'Explore', account: 'Account' }
+  const TITLES = { dashboard: 'Dashboard', launch: 'Launch', coins: 'My coins', fees: 'Creator fees', history: 'History', board: 'Leaderboard', account: 'Account' }
   function show() {
     const v = (location.hash.slice(1).split('&')[0] || 'dashboard'), id = TITLES[v] ? v : 'dashboard'
+    if (v === 'explore') return location.replace('#board')   // Explore became the leaderboard
     document.querySelectorAll('.view').forEach((s) => (s.hidden = s.dataset.view !== id))
     document.querySelectorAll('.nv').forEach((a) => a.classList.toggle('on', a.dataset.view === id))
     $('viewTitle').textContent = TITLES[id]; document.title = `dzz · ${TITLES[id].toLowerCase()}`
@@ -1261,6 +1203,7 @@ summary(); stats()
     dispatchEvent(new Event('resize'))                     // segmented controls measure themselves when shown
     if (id === 'account' || id === 'dashboard' || id === 'history') account()
     if (id === 'fees') window.DzzFeesTotal?.refresh()
+    if (id === 'board') board()
   }
   addEventListener('hashchange', () => { show(); scrollTo({ top: 0 }) })
   show()
@@ -1410,6 +1353,9 @@ summary(); stats()
     if (!p) { if (!DzzAuth.token() && !DzzAuth.lastError) location.replace('/login?next=' + encodeURIComponent('/app' + location.hash)); return }
     $('dashName').textContent = p.name
     paint(p); $('accName').textContent = p.name
+    $('accBoard').textContent = p.board === false ? 'Show me' : 'Hide me'
+    $('accBoardP').textContent = p.board === false ? 'You are hidden from the leaderboard.' : 'Your name, picture and fee totals show on the leaderboard. Your wallets and coins never do.'
+    $('accBoard').onclick = async () => { const b = $('accBoard'); b.disabled = true; try { await DzzAuth.setBoard(p.board === false); LB = null; toast(p.board === false ? 'You are on the leaderboard' : 'Hidden from the leaderboard') } catch (e) { say(String(e.message || e), true) } b.disabled = false }
     $('accSub').textContent = `${p.wallets.length} wallet${p.wallets.length === 1 ? '' : 's'} · ${p.identities?.length || 0} sign-in account${p.identities?.length === 1 ? '' : 's'}`
     const ids = p.identities || [], canDrop = ids.length + p.wallets.length > 1
     $('accIds').innerHTML = ['discord', 'x'].map((k) => {
@@ -1593,6 +1539,52 @@ summary(); stats()
     for (const e of hShown()) lines.push([e.t ? new Date(e.t).toISOString() : '', e.t ? F.dayKey(e.t) : '', e.t ? F.time(e.t) : '', e.kind, evName(e), e.c.symbol, e.c.mint, venueOf(e.c)[0], e.wallet, e.n != null ? (e.n / 1e9).toFixed(9) : '', e.n != null && D.px ? ((e.n / 1e9) * D.px).toFixed(2) : '', e.sig || ''].map(q).join(','))
     const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([lines.join('\n')], { type: 'text/csv' })); a.download = `dzz-history-${F.dayKey(Date.now())}.csv`; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000)
   }
+
+  // ---------------------------------------------------------------- leaderboard: profiles ranked by the creator fees they collected (api/leaderboard.js)
+  let LB = null, lbBy = 'claimed', lbAt = 0
+  const MEDAL = ['#e8c36a', '#c4cdd9', '#d39a6c'], LBW = { claimed: 'collected', generated: 'earned', waiting: 'waiting' }
+  const hue = (k) => { let h = 0; for (const c of String(k)) h = (h * 31 + c.charCodeAt(0)) % 360; return h }
+  const lbAv = (u) => (u.avatar ? `<img src="${esc(u.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer">` : `<span style="background:linear-gradient(135deg,hsl(${hue(u.key)} 55% 44%),hsl(${(hue(u.key) + 48) % 360} 62% 26%))">${esc((u.name || '#')[0].toUpperCase())}</span>`)
+  const lbName = (u, key) => (u.name ? esc(u.name) : `Unnamed<i>#${esc(u.key.slice(0, 4))}</i>`) + (u.key === key ? '<em class="tagme">you</em>' : '')
+  async function board(force) {
+    const me = await DzzAuth.me().catch(() => null)
+    if (!LB || force || Date.now() - lbAt > 60000) {
+      try { const r = await (await fetch('/api/leaderboard')).json(); if (!r.users) throw new Error(r.error); LB = r; lbAt = Date.now() }
+      catch { if (!LB) { $('lbPod').innerHTML = '<div class="lempty">Could not load the leaderboard right now.</div>'; return } }
+    }
+    drawBoard(me)
+  }
+  function drawBoard(me) {
+    const px = LB.solUsd, key = me?.boardKey, w = LBW[lbBy]
+    const users = [...LB.users].sort((a, b) => (b[lbBy] || 0) - (a[lbBy] || 0) || b.claimed - a.claimed), top = users[0]?.[lbBy] || 0
+    const coins = users.reduce((a, u) => a + u.coins, 0)
+    $('lbStats').innerHTML = `<div><span>Collected by everyone</span>${F.sol(LB.totals.claimed)}<small>${F.usd(LB.totals.claimed, px)}</small></div>
+      <div><span>Waiting to collect</span>${F.sol(LB.totals.waiting)}<small>${F.usd(LB.totals.waiting, px)}</small></div>
+      <div><span>On the board</span><b class="n">${users.length}</b><small>of ${LB.profiles} dzz profile${LB.profiles === 1 ? '' : 's'}</small></div>
+      <div><span>Coins launched</span><b class="n">${coins}</b><small>by these profiles</small></div>`
+    const i = key ? users.findIndex((u) => u.key === key) : -1
+    $('lbMe').innerHTML = i >= 0 ? `You are <b>No. ${i + 1}</b> of ${users.length}` : me?.board === false ? 'You are hidden from the board. <a class="link" href="#account">Change</a>' : me ? 'Launch from a wallet on your account to join the board.' : ''
+    const pod = users.slice(0, 3), since = (u) => { const d = new Date(u.first || u.since); return `${F.MON[d.getMonth()]} ${d.getFullYear()}` }
+    $('lbPod').innerHTML = pod.length ? [1, 0, 2].filter((r) => pod[r]).map((r, k) => { const u = pod[r]
+      return `<div class="pod r${r + 1}${u.key === key ? ' me' : ''}" style="--medal:${MEDAL[r]};--bn:${esc(bannerCss(u.banner))};animation-delay:${k * 80}ms">
+        <div class="bn"></div><span class="rk">No. ${r + 1}</span><span class="big">${r + 1}</span>
+        <div class="pb"><div class="av">${lbAv(u)}</div><h3>${lbName(u, key)}</h3>
+          <p class="sub">${plural(u.coins, 'coin')} · ${plural(u.claims, 'claim')}${u.last ? ' · last claim ' + F.ago(u.last) : ''}</p>
+          <div class="amt">${F.sol(u[lbBy])}<small>${F.usd(u[lbBy], px) || '&nbsp;'} ${w}</small></div>
+          <div class="ft2"><span>Earned <b>${F.text(u.generated, { short: true })}</b></span><span>Waiting <b>${F.text(u.waiting, { short: true })}</b></span><span>Since <b>${since(u)}</b></span></div></div></div>` }).join('')
+      : '<div class="lempty">No one on the board yet. Launch a coin and collect its fees to be first.</div>'
+    const rest = users.slice(3)
+    $('lbList').innerHTML = rest.length ? `<div class="lbrow lbhead"><span>#</span><span>Profile</span><span class="share">Share of No. 1</span><span class="vs">Venues</span><span class="last">Last claim</span><span class="amt">${w[0].toUpperCase() + w.slice(1)}</span></div>` + rest.map((u, j) => `<div class="lbrow${u.key === key ? ' me' : ''}" style="animation-delay:${Math.min(j, 14) * 28}ms">
+        <span class="n">${String(j + 4).padStart(2, '0')}</span>
+        <div class="who"><span class="lbav">${lbAv(u)}</span><div><b>${lbName(u, key)}</b><small>${plural(u.coins, 'coin')} · ${plural(u.claims, 'claim')}</small></div></div>
+        <div class="share"><i style="width:${top ? Math.max(2, Math.round(((u[lbBy] || 0) / top) * 100)) : 0}%"></i></div>
+        <span class="vs">${u.venues.map((v) => vlogo({ venue: v })).join('')}</span>
+        <span class="last">${u.last ? F.ago(u.last) : '—'}</span>
+        <div class="amt">${F.sol(u[lbBy])}<small>${F.usd(u[lbBy], px)}</small></div></div>`).join('') : ''
+    $('lbNote').textContent = (LB.reading ? 'Some claims are still being read from Solana; the board updates by itself. ' : `Read from Solana ${F.ago(LB.at)}. `) + 'Only names, pictures and fee totals are shown, never wallets or coins. Leave the board from Account.'
+  }
+  seg('lbBy', (v) => { lbBy = v; if (LB) DzzAuth.me().then(drawBoard) })
+  setInterval(() => { if (!document.hidden && document.querySelector('.view[data-view="board"]:not([hidden])')) board() }, 60000)
 })()
 </script>
 <script>
