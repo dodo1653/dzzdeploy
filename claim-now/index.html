@@ -1,0 +1,47 @@
+<!doctype html>
+<!-- One-off claim page: Phantom (or Solflare / Backpack) directly, Meteora DBC creator fees for one pool, no dzz connect code. -->
+<html><head><meta charset="utf-8"><title>Claim fees</title>
+<style>body{background:#0b0b0c;color:#eee;font:16px/1.5 system-ui,sans-serif;max-width:640px;margin:60px auto;padding:0 16px}
+button{font:600 16px system-ui;padding:12px 20px;border-radius:8px;border:0;background:#a9bfff;color:#0b0b0c;cursor:pointer;margin:6px 6px 6px 0}
+button:disabled{opacity:.5}input{width:100%;font:14px monospace;padding:10px;border-radius:8px;border:1px solid #333;background:#151517;color:#eee;margin:6px 0 12px}
+pre{white-space:pre-wrap;word-break:break-all;background:#151517;padding:14px;border-radius:8px;font-size:13px;min-height:60px}a{color:#a9bfff}</style></head>
+<body>
+<h2>Claim Meteora creator fees</h2>
+<label>Pool<input id="pool" value="CevTzvx8ZvtzGMC2ehY5bDrX2Q3wC6E7GSmMPA5rNtJy"></label>
+<p>Wallet that launched the coin: <code>6RWYUqJJCJe4dhmUPyLYeoJp7X3ubr37LQPy2iYNC298</code></p>
+<button id="ph">Claim with Phantom</button><button id="sf">Solflare</button><button id="bp">Backpack</button>
+<pre id="o">Loading the Meteora library…</pre>
+<script src="https://dzzdeploy.vercel.app/assets/meteora.js"></script>
+<script>
+const o = document.getElementById('o'), log = (t) => { o.textContent += '\n' + t }
+const RPC = 'https://solana-rpc.publicnode.com'
+o.textContent = window.MeteoraLaunch ? 'Ready. Pick your wallet.' : 'The Meteora library did not load. Refresh the page.'
+const b64 = (u8) => { let s = ''; for (const x of u8) s += String.fromCharCode(x); return btoa(s) }
+const rpc = (method, params) => fetch(RPC, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }) }).then((r) => r.json())
+async function go(pick) {
+  const btns = document.querySelectorAll('button'); btns.forEach((b) => (b.disabled = true))
+  try {
+    const w = pick(); if (!w) throw new Error('that wallet extension was not found in this browser')
+    o.textContent = 'Connecting…'
+    const r = await w.connect(), me = (r?.publicKey || w.publicKey).toString(); log('Connected: ' + me)
+    if (me !== '6RWYUqJJCJe4dhmUPyLYeoJp7X3ubr37LQPy2iYNC298') log('Note: this is not the wallet that launched the coin. Switch to 6RWY…C298 in your wallet and try again if this fails.')
+    const pool = document.getElementById('pool').value.trim()
+    const f = await MeteoraLaunch.feesOf(pool, me); log(`Waiting: ${f.sol} ${f.unit}${f.yours ? '' : ' (this wallet is NOT the creator)'}`)
+    if (!f.yours) throw new Error('this wallet is not the creator of that coin')
+    const txs = await MeteoraLaunch.claimTxs({ owner: me, pool }); if (!txs.length) throw new Error('nothing to claim')
+    log('Approve in your wallet…')
+    const signed = txs.length > 1 && w.signAllTransactions ? await w.signAllTransactions(txs) : await Promise.all(txs.map((t) => w.signTransaction(t)))
+    for (const t of signed) {
+      const s = await rpc('sendTransaction', [b64(t.serialize()), { encoding: 'base64', maxRetries: 5 }])
+      if (s.error) throw new Error(s.error.message)
+      log('Sent: https://solscan.io/tx/' + s.result)
+      for (let i = 0; i < 40; i++) { const st = (await rpc('getSignatureStatuses', [[s.result]])).result?.value?.[0]; if (st?.err) throw new Error('failed: ' + JSON.stringify(st.err)); if (st?.confirmationStatus) { log('Confirmed ✓ (' + st.confirmationStatus + ')'); break } await new Promise((r) => setTimeout(r, 1500)) }
+    }
+    log('\nDone. The SOL is in ' + me)
+  } catch (e) { log('ERROR: ' + (e?.message || e)) }
+  btns.forEach((b) => (b.disabled = false))
+}
+document.getElementById('ph').onclick = () => go(() => window.phantom?.solana || (window.solana?.isPhantom ? window.solana : null))
+document.getElementById('sf').onclick = () => go(() => window.solflare)
+document.getElementById('bp').onclick = () => go(() => window.backpack?.solana || window.backpack)
+</script></body></html>
