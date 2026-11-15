@@ -17,6 +17,10 @@ const OURS = new RegExp('^(https://([a-z0-9]+\.public\.blob\.vercel-storage\.com
 const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'
 const b58dec = (s) => { let n = 0n; for (const c of s) { const i = B58.indexOf(c); if (i < 0) throw new Error('bad base58'); n = n * 58n + BigInt(i) } let h = n.toString(16); if (h.length % 2) h = '0' + h; const out = Buffer.from(h === '0' ? '' : h, 'hex'); let z = 0; for (const c of s) { if (c !== '1') break; z++ } return Buffer.concat([Buffer.alloc(z), out]) }
 
+// a wallet on any profile, including one that left the leaderboard (admin/board leaves those out)
+async function linked(w) {
+  try { const r = await fetch(STORE + '/admin/owner?wallet=' + w, { headers: { authorization: 'Bearer ' + (process.env.STORE_KEY || '') }, signal: AbortSignal.timeout(6000) }); return r.ok && !!(await r.json()).profile } catch { return true }   // store down: don't lose the launch
+}
 async function rpc(method, params) {
   let last
   for (const url of RPCS) {
@@ -67,6 +71,9 @@ export default async function handler(req, res) {
     }
     if (!meta) return res.status(400).json({ error: 'no pump.fun, Meteora or Float create for this mint in that transaction' })
     if (!OURS.test(meta.uri)) return res.status(400).json({ error: 'not launched with dzz' })
+    // the launching wallet has to be on a dzz profile (signed in with Discord, X or that wallet): no anonymous launches
+    const dev = keys[0], own = await fetch(STORE + '/admin/board', { method: 'POST', headers: { authorization: 'Bearer ' + (process.env.STORE_KEY || ''), 'content-type': 'application/json' }, body: JSON.stringify({ wallets: [dev] }), signal: AbortSignal.timeout(8000) }).then((r) => r.json()).catch(() => null)
+    if (own && !own.owners?.[dev] && !(await linked(dev))) return res.status(403).json({ error: 'sign in to dzz and link this wallet before launching: launches from wallets on no profile are not listed' })
     let image = ''; try { image = (await (await fetch(meta.uri)).json()).image || '' } catch {}
     const coin = { mint, name: meta.name.slice(0, 32), symbol: meta.symbol.slice(0, 10), image, uri: meta.uri, sig, at: (tx.blockTime || Math.floor(Date.now() / 1000)) * 1000, dev: keys[0], ...extra }
     list = [coin, ...(await readList()).filter((c) => c.mint !== mint)].slice(0, 500)

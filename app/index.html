@@ -256,6 +256,7 @@ button.pav.editable:hover::after { opacity: 1; }
 .lbav img, .lbav > span { width: 100%; height: 100%; object-fit: cover; display: grid; place-items: center; font: 600 14px var(--head); color: rgba(255, 255, 255, .92); }
 .lbname { display: flex; align-items: center; gap: 8px; min-width: 0; } .lbname b { font: 500 14px var(--ui); letter-spacing: -.01em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--ink); }
 .lbname i { font: 400 12px var(--mono); font-style: normal; color: var(--t3); }
+.lbids { display: flex; flex-wrap: wrap; gap: 4px 10px; margin-top: 4px; font: 400 11px var(--mono); color: var(--t3); } .lbids a { color: var(--t2); text-decoration: none; border-bottom: 1px dotted var(--t3); } .lbids a:hover { color: var(--ink); } .lbids .w { letter-spacing: .02em; }
 .tagme { flex: none; font: 500 10px var(--mono); letter-spacing: .06em; text-transform: uppercase; color: var(--t2); border: 1px solid var(--line); padding: 2px 6px; border-radius: 5px; }
 .lbsub { display: flex; align-items: center; gap: 6px; margin-top: 3px; font: 400 12px var(--mono); color: var(--t3); white-space: nowrap; } .lbsub .vlogo { width: 14px; height: 14px; opacity: .85; }
 .lbrank { font: 500 13px var(--mono); color: var(--t3); font-variant-numeric: tabular-nums; }
@@ -1127,6 +1128,13 @@ async function launch() {
   ;['meta', 'sign', 'live'].forEach((k) => step(k)); $('done').innerHTML = ''; let cur = 'meta'
   try {
     if (!sol) await connect()
+    // no anonymous launches: you are signed in, and the wallet that launches is on your account (its address shows on the leaderboard)
+    const me = await window.DzzAuth?.me().catch(() => null)
+    if (!me) { location.href = '/login?next=' + encodeURIComponent('/app#launch'); throw new Error('Sign in with Discord, X or your wallet to launch.') }
+    if (typeof sol === 'string' && !me.wallets.includes(sol)) {
+      note('Sign once to put this wallet on your account…')
+      try { await DzzAuth.linkWallet() } catch (e) { throw new Error(/another|already/i.test(e.message || '') ? 'This wallet is on another dzz account. Sign in with that account to launch from it.' : 'Launching needs this wallet on your account: ' + (e.message || 'the signature was refused')) }
+    }
     const have = await balance(), need = needSol()
     if (have != null && have < need) { const e = new Error('short'); e.short = { need, have }; throw e }
     step('meta', 'run')
@@ -1573,13 +1581,17 @@ summary(); stats()
   let LB = null, lbBy = 'claimed', lbAt = 0, lbView = (() => { try { return localStorage.getItem('dzz-lbview') || 'list' } catch { return 'list' } })()
   const MEDAL = ['#d9b45f', '#aeb7c4', '#b98260'], LBW = { claimed: 'Collected', generated: 'Earned', waiting: 'Waiting' }
   const hue = (k) => { let h = 0; for (const c of String(k)) h = (h * 31 + c.charCodeAt(0)) % 360; return h }
-  const lbAv = (u) => `<span style="background:hsl(${hue(u.key)} 26% 30%)">${esc((u.name || '#')[0].toUpperCase())}</span>${u.avatar ? `<img src="${esc(u.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}`
-  const lbName = (u, key) => `<span class="lbname"><b>${u.name ? esc(u.name) : 'Unnamed'}</b>${u.name ? '' : `<i>#${esc(u.key.slice(0, 4))}</i>`}${u.key === key ? '<em class="tagme">you</em>' : ''}</span>`
-  const lbSub = (u) => `<span class="lbsub">${u.venues.map((v) => vlogo({ venue: v })).join('')}${plural(u.coins, 'coin')} · ${plural(u.claims, 'claim')}</span>`
+  const lbAv = (u) => `<span style="background:hsl(${hue(u.key)} 26% 30%)">${esc((lbTitle(u).replace(/^@/, '') || '#')[0].toUpperCase())}</span>${u.avatar ? `<img src="${esc(u.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}`
+  // who it is: a name, or else the X / Discord handle, or else the launch wallet. Never anonymous.
+  const shortW = (w) => (w ? w.slice(0, 4) + '…' + w.slice(-4) : '')
+  const lbTitle = (u) => u.name || (u.x ? '@' + u.x : '') || u.discord || shortW(u.wallets?.[0]) || 'dzz profile'
+  const lbName = (u, key) => `<span class="lbname"><b>${esc(lbTitle(u))}</b>${u.key === key ? '<em class="tagme">you</em>' : ''}</span>`
+  const lbIds = (u) => `<span class="lbids">${u.x ? `<a href="https://x.com/${esc(u.x)}" target="_blank" rel="noopener">X @${esc(u.x)}</a>` : ''}${u.discord ? `<span>Discord ${esc(u.discord)}</span>` : ''}${(u.wallets || []).slice(0, 2).map((w) => `<a class="w" href="https://solscan.io/account/${esc(w)}" target="_blank" rel="noopener" title="${esc(w)}">${esc(shortW(w))}</a>`).join('')}${(u.wallets || []).length > 2 ? `<span>+${u.wallets.length - 2}</span>` : ''}</span>`
+  const lbSub = (u) => `<span class="lbsub">${u.venues.map((v) => vlogo({ venue: v })).join('')}${plural(u.coins, 'coin')} · ${plural(u.claims, 'claim')}</span>${lbIds(u)}`
   const lbRank = (r) => `<span class="lbrank${r < 3 ? ' lead' : ''}"${r < 3 ? ` style="--medal:${MEDAL[r]}"` : ''}>${String(r + 1).padStart(2, '0')}</span>`
   // ---------------------------------------------------------------- someone's PnL calendar, from the leaderboard
   let PC = null   // { u, ev, m, sel }
-  $('lbOut').addEventListener('click', (e) => { const r = e.target.closest('[data-pk]'); if (r) openPC(r.dataset.pk) })
+  $('lbOut').addEventListener('click', (e) => { if (e.target.closest('.lbids a')) return; const r = e.target.closest('[data-pk]'); if (r) openPC(r.dataset.pk) })
   async function openPC(k) {
     const u = (LB?.users || []).find((x) => x.key === k); if (!u) return
     PC = { u, ev: null, m: null, sel: null }
@@ -1663,7 +1675,7 @@ summary(); stats()
         ${users.map((u, r) => `<div class="lbrow pk${u.key === key ? ' mine' : ''}" data-pk="${esc(u.key)}" title="See the PnL calendar" style="animation-delay:${Math.min(r, 14) * 25}ms">${lbRank(r)}
           <div class="who"><span class="lbav">${lbAv(u)}</span><div>${lbName(u, key)}${lbSub(u)}</div></div>
           ${cell(u, 'claimed')}${cell(u, 'generated')}${cell(u, 'waiting')}<span class="when">${u.last ? F.ago(u.last) : '—'}</span></div>`).join('')}</div>`
-    $('lbNote').textContent = (LB.reading ? 'Some claims are still being read from Solana; the board updates by itself. ' : `Read from Solana ${F.ago(LB.at)}. `) + 'Only names, pictures and fee totals are shown, never wallets or coins. You can leave the board from Account.'
+    $('lbNote').textContent = (LB.reading ? 'Some claims are still being read from Solana; the board updates by itself. ' : `Read from Solana ${F.ago(LB.at)}. `) + 'Every profile shows its name, its X or Discord and the wallets it launched from. You can leave the board from Account.'
   }
   seg('lbBy', (v) => { lbBy = v; if (LB) DzzAuth.me().then(drawBoard) })
   document.querySelectorAll('#lbView button').forEach((b) => b.classList.toggle('on', b.dataset.v === lbView))
