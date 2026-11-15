@@ -1583,10 +1583,11 @@ summary(); stats()
   const hue = (k) => { let h = 0; for (const c of String(k)) h = (h * 31 + c.charCodeAt(0)) % 360; return h }
   const lbAv = (u) => `<span style="background:hsl(${hue(u.key)} 26% 30%)">${esc((lbTitle(u).replace(/^@/, '') || '#')[0].toUpperCase())}</span>${u.avatar ? `<img src="${esc(u.avatar)}" alt="" loading="lazy" referrerpolicy="no-referrer" onerror="this.remove()">` : ''}`
   // who it is: a name, or else the X / Discord handle, or else the launch wallet. Never anonymous.
+  const xh = (u) => String(u.x || '').replace(/^@+/, '')
   const shortW = (w) => (w ? w.slice(0, 4) + '…' + w.slice(-4) : '')
-  const lbTitle = (u) => u.name || (u.x ? '@' + u.x : '') || u.discord || shortW(u.wallets?.[0]) || 'dzz profile'
+  const lbTitle = (u) => u.name || (xh(u) ? '@' + xh(u) : '') || u.discord || shortW(u.wallets?.[0]) || 'dzz profile'
   const lbName = (u, key) => `<span class="lbname"><b>${esc(lbTitle(u))}</b>${u.key === key ? '<em class="tagme">you</em>' : ''}</span>`
-  const lbIds = (u) => `<span class="lbids">${u.x ? `<a href="https://x.com/${esc(u.x)}" target="_blank" rel="noopener">X @${esc(u.x)}</a>` : ''}${u.discord ? `<span>Discord ${esc(u.discord)}</span>` : ''}${(u.wallets || []).slice(0, 2).map((w) => `<a class="w" href="https://solscan.io/account/${esc(w)}" target="_blank" rel="noopener" title="${esc(w)}">${esc(shortW(w))}</a>`).join('')}${(u.wallets || []).length > 2 ? `<span>+${u.wallets.length - 2}</span>` : ''}</span>`
+  const lbIds = (u) => `<span class="lbids">${xh(u) ? `<a href="https://x.com/${esc(xh(u))}" target="_blank" rel="noopener">X @${esc(xh(u))}</a>` : ''}${u.discord ? `<span>Discord ${esc(u.discord)}</span>` : ''}${(u.wallets || []).slice(0, 2).map((w) => `<a class="w" href="https://solscan.io/account/${esc(w)}" target="_blank" rel="noopener" title="${esc(w)}">${esc(shortW(w))}</a>`).join('')}${(u.wallets || []).length > 2 ? `<span>+${u.wallets.length - 2}</span>` : ''}</span>`
   const lbSub = (u) => `<span class="lbsub">${u.venues.map((v) => vlogo({ venue: v })).join('')}${plural(u.coins, 'coin')} · ${plural(u.claims, 'claim')}</span>${lbIds(u)}`
   const lbRank = (r) => `<span class="lbrank${r < 3 ? ' lead' : ''}"${r < 3 ? ` style="--medal:${MEDAL[r]}"` : ''}>${String(r + 1).padStart(2, '0')}</span>`
   // ---------------------------------------------------------------- someone's PnL calendar, from the leaderboard
