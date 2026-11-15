@@ -406,6 +406,16 @@ button.pav.editable:hover::after { opacity: 1; }
   .lrow { grid-template-columns: 40px 1fr auto; } .lrow .ca, .lrow .age, .lrow .lk { grid-column: 2 / -1; }
 }
 @media (max-width: 900px) and (min-width: 0) { .topbar .right .hide-m { display: none; } }
+/* someone's PnL calendar, opened from the leaderboard */
+.pk { cursor: pointer; } .lbrow.pk:hover, .lbcard.pk:hover { border-color: var(--acc); }
+.pcback { position: fixed; inset: 0; z-index: 80; background: rgba(0, 0, 0, .55); backdrop-filter: blur(6px); display: grid; place-items: start center; overflow-y: auto; padding: 6vh 16px 40px; }
+.pcback[hidden] { display: none; }
+.pcsheet { width: min(980px, 100%); animation: pcIn .22s ease both; }
+@keyframes pcIn { from { opacity: 0; transform: translateY(10px) } }
+.pchead { align-items: center; } .pcwho { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.pcnav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 14px; }
+.pcall { display: flex; align-items: baseline; gap: 10px; } .pcall span { color: var(--t3); font-size: 13px; }
+body.pc-on { overflow: hidden; }
 </style>
 </head>
 <body data-bg="soft">
@@ -594,6 +604,10 @@ button.pav.editable:hover::after { opacity: 1; }
       <div id="lbOut"><div class="lempty">loading…</div></div>
       <p class="hint" id="lbNote" style="margin-top:14px"></p>
     </section>
+
+    <div class="pcback" id="pcBack" hidden><div class="card pcsheet" role="dialog" aria-label="PnL calendar">
+      <div class="card-h pchead"><div class="pcwho" id="pcHead"></div><span class="end"><button type="button" class="btn sm" id="pcClose">Close</button></span></div>
+      <div id="pcBody"></div></div></div>
 
     <!-- ACCOUNT -->
     <section class="view" data-view="account" hidden>
@@ -1563,6 +1577,62 @@ summary(); stats()
   const lbName = (u, key) => `<span class="lbname"><b>${u.name ? esc(u.name) : 'Unnamed'}</b>${u.name ? '' : `<i>#${esc(u.key.slice(0, 4))}</i>`}${u.key === key ? '<em class="tagme">you</em>' : ''}</span>`
   const lbSub = (u) => `<span class="lbsub">${u.venues.map((v) => vlogo({ venue: v })).join('')}${plural(u.coins, 'coin')} · ${plural(u.claims, 'claim')}</span>`
   const lbRank = (r) => `<span class="lbrank${r < 3 ? ' lead' : ''}"${r < 3 ? ` style="--medal:${MEDAL[r]}"` : ''}>${String(r + 1).padStart(2, '0')}</span>`
+  // ---------------------------------------------------------------- someone's PnL calendar, from the leaderboard
+  let PC = null   // { u, ev, m, sel }
+  $('lbOut').addEventListener('click', (e) => { const r = e.target.closest('[data-pk]'); if (r) openPC(r.dataset.pk) })
+  async function openPC(k) {
+    const u = (LB?.users || []).find((x) => x.key === k); if (!u) return
+    PC = { u, ev: null, m: null, sel: null }
+    $('pcBack').hidden = false; document.body.classList.add('pc-on')
+    $('pcHead').innerHTML = `<span class="lbav">${lbAv(u)}</span><div>${lbName(u, '')}${lbSub(u)}</div>`
+    $('pcBody').innerHTML = '<div class="lempty">reading…</div>'
+    try {
+      const r = await (await fetch('/api/leaderboard?cal=' + encodeURIComponent(k))).json(); if (!r.ev) throw new Error(r.error)
+      if (PC?.u.key !== k) return
+      PC.ev = r.ev.map(([t, n, kd]) => ({ t, n, kind: kd ? 'claim' : 'launch' })); drawPC()
+    } catch (er) { $('pcBody').innerHTML = `<div class="lempty">${esc(er.message || 'Could not read this calendar right now.')}</div>` }
+  }
+  const closePC = () => { $('pcBack').hidden = true; document.body.classList.remove('pc-on'); PC = null }
+  $('pcClose').onclick = closePC
+  $('pcBack').addEventListener('click', (e) => { if (e.target === $('pcBack')) closePC() })
+  addEventListener('keydown', (e) => { if (e.key === 'Escape' && PC) closePC() })
+  function drawPC() {
+    const ev = PC.ev, days = new Map()
+    for (const e of ev) { const k = F.dayKey(e.t), d = days.get(k) || { net: 0, in: 0, out: 0, l: 0, c: 0, ev: [] }; if (e.n != null) { d.net += e.n; if (e.n > 0) d.in += e.n; else d.out -= e.n } e.kind === 'launch' ? d.l++ : d.c++; d.ev.push(e); days.set(k, d) }
+    const now = new Date(), ts = ev.map((e) => e.t), lo = ts.length ? new Date(Math.min(...ts)) : now
+    const minM = new Date(lo.getFullYear(), lo.getMonth(), 1), maxM = new Date(now.getFullYear(), now.getMonth(), 1)
+    if (!PC.m) { const hi = ts.length ? new Date(Math.max(...ts)) : now; PC.m = new Date(hi.getFullYear(), hi.getMonth(), 1) }
+    if (PC.m < minM) PC.m = minM; if (PC.m > maxM) PC.m = maxM
+    const y = PC.m.getFullYear(), mo = PC.m.getMonth(), nDays = new Date(y, mo + 1, 0).getDate(), lead = (new Date(y, mo, 1).getDay() + 6) % 7, pre = `${y}-${String(mo + 1).padStart(2, '0')}-`
+    let net = 0, inn = 0, out = 0, nl = 0, nc = 0, max = 0, allNet = 0
+    for (const [k, x] of days) { allNet += x.net; if (k.startsWith(pre)) { net += x.net; inn += x.in; out += x.out; nl += x.l; nc += x.c; max = Math.max(max, Math.abs(x.net)) } }
+    if (!PC.sel || !PC.sel.startsWith(pre)) PC.sel = [...days.keys()].filter((k) => k.startsWith(pre)).sort().at(-1) || null
+    const today = F.dayKey(Date.now())
+    let g = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map((d) => `<div class="h">${d}</div>`).join('') + '<div class="h wk">Week</div>', wk = 0, wkHas = false
+    for (let i = 0, cells = Math.ceil((lead + nDays) / 7) * 7; i < cells; i++) {
+      const dn = i - lead + 1
+      if (dn < 1 || dn > nDays) g += '<div class="cday out"></div>'
+      else {
+        const key = pre + String(dn).padStart(2, '0'), x = days.get(key), v = x?.net || 0, a = v ? Math.round(10 + 32 * Math.sqrt(Math.abs(v) / (max || 1))) : 0
+        g += `<button type="button" class="cday${v > 0 ? ' pos' : v < 0 ? ' neg' : ''}${key === today ? ' today' : ''}${key === PC.sel ? ' sel' : ''}" data-k="${key}" style="--a:${a}%"><span class="d">${dn}</span>${x ? `<span class="marks">${'<i></i>'.repeat(Math.min(x.l, 3))}${'<i class="c"></i>'.repeat(Math.min(x.c, 3))}</span>` : ''}<span class="n">${v ? F.text(v, { sign: true, short: true }) : ''}</span></button>`
+        if (x) { wk += v; wkHas = true }
+      }
+      if (i % 7 === 6) { g += `<div class="cwk"><small>week</small><span class="n${wk > 0 ? ' pos' : wk < 0 ? ' neg' : ''}">${wkHas ? F.text(wk, { sign: true, short: true }) : '–'}</span></div>`; wk = 0; wkHas = false }
+    }
+    const x = PC.sel && days.get(PC.sel), [yy, mm, dd] = (PC.sel || '').split('-').map(Number)
+    const day = !PC.sel ? `<h4>${MONTH[mo]} ${y}</h4><p class="none">No launches or claims this month.</p>`
+      : `<h4>${WEEKDAY[new Date(yy, mm - 1, dd).getDay()]} ${dd} ${MONTH[mm - 1]} ${yy}</h4><div class="dn">${F.sol(x?.net || 0, { sign: true, tone: true })}</div>` +
+        (x ? x.ev.slice().sort((a, b) => a.t - b.t).map((e) => `<div class="ev"><span class="t">${F.time(e.t).slice(0, 5)}</span><div class="w"><b>${e.kind === 'launch' ? 'Launched a coin' : 'Collected fees'}</b><small>${e.kind === 'launch' ? 'launch cost' : 'creator fees'}</small></div>${e.n != null ? F.sol(e.n, { sign: true, tone: e.kind === 'claim' }) : '<span class="solv none">—</span>'}</div>`).join('') : '<p class="none">No launches or claims on this day.</p>')
+    $('pcBody').innerHTML = `<div class="pcnav"><div class="pcall"><span>All time</span>${F.sol(allNet, { sign: true, tone: true })}</div><span class="calnav"><button type="button" id="pcPrev" aria-label="Previous month"${PC.m <= minM ? ' disabled' : ''}><svg viewBox="0 0 24 24"><path d="M15 6l-6 6 6 6"/></svg></button><b>${MONTH[mo]} ${y}</b><button type="button" id="pcNext" aria-label="Next month"${PC.m >= maxM ? ' disabled' : ''}><svg viewBox="0 0 24 24"><path d="M9 6l6 6-6 6"/></svg></button></span></div>
+      <div class="calwrap"><div><div class="calsum"><div><div class="net">${F.sol(net, { sign: true, tone: true })}</div><small>net in ${MONTH[mo]}</small></div>
+        <dl><div><dt>collected</dt><dd>${F.sol(inn)}</dd></div><div><dt>launch costs</dt><dd>${F.sol(out)}</dd></div><div><dt>launches</dt><dd><span class="plain">${nl}</span></dd></div><div><dt>claims</dt><dd><span class="plain">${nc}</span></dd></div></dl></div>
+        <div class="calgrid" id="pcGrid">${g}</div><div class="calkey"><span><i></i>launch</span><span><i class="c"></i>fee claim</span><span>${F.zone ? 'times in ' + esc(F.zone) : ''}</span></div></div>
+        <div class="calday">${day}</div></div>
+      <p class="hint" style="margin-top:12px">Amounts and times only: which coins and wallets are behind them stays private.</p>`
+    $('pcPrev').onclick = () => { PC.m = new Date(PC.m.getFullYear(), PC.m.getMonth() - 1, 1); PC.sel = null; drawPC() }
+    $('pcNext').onclick = () => { PC.m = new Date(PC.m.getFullYear(), PC.m.getMonth() + 1, 1); PC.sel = null; drawPC() }
+    $('pcGrid').onclick = (e) => { const b = e.target.closest('.cday[data-k]'); if (b) { PC.sel = b.dataset.k; drawPC() } }
+  }
   async function board(force) {
     const me = await DzzAuth.me().catch(() => null)
     if (!LB || force || Date.now() - lbAt > 60000) {
@@ -1584,13 +1654,13 @@ summary(); stats()
     if (!users.length) { $('lbOut').innerHTML = '<div class="lempty">No one is ranked yet. Launch a coin and collect its fees to be first.</div>'; return }
     const cell = (u, k) => `<div class="num c-${k[0]}${k === lbBy ? ' on' : ''}">${F.sol(u[k])}<small>${F.usd(u[k], px) || '&nbsp;'}</small></div>`
     $('lbOut').innerHTML = lbView === 'grid'
-      ? `<div class="lbgrid">${users.map((u, r) => `<div class="lbcard${u.key === key ? ' mine' : ''}" style="animation-delay:${Math.min(r, 12) * 30}ms">
+      ? `<div class="lbgrid">${users.map((u, r) => `<div class="lbcard pk${u.key === key ? ' mine' : ''}" data-pk="${esc(u.key)}" title="See the PnL calendar" style="animation-delay:${Math.min(r, 12) * 30}ms">
           <div class="bn" style="--bn:${u.banner ? esc(bannerCss(u.banner)) : 'linear-gradient(180deg, var(--s3), var(--s1))'}"></div>
           <div class="hd"><span class="lbav">${lbAv(u)}</span><div>${lbName(u, key)}${lbSub(u)}</div>${lbRank(r)}</div>
           <div class="amt">${F.sol(u[lbBy])}<small>${F.usd(u[lbBy], px) ? F.usd(u[lbBy], px) + ' · ' : ''}${LBW[lbBy].toLowerCase()}</small></div>
           <dl>${['claimed', 'generated', 'waiting'].filter((k) => k !== lbBy).map((k) => `<div><dt>${LBW[k]}</dt><dd>${F.text(u[k], { short: true })}</dd></div>`).join('')}<div><dt>Last claim</dt><dd>${u.last ? F.ago(u.last).replace(' ago', '') : '—'}</dd></div></dl></div>`).join('')}</div>`
       : `<div class="lbtable"><div class="lbrow lbhead"><span>Rank</span><span>Profile</span>${['claimed', 'generated', 'waiting'].map((k) => `<span class="num c-${k[0]}${k === lbBy ? ' on' : ''}">${LBW[k]}</span>`).join('')}<span class="when">Last claim</span></div>
-        ${users.map((u, r) => `<div class="lbrow${u.key === key ? ' mine' : ''}" style="animation-delay:${Math.min(r, 14) * 25}ms">${lbRank(r)}
+        ${users.map((u, r) => `<div class="lbrow pk${u.key === key ? ' mine' : ''}" data-pk="${esc(u.key)}" title="See the PnL calendar" style="animation-delay:${Math.min(r, 14) * 25}ms">${lbRank(r)}
           <div class="who"><span class="lbav">${lbAv(u)}</span><div>${lbName(u, key)}${lbSub(u)}</div></div>
           ${cell(u, 'claimed')}${cell(u, 'generated')}${cell(u, 'waiting')}<span class="when">${u.last ? F.ago(u.last) : '—'}</span></div>`).join('')}</div>`
     $('lbNote').textContent = (LB.reading ? 'Some claims are still being read from Solana; the board updates by itself. ' : `Read from Solana ${F.ago(LB.at)}. `) + 'Only names, pictures and fee totals are shown, never wallets or coins. You can leave the board from Account.'
