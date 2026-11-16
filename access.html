@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Access · dzz</title>
+<link rel="icon" href="/assets/icon.png">
+<meta name="robots" content="noindex">
+<script src="/assets/theme.js"></script>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/assets/ui.css">
+<style>
+body { min-height: 100vh; min-height: 100dvh; display: grid; place-items: center; }
+.stack { position: relative; z-index: 2; width: min(340px, 100% - 32px); text-align: center; padding-bottom: 60px; }
+.bigmark { display: inline-flex; margin: 0 auto 30px; } .bigmark .logo svg { width: 30px; height: 30px; } .bigmark .logo b { display: none; }
+h1 { margin: 0; font: 500 clamp(30px, 3.4vw, 36px)/1.1 var(--ui); letter-spacing: -.045em; }
+.sub { margin: 12px 0 30px; color: var(--t2); font-size: 15px; }
+.code { width: 100%; height: 48px; border-radius: 9px; border: 1px solid var(--line2); background: color-mix(in srgb, var(--bg) 70%, #1a1b1f); color: var(--ink);
+  font: 500 17px var(--mono); letter-spacing: .14em; text-align: center; text-transform: uppercase; outline: none; transition: border-color .2s; }
+.code:focus { border-color: rgba(255,255,255,.3); }
+.enter { margin-top: 10px; width: 100%; height: 44px; border-radius: 9px; border: 0; background: var(--ink); color: var(--bg); font: 600 14px var(--ui); cursor: pointer; }
+.enter:disabled { opacity: .5; cursor: default; }
+.msg { min-height: 20px; margin: 16px 0 0; font-size: 13px; color: var(--t2); } .msg.err { color: var(--bad); }
+</style>
+</head>
+<body data-hud>
+<form class="stack" id="f" autocomplete="off">
+  <span class="mark bigmark"><span class="logo" role="img" aria-label="dzz"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 4h16v3.4H4z M13.6 8.6H20l-9.6 6.8H4z M4 16.6h16V20H4z"/></svg><b>dzz</b></span></span>
+  <h1>dzz is <span class="grad">invite only</span></h1>
+  <p class="sub">Enter your access code.</p>
+  <input class="code" id="code" placeholder="DZZ-XXXX-XXXX" spellcheck="false" autocapitalize="characters" autofocus>
+  <button class="enter" id="go">Enter</button>
+  <p class="msg" id="msg" role="status"></p>
+</form>
+<script src="/assets/bg.js"></script>
+<script>
+const $ = (id) => document.getElementById(id), next = new URLSearchParams(location.search).get('next') || '/'
+const safeNext = /^\/(?!\/)/.test(next) ? next : '/'
+$('f').onsubmit = async (e) => {
+  e.preventDefault(); $('go').disabled = true; $('msg').className = 'msg'; $('msg').textContent = 'Checking…'
+  try {
+    const r = await fetch('https://dzz-store.trenchcounty.workers.dev/gate', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ code: $('code').value }) })
+    const j = await r.json(); if (!j.pass) throw new Error(j.error || 'wrong access code')
+    try { localStorage.setItem('dzz.gate', j.pass) } catch {}
+    location.replace(safeNext)
+  } catch (err) { $('msg').className = 'msg err'; $('msg').textContent = err.message } finally { $('go').disabled = false }
+}
+</script>
+</body>
+</html>
