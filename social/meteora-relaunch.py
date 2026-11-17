@@ -5,7 +5,7 @@ P = [
 
 Our first venue is no longer the right home for dzz, so we're moving. The official $dzz will launch on @MeteoraAG instead.
 
-Same launcher, same custom addresses, same dev. Only the venue changes.
+Same launcher, same dev. Only the venue changes.
 
 Launch time and CA will be posted here. Nothing before that is ours.'''),
 ('go live (with the film)', '''$dzz is live on @MeteoraAG.
