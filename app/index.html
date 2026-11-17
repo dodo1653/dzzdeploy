@@ -571,7 +571,7 @@ body.pc-on { overflow: hidden; }
         <div class="card-h"><h3>Claim</h3><span class="sub">Meteora and Float coins you launched</span><span class="end"><button class="btn sm" id="claimReload" type="button">Refresh</button></span></div>
         <div id="claimRows"><div class="lempty">reading…</div></div>
         <div class="claim-any"><input class="in mono" id="claimCa" placeholder="Or paste a coin's contract address" spellcheck="false" autocomplete="off"><button class="btn" id="claimFind" type="button">Find</button></div>
-        <p class="hint" id="claimMsg" style="margin-top:12px">Connect the wallet that launched the coin to claim. On Float anyone can press Claim: the fees always go to the coin's fee wallet. pump.fun coins are claimed on pump.fun: your profile, Creator rewards.</p>
+        <p class="hint" id="claimMsg" style="margin-top:12px">Connect the wallet that launched the coin to claim. On Float anyone can press Claim: the fees always go to the coin's fee wallet. pump.fun coins paired with a token are claimed here too; pump.fun coins paired with SOL are claimed on pump.fun: your profile, Creator rewards.</p>
       </div>
     </section>
 
@@ -1708,21 +1708,41 @@ summary(); stats()
       if (!(c.venue === 'float' || (c.venue === 'meteora' && c.pool)) || seen.has(c.mint)) continue
       seen.add(c.mint); list.push({ ...c, fee: fees.get(c.mint) })
     }
+    // pump.fun coins paired with another token: their creator fees wait in that token inside the curve (newest 12, read live)
+    const pumps = []; for (const c of [...mine.map((h) => ({ ...h, dev: pub.find((x) => x.mint === h.mint)?.dev })), ...pub.filter((c) => wallets.has(c.dev))]) if (!c.venue && !seen.has(c.mint)) { seen.add(c.mint); pumps.push(c) }
+    draw()
+    const qs = await Promise.all(pumps.sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 12).map((c) => PumpLaunch.quoteFeesOf(c.mint).then((q) => ({ c, q })).catch(() => null)))
+    for (const x of qs) if (x && !x.q.sol) list.push({ ...x.c, venue: 'pumpq', q: x.q })
     draw()
   }
   function draw() {
     $('claimRows').innerHTML = list.length ? list.map((c, i) => {
       const w = c.fee?.waiting, F = window.DzzFig, born = c.fee?.born || c.at, lastC = (c.fee?.claims || []).find((k) => k.at)
+      if (c.venue === 'pumpq') { const q = c.q, none = !(q.waiting > 0)
+        return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">pump.fun · paired with ${esc(q.unit)} · from ${short(c.dev)}</span></div></div>
+        <div class="amt"><span class="solv">${q.waiting.toLocaleString('en-US', { maximumFractionDigits: q.waiting < 10 ? 4 : 0 })} ${esc(q.unit)}</span><small>waiting</small></div>${none ? '<span class="nothing">Nothing to claim</span>' : `<button class="btn acc" type="button" data-i="${i}">Claim</button>`}</div>` }
       const amt = w == null ? '<span class="solv none">—</span>' : F.sol(w)
       return `<div class="crow"><div class="coinc">${c.image ? `<img src="${esc(c.image)}" alt="">` : `<span class="ph">${esc((c.symbol || '?')[0])}</span>`}<div style="min-width:0"><b>${esc(c.name)} <small>$${esc(c.symbol)}</small></b><span class="who">from ${short(c.dev)}${born ? ` · launched ${F.date(born)} ${F.time(born).slice(0, 5)}` : ''}${lastC ? ` · last claim ${F.ago(lastC.at)}` : ''}</span></div></div>
         <div class="amt">${amt}<small>${w == null ? 'fees in its token' : 'waiting'}${c.fee?.claimed ? ` · ${F.text(c.fee.claimed)} collected` : ''}</small></div>${w === 0 ? '<span class="nothing">Nothing to claim</span>' : `<button class="btn acc" type="button" data-i="${i}">Claim</button>`}</div>`
-    }).join('') : '<div class="lempty">No Meteora or Float coins found for this browser or your account. Paste a contract address below.</div>'
+    }).join('') : '<div class="lempty">No coins with fees to claim found for this browser or your account. Paste a contract address below.</div>'
   }
   async function claim(b) {
     const c = list[+b.dataset.i]; if (!c || b.disabled) return
     b.disabled = true; const label = (t) => (b.textContent = t)
     try {
       label('Connecting…'); await connect()
+      if (c.venue === 'pumpq') {                     // pump.fun, paired with a token: sweep the curve's fees and collect them in one transaction
+        if (c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
+        label('Reading…')
+        const r = await PumpLaunch.claimQuoteFees({ mint: c.mint, owner: sol }, (k, x) => {
+          if (k === 'approve') { label('Approve…'); say(`Approve the claim of ${c.q.waiting.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${c.q.unit} in your wallet.`) }
+          if (k === 'sending') label('Sending…')
+          if (k === 'sent') { label('Confirming…'); $('claimMsg').innerHTML = `Sent. Confirming on Solana… <a class="link" href="https://solscan.io/tx/${esc(x)}" target="_blank" rel="noopener">view ↗</a>`; $('claimMsg').style.color = '' }
+        })
+        const amt = `${r.amount.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${r.unit}`
+        label('Claimed ✓'); b.classList.remove('acc'); $('claimMsg').innerHTML = `Claimed ${esc(amt)} from ${esc(c.symbol)} into your wallet. <a class="link" href="https://solscan.io/tx/${esc(r.sig)}" target="_blank" rel="noopener">view ↗</a>`; $('claimMsg').style.color = 'var(--ok)'
+        window.dzzToast?.(`Claimed ${amt} from ${c.symbol}`); S.click(); c.q.waiting = 0; setTimeout(draw, 1500); return
+      }
       const fl = c.venue === 'float'                // on Float anyone can send the claim: the fees go to the coin's fee wallet
       if (!fl && c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
       label('Reading…'); const M = fl ? await floatL() : await meteora(), v = await M.feesOf(fl ? c.mint : c.pool, sol)
@@ -1748,7 +1768,12 @@ summary(); stats()
     const ca = $('claimCa').value.trim(); if (!ca) return
     const pub = (await fetch('/api/launched').then((r) => r.json()).catch(() => ({ coins: [] }))).coins || [], c = pub.find((x) => x.mint === ca)
     if (!c) return say('That coin is not on the dzz list. Only coins launched with dzz can be claimed here.', true)
-    if (c.venue !== 'meteora' && c.venue !== 'float') return say(`${c.symbol} is a pump.fun coin: claim it on pump.fun, from your profile's Creator rewards.`, true)
+    if (c.venue !== 'meteora' && c.venue !== 'float') {
+      let q = null; try { q = await PumpLaunch.quoteFeesOf(ca) } catch {}
+      if (!q || q.sol) return say(`${c.symbol} is a pump.fun coin paired with SOL: claim it on pump.fun, from your profile's Creator rewards.`, true)
+      if (!list.some((x) => x.mint === ca)) { list.unshift({ ...c, venue: 'pumpq', q }); draw() }
+      return say(`${c.symbol} added: ${q.waiting.toLocaleString('en-US', { maximumFractionDigits: 2 })} ${q.unit} waiting. Press Claim with ${short(c.dev)} connected.`)
+    }
     if (!list.some((x) => x.mint === ca)) { list.unshift(c); draw() }
     say(c.venue === 'float' ? `${c.symbol} added. Press Claim with any wallet: the fees go to the coin's fee wallet.` : `${c.symbol} added. Press Claim with ${short(c.dev)} connected.`)
   }
