@@ -1,0 +1,185 @@
+<!doctype html>
+<!-- dzz moves to Meteora: 13.7 s launch film. The @dzz6i banner look (blue light columns, dot-matrix dzz with a blue last z),
+     blur-in words with a marker sweep, flash on the hit. Cut to the bars of the GTA track started 2.5 s in (hit at 4.09 s, then every 1.92 s).
+     Deterministic: window.renderFrame(t). -->
+<html><head><meta charset="utf-8">
+<style>
+  @font-face { font-family: 'Inter Tight'; font-style: normal; font-weight: 400 900; src: url(/film/inter-tight-latin.woff2) format('woff2') }
+  *, *::before, *::after { transition: none !important; animation: none !important; box-sizing: border-box }
+  :root { --fs: 104px; --f: 'Inter Tight', system-ui, sans-serif; --mono: ui-monospace, 'Cascadia Mono', Consolas, monospace; --blue: #6aa6ff }
+  html, body { width: 1920px; height: 1080px; overflow: hidden !important; background: #05070d; margin: 0; font-family: var(--f); -webkit-font-smoothing: antialiased; color: #fff }
+  .L { position: absolute; inset: 0; overflow: hidden; pointer-events: none }
+  #bg { position: absolute; inset: 0 }
+  #vig { position: absolute; inset: 0; background: radial-gradient(80% 90% at 50% 45%, rgba(0,0,0,0) 45%, rgba(0,0,0,.55) 100%) }
+  .grain { position: absolute; inset: 0; opacity: .08; mix-blend-mode: overlay; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>") }
+  .ln { position: absolute; left: 0; right: 0; z-index: 30; display: flex; justify-content: center; align-items: center; gap: .24em; font: 700 var(--fs)/1 var(--f); letter-spacing: -.045em; color: #fff; text-shadow: 0 8px 40px rgba(0, 0, 0, .55) }
+  .ln .w { display: inline-block; will-change: transform, filter }
+  .ln .w[data-acc="1"] { padding: 0 .1em .02em; margin: 0 -.06em; border-radius: .1em; background: linear-gradient(90deg, #3d7bff, #1f4fd6) 0 64% / 0% 62% no-repeat }
+  .ln .i { display: inline-block; width: .9em; height: .9em; vertical-align: middle; background: url(/assets/venues/meteora.svg) center/contain no-repeat; filter: drop-shadow(0 10px 20px rgba(0,0,0,.5)) }
+  #logo { position: absolute; left: 50%; top: 470px; z-index: 31; transform: translate(-50%, -50%) }
+  #logo i { position: absolute; width: 30px; height: 30px; border-radius: 5px; background: #eef1f6 }
+  #logo i.b { background: var(--blue); box-shadow: 0 0 26px rgba(90, 150, 255, .75) }
+  #now { position: absolute; left: 0; right: 0; top: 700px; z-index: 31; display: flex; justify-content: center; align-items: center; gap: 18px; font: 500 34px var(--mono); letter-spacing: .14em; color: rgba(255,255,255,.72); text-transform: uppercase }
+  #now img { width: 46px; height: 46px }
+  #ca { position: absolute; left: 0; right: 0; top: 600px; z-index: 31; text-align: center; font: 600 78px var(--mono); letter-spacing: .02em; color: rgba(255,255,255,.82) }
+  #ca b { color: var(--blue); font-weight: 700; text-shadow: 0 0 30px rgba(90,150,255,.7) }
+  .row { position: absolute; left: 0; right: 0; z-index: 31; display: flex; justify-content: center; gap: 22px }
+  .chip { font: 600 46px var(--f); letter-spacing: -.01em; padding: 18px 34px; border-radius: 18px; border: 2px solid rgba(255,255,255,.16); background: rgba(10,14,26,.55); color: rgba(255,255,255,.78); backdrop-filter: blur(8px) }
+  .chip.on { border-color: var(--blue); background: rgba(40,90,220,.35); color: #fff; box-shadow: 0 0 40px rgba(70,130,255,.35) }
+  #stats { position: absolute; left: 0; right: 0; top: 470px; z-index: 31; display: flex; justify-content: center; gap: 170px }
+  .st { text-align: center }
+  .st b { display: block; font: 800 150px/1 var(--f); letter-spacing: -.04em; font-variant-numeric: tabular-nums }
+  .st span { display: block; margin-top: 18px; font: 500 30px var(--mono); letter-spacing: .12em; text-transform: uppercase; color: rgba(255,255,255,.62) }
+  #url { position: absolute; left: 0; right: 0; top: 700px; z-index: 31; text-align: center; font: 500 40px var(--mono); color: rgba(255, 255, 255, .75); letter-spacing: .02em; opacity: 0 }
+  #flash { position: absolute; inset: 0; z-index: 40; background: #dfe9ff; opacity: 0 }
+</style></head><body>
+<div class="L"><canvas id="bg" width="1920" height="1080"></canvas><div id="vig"></div><div class="grain"></div></div>
+<div class="L" id="lines"></div>
+<div id="logo"></div>
+<div id="now"><img src="/assets/venues/meteora.svg" alt="">now on Meteora</div>
+<div id="ca"></div>
+<div class="row" id="fees" style="top:560px"></div>
+<div class="row" id="pairs" style="top:700px"></div>
+<div id="stats"></div>
+<div id="url"></div>
+<div id="flash"></div>
+<script>
+const $ = (id) => document.getElementById(id)
+const DUR = 13.69; window.DURATION = DUR; window.READY = false
+const cl = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x)), seg = (t, a, b) => cl((t - a) / (b - a)), lerp = (a, b, k) => a + (b - a) * k
+const E = { out: (x) => 1 - (1 - x) ** 3, o5: (x) => 1 - (1 - x) ** 5, in3: (x) => x * x * x, io: (x) => (x < .5 ? 4 * x * x * x : 1 - (-2 * x + 2) ** 3 / 2), back: (x) => { const c = 1.70158, c3 = c + 1; return 1 + c3 * (x - 1) ** 3 + c * (x - 1) ** 2 } }
+const S = { a: [0, 2.05], b: [2.05, 4.09], hit: [4.09, 6.01], c: [6.01, 7.93], d: [7.93, 9.85], e: [9.85, 11.77], f: [11.77, 13.69] }
+const BARS = [0, 2.05, 4.09, 6.01, 7.93, 9.85, 11.77]
+const inOut = (t, [a, b], d = .25) => { const out = E.in3(seg(t, b - .22, b)); return { vis: t >= a && t < b, p: E.out(seg(t, a, a + d)), out } }
+
+// ---------------------------------------------------------------- the banner's light columns, breathing with the track
+const bg = $('bg').getContext('2d'), NCOL = 34, CW = 1920 / NCOL
+function drawBg(t) {
+  bg.fillStyle = '#05070d'; bg.fillRect(0, 0, 1920, 1080)
+  const last = BARS.filter((b) => b <= t).pop() ?? 0, k = Math.exp(-(t - last) * 3) * (last === 4.09 ? 1 : .5)
+  for (let i = 0; i < NCOL; i++) {
+    const x = i * CW, sweep = Math.exp(-(((i / NCOL) - ((t * .07 + .15) % 1.3 - .15)) ** 2) / .02)
+    const h = 1080 * (.55 + .2 * Math.sin(i * 1.7 + t * .5) * .5 + .12 * k + .1 * sweep)
+    const a = .5 + .25 * sweep + .35 * k
+    const g = bg.createLinearGradient(0, 1080, 0, 1080 - h)
+    g.addColorStop(0, `rgba(70,120,230,${a})`); g.addColorStop(.45, `rgba(40,80,190,${a * .55})`); g.addColorStop(1, 'rgba(10,20,50,0)')
+    bg.fillStyle = g; bg.fillRect(x + 2, 1080 - h, CW - 4, h)
+    const s = bg.createLinearGradient(x, 0, x + CW, 0)   // each column is a soft cylinder: dark edges, lit middle
+    s.addColorStop(0, 'rgba(0,0,0,.55)'); s.addColorStop(.5, 'rgba(0,0,0,0)'); s.addColorStop(1, 'rgba(0,0,0,.55)')
+    bg.fillStyle = s; bg.fillRect(x, 0, CW, 1080)
+  }
+  const top = bg.createLinearGradient(0, 0, 0, 1080); top.addColorStop(0, 'rgba(5,7,13,.95)'); top.addColorStop(.45, 'rgba(5,7,13,.55)'); top.addColorStop(1, 'rgba(5,7,13,0)')
+  bg.fillStyle = top; bg.fillRect(0, 0, 1920, 1080)
+}
+
+// ---------------------------------------------------------------- the words
+const LINES = [
+  ['a', S.a, 540, ['dzz', 'is', 'moving']],
+  ['b', S.b, 540, ['to', { i: 1 }, { w: 'Meteora.', acc: 1 }]],
+  ['c', S.c, 420, ['Your', 'coin.', 'Your', { w: 'address.', acc: 1 }], 0, 96],
+  ['d', S.d, 390, ['Your', { w: 'fee.', acc: 1 }, 'Your', { w: 'pair.', acc: 1 }], 0, 96],
+  ['e', S.e, 300, ['dzz', 'so', 'far'], 0, 72],
+  ['f', S.f, 520, [{ w: '$dzz', acc: 1 }, 'now', 'on', 'Meteora.'], 0, 112],
+]
+$('lines').innerHTML = LINES.map(([id, , y, toks, , fs]) => `<div class="ln" id="L_${id}" style="top:${y}px;${fs ? `--fs:${fs}px;` : ''}margin-top:calc(var(--fs) * -.5)">${toks.map((k, i) =>
+  typeof k === 'string' ? `<span class="w" data-i="${i}">${k}</span>` : k.w ? `<span class="w" data-i="${i}" data-acc="1">${k.w}</span>`
+  : `<span class="w" data-i="${i}" data-pop="1"><i class="i"></i></span>`).join('')}</div>`).join('')
+const REV = {}
+for (const [id, [a, b], , toks, delay = 0] of LINES) { const t0 = a + .04 + delay, n = toks.length; REV[id] = { t0, step: Math.min(.16, (b - t0 - .5) / n), end: b } }
+REV.f.end = DUR + 1
+const GREY = [190, 205, 235]
+function drawLines(t) {
+  for (const [id] of LINES) {
+    const el = $('L_' + id), R = REV[id], vis = t >= R.t0 - .05 && t < R.end
+    el.style.opacity = vis ? 1 : 0; if (!vis) continue
+    const out = E.in3(seg(t, R.end - .22, R.end))
+    el.style.filter = out ? `blur(${out * 16}px)` : ''; el.style.opacity = 1 - out; el.style.transform = `translateY(${-out * 20}px) scale(${1 + out * .04})`
+    el.querySelectorAll('.w').forEach((w) => {
+      const i = +w.dataset.i, s0 = R.t0 + i * R.step, p = E.out(seg(t, s0, s0 + .45))
+      w.style.color = `rgb(${GREY.map((c) => Math.round(lerp(c, 255, p)))})`; w.style.opacity = cl(p * 3.5)
+      w.style.filter = p < .999 ? `blur(${(1 - p) * 12}px)` : ''
+      w.style.transform = w.dataset.pop ? `scale(${.4 + .6 * E.back(seg(t, s0, s0 + .4))})` : `translateY(${(1 - p) * 18}px)`
+      if (w.dataset.acc) w.style.backgroundSize = `${(E.io(seg(t, s0 + .12, s0 + .45)) * 100).toFixed(1)}% 62%`
+    })
+  }
+}
+
+// ---------------------------------------------------------------- the dot-matrix dzz on the hit: dots drop in, last z lights blue
+const GL = { d: ['....#', '....#', '.####', '#...#', '#...#', '#...#', '.####'], z: ['.....', '.....', '#####', '...#.', '..#..', '.#...', '#####'] }
+const P = 36, DOTS = []
+;['d', 'z', 'z'].forEach((g, gi) => GL[g].forEach((r, y) => [...r].forEach((c, x) => { if (c === '#') DOTS.push({ x: gi * 6 * P + x * P, y: y * P, b: gi === 2 }) })))
+const LW = 17 * P - 6, LH = 7 * P - 6
+$('logo').style.width = LW + 'px'; $('logo').style.height = LH + 'px'
+$('logo').innerHTML = DOTS.map((d, i) => `<i id="d${i}" class="${d.b ? 'b' : ''}" style="left:${d.x}px;top:${d.y}px"></i>`).join('')
+const ord = DOTS.map((d, i) => [i, d.x + d.y * .4 + ((i * 37) % 11) * 6]).sort((a, b) => a[1] - b[1]).map(([i]) => i)
+const rank = []; ord.forEach((i, r) => (rank[i] = r))
+function logo(t) {
+  const [a, b] = S.hit, { vis, out } = inOut(t, S.hit), el = $('logo')
+  $('flash').style.opacity = (cl(1 - (t - a) / .28) * .8 * (t >= a ? 1 : 0)).toFixed(3)
+  el.style.opacity = vis ? (1 - out).toFixed(3) : 0; $('now').style.opacity = 0
+  if (!vis) return
+  el.style.transform = `translate(-50%, -50%) scale(${(lerp(1.12, 1, E.o5(seg(t, a, a + .6))) * (1 + .03 * seg(t, a, b)) * (1 + out * .06)).toFixed(4)})`
+  el.style.filter = out ? `blur(${out * 16}px)` : ''
+  DOTS.forEach((d, i) => {
+    const s0 = a + rank[i] * (.5 / DOTS.length), p = E.back(seg(t, s0, s0 + .3)), q = seg(t, s0, s0 + .18)
+    const e = $('d' + i); e.style.opacity = q.toFixed(3); e.style.transform = `translateY(${((1 - p) * -40).toFixed(1)}px) scale(${(.5 + .5 * p).toFixed(3)})`
+  })
+  const n = $('now'), np = E.out(seg(t, a + .7, a + 1.1))
+  n.style.opacity = (np * (1 - out)).toFixed(3); n.style.transform = `translateY(${((1 - np) * 14).toFixed(1)}px)`; n.style.filter = np < .999 ? `blur(${(1 - np) * 8}px)` : out ? `blur(${out * 12}px)` : ''
+}
+
+// ---------------------------------------------------------------- the address: shuffles, then lands on an ending you chose
+const B58 = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz', FINAL = '7Hq4…mRk9dzz'
+const hash = (n) => { n = Math.imul(n ^ (n >>> 15), 0x2c1b3c6d); n = Math.imul(n ^ (n >>> 12), 0x297a2d39); return (n ^ (n >>> 15)) >>> 0 }
+function ca(t) {
+  const [a] = S.c, { vis, out } = inOut(t, S.c), el = $('ca'); el.style.opacity = 0; if (!vis) return
+  const p = E.out(seg(t, a + .25, a + .55)); el.style.opacity = (p * (1 - out)).toFixed(3); el.style.filter = out ? `blur(${out * 14}px)` : p < .999 ? `blur(${(1 - p) * 10}px)` : ''
+  const fr = Math.floor(t * 24), lock = seg(t, a + .5, a + 1.25)
+  let s = ''
+  for (let i = 0; i < FINAL.length; i++) {
+    const c = FINAL[i], done = c === '…' || i / FINAL.length < lock * 1.15 - .1 || lock >= 1
+    s += done ? c : B58[hash(fr * 131 + i * 7) % 58]
+  }
+  el.innerHTML = s.slice(0, -3) + `<b>${s.slice(-3)}</b>`
+}
+
+// ---------------------------------------------------------------- fee + pair chips: the pick moves along, like clicking through the launcher
+const FEES = ['0.5%', '1%', '2%', '3%'], PAIRS = ['SOL', 'HYPE', 'ZEC', 'Take-Two', 'Any token']
+$('fees').innerHTML = FEES.map((f, i) => `<span class="chip" id="fe${i}">${f}</span>`).join('')
+$('pairs').innerHTML = PAIRS.map((f, i) => `<span class="chip" id="pa${i}">${f}</span>`).join('')
+function chips(t) {
+  const [a] = S.d, { vis, out } = inOut(t, S.d)
+  for (const [row, list, d0, pickAt] of [['fe', FEES, .35, [.75, 1.05, 1.3]], ['pa', PAIRS, .5, [.9, 1.15, 1.4]]]) {
+    const picks = [0, 1, 2, 3].slice(0, 1 + pickAt.filter((x) => t >= a + x).length)
+    list.forEach((_, i) => {
+      const e = $(row + i), s0 = a + d0 + i * .05, p = E.out(seg(t, s0, s0 + .35))
+      e.style.opacity = vis ? (p * (1 - out)).toFixed(3) : 0
+      e.style.transform = `translateY(${((1 - p) * 26).toFixed(1)}px)`; e.style.filter = out ? `blur(${out * 12}px)` : p < .999 ? `blur(${(1 - p) * 8}px)` : ''
+      const on = row === 'fe' ? i === picks.length - 1 : i === [0, 1, 2, 4][picks.length - 1]
+      e.classList.toggle('on', vis && t >= a + pickAt[0] - .25 && on)
+    })
+  }
+}
+
+// ---------------------------------------------------------------- the numbers so far (live leaderboard, 2026-11-17)
+const ST = [[63, 0, 'coins launched'], [10.4, 1, 'SOL fees claimed'], [28, 0, 'accounts']]
+$('stats').innerHTML = ST.map((s, i) => `<div class="st" id="st${i}"><b>0</b><span>${s[2]}</span></div>`).join('')
+function stats(t) {
+  const [a, b] = S.e, { vis, out } = inOut(t, S.e)
+  ST.forEach(([v, dp], i) => {
+    const e = $('st' + i), s0 = a + .3 + i * .12, p = E.out(seg(t, s0, s0 + .4))
+    e.style.opacity = vis ? (p * (1 - out)).toFixed(3) : 0; e.style.transform = `translateY(${((1 - p) * 24).toFixed(1)}px)`
+    e.style.filter = out ? `blur(${out * 14}px)` : p < .999 ? `blur(${(1 - p) * 10}px)` : ''
+    e.firstChild.textContent = (v * E.io(seg(t, s0, b - .5))).toFixed(dp)
+  })
+}
+
+function url(t) {
+  const a = 12.5, s = 'dzzdeploy.vercel.app', n = Math.round(cl((t - a) / .55) * s.length)
+  $('url').style.opacity = t >= a ? 1 : 0; $('url').textContent = s.slice(0, n) + (t >= a && Math.floor(t * 3) % 2 ? '|' : '')
+}
+
+window.renderFrame = (t) => { drawBg(t); drawLines(t); logo(t); ca(t); chips(t); stats(t); url(t) }
+const imgs = ['/assets/venues/meteora.svg'].map((s) => new Promise((r) => { const i = new Image(); i.onload = i.onerror = r; i.src = s }))
+Promise.all([document.fonts.load("700 104px 'Inter Tight'"), document.fonts.load("800 150px 'Inter Tight'"), document.fonts.ready, ...imgs]).then(() => setTimeout(() => { renderFrame(0); window.READY = true }, 300))
+</script></body></html>
