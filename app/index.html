@@ -1710,10 +1710,11 @@ summary(); stats()
     }
     // pump.fun coins paired with another token: their creator fees wait in that token inside the curve (newest 12, read live)
     const pumps = []; for (const c of [...mine.map((h) => ({ ...h, dev: pub.find((x) => x.mint === h.mint)?.dev })), ...pub.filter((c) => wallets.has(c.dev))]) if (!c.venue && !seen.has(c.mint)) { seen.add(c.mint); pumps.push(c) }
-    draw()
+    draw(); if (pumps.length) say('Checking your pump.fun coins for fees paired in a token…')
     const qs = await Promise.all(pumps.sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 12).map((c) => PumpLaunch.quoteFeesOf(c.mint).then((q) => ({ c, q })).catch(() => null)))
-    for (const x of qs) if (x && !x.q.sol) list.push({ ...x.c, venue: 'pumpq', q: x.q })
-    draw()
+    const found = qs.filter((x) => x && !x.q.sol).map((x) => ({ ...x.c, venue: 'pumpq', q: x.q })).sort((a, b) => b.q.waiting - a.q.waiting)
+    list.unshift(...found)   // at the top: these never show anywhere else
+    draw(); if (pumps.length) say(found.length ? `Found ${found.length} pump.fun coin${found.length > 1 ? 's' : ''} paired with a token, at the top. Connect the wallet that launched it and press Claim.` : 'Connect the wallet that launched the coin to claim.')
   }
   function draw() {
     $('claimRows').innerHTML = list.length ? list.map((c, i) => {
