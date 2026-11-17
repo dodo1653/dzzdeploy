@@ -1,0 +1,79 @@
+<!doctype html>
+<!-- dzz ticker image, 1500x1500: the site's fluted-glass shader as the ground, "dzz" as lit beads on an LED board
+     (dz in white ceramic, the last z in cobalt glass). Render: VW=1500 VH=1500 SNAP=1500 node pitwall/render.mjs <url> <dir> -->
+<html><head><meta charset="utf-8"><style>
+  html, body { margin: 0; width: 1500px; height: 1500px; overflow: hidden; background: #05060a; }
+  canvas { position: absolute; left: 0; top: 0; width: 1500px; height: 1500px; }
+</style></head><body>
+<canvas id="bg" width="1500" height="1500"></canvas><canvas id="fg" width="1500" height="1500"></canvas>
+<script>
+// ---------------- ground: the fluted glass, lit from below in cobalt
+const cv = document.getElementById('bg'), gl = cv.getContext('webgl', { preserveDrawingBuffer: true })
+const FS = `precision highp float;uniform vec2 uRes;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p),f=fract(p),u=f*f*(3.-2.*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
+float fbm(vec2 p){float v=0.,a=.5;for(int i=0;i<5;i++){v+=a*noise(p);p*=2.03;a*=.5;}return v;}
+void main(){vec2 f=gl_FragCoord.xy,uv=f/uRes;float W=94.;float col=floor(f.x/W),fx=fract(f.x/W),b=fx-.5;float lens=b*(.6+.25*sin(col*1.7+.5));
+  vec2 s=vec2((col+.5+lens)*W/uRes.x,uv.y+.02*sin(col*2.3));
+  float h=.47+.09*fbm(vec2(s.x*3.,1.7))+pow(abs(s.x-.5)*2.,1.6)*.22;float body=smoothstep(h+.05,h-.32,s.y);float rim=exp(-pow(max(s.y-h,0.)*6.,2.))*.25;
+  float drift=fbm(vec2(s.x*2.4,s.y*1.8+3.));vec3 c1=vec3(.07,.23,.78),c2=vec3(.42,.66,1.);vec3 L=mix(c1,c2,clamp(drift*1.2-s.y*.6+.35,0.,1.));
+  float I=(body*.95+rim)*(.6+.6*drift);float shade=.5+.5*cos(b*3.14159);float spec=smoothstep(.06,0.,abs(fx-.2))*.5+smoothstep(.04,0.,abs(fx-.82))*.14;float seam=smoothstep(0.,.025,fx)*smoothstep(1.,.975,fx);
+  vec3 bg=vec3(.018,.02,.032);vec3 c=bg+L*I*shade*seam*.95+L*spec*I*.5;
+  float vg=length((uv-vec2(.5,.5))*vec2(1.,1.1));c*=1.-.62*smoothstep(.32,.9,vg);
+  c+=(hash(f)-.5)*.018;gl_FragColor=vec4(c,1.);}`
+const sh = (t, s) => { const o = gl.createShader(t); gl.shaderSource(o, s); gl.compileShader(o); return o }
+const pr = gl.createProgram(); gl.attachShader(pr, sh(gl.VERTEX_SHADER, 'attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}')); gl.attachShader(pr, sh(gl.FRAGMENT_SHADER, FS)); gl.linkProgram(pr); gl.useProgram(pr)
+gl.bindBuffer(gl.ARRAY_BUFFER, gl.createBuffer()); gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1, -1, 3, -1, -1, 3]), gl.STATIC_DRAW)
+const ap = gl.getAttribLocation(pr, 'p'); gl.enableVertexAttribArray(ap); gl.vertexAttribPointer(ap, 2, gl.FLOAT, false, 0, 0)
+gl.uniform2f(gl.getUniformLocation(pr, 'uRes'), 1500, 1500); gl.viewport(0, 0, 1500, 1500); gl.drawArrays(gl.TRIANGLES, 0, 3)
+
+// ---------------- the board: "dzz" in a 5x7 dot matrix
+const G = {
+  d: ['....#', '....#', '.####', '#...#', '#...#', '#...#', '.####'],
+  z: ['.....', '.....', '#####', '...#.', '..#..', '.#...', '#####'],
+}
+const word = ['d', 'z', 'z'], COLS = 17, ROWS = 7, P = 63, R = P * .47
+const ox = 750 - (COLS * P) / 2 + P / 2, oy = 750 - (ROWS * P) / 2 + P / 2
+const c = document.getElementById('fg').getContext('2d')
+// the plate the dots sit in: dark smoked glass, hairline edge, soft contact shadow
+function rr(x, y, w, h, r) { c.beginPath(); c.moveTo(x + r, y); c.arcTo(x + w, y, x + w, y + h, r); c.arcTo(x + w, y + h, x, y + h, r); c.arcTo(x, y + h, x, y, r); c.arcTo(x, y, x + w, y, r); c.closePath() }
+const px = ox - P * .95, py = oy - P * .95, pw = COLS * P + P * .9, ph = ROWS * P + P * .9
+c.save(); c.shadowColor = 'rgba(0,0,0,.75)'; c.shadowBlur = 90; c.shadowOffsetY = 40; rr(px, py, pw, ph, 46); c.fillStyle = 'rgba(8,9,14,.82)'; c.fill(); c.restore()
+const pg = c.createLinearGradient(0, py, 0, py + ph); pg.addColorStop(0, 'rgba(255,255,255,.07)'); pg.addColorStop(.5, 'rgba(255,255,255,.015)'); pg.addColorStop(1, 'rgba(255,255,255,.04)')
+rr(px, py, pw, ph, 46); c.fillStyle = pg; c.fill(); c.lineWidth = 3; c.strokeStyle = 'rgba(255,255,255,.12)'; c.stroke()
+rr(px + 3, py + 3, pw - 6, 3, 2); c.fillStyle = 'rgba(255,255,255,.10)'; c.fill()
+// every cell: a recessed socket; lit cells get a bead
+function socket(x, y) {
+  const g = c.createRadialGradient(x, y - R * .25, R * .1, x, y, R * 1.02); g.addColorStop(0, 'rgba(0,0,0,.5)'); g.addColorStop(.8, 'rgba(0,0,0,.3)'); g.addColorStop(1, 'rgba(255,255,255,.035)')
+  c.beginPath(); c.arc(x, y, R * .98, 0, 7); c.fillStyle = g; c.fill()
+}
+function bead(x, y, kind) {
+  // contact shadow
+  c.save(); c.shadowColor = 'rgba(0,0,0,.8)'; c.shadowBlur = 22; c.shadowOffsetY = 12; c.beginPath(); c.arc(x, y, R, 0, 7); c.fillStyle = '#000'; c.fill(); c.restore()
+  const glass = kind === 'g'
+  // body
+  const b = c.createRadialGradient(x - R * .35, y - R * .45, R * .05, x, y, R * 1.05)
+  if (glass) { b.addColorStop(0, '#d8e7ff'); b.addColorStop(.18, '#86b4ff'); b.addColorStop(.55, '#2f6cf0'); b.addColorStop(.9, '#0d2f9e'); b.addColorStop(1, '#081a5c') }
+  else { b.addColorStop(0, '#ffffff'); b.addColorStop(.3, '#eef0f4'); b.addColorStop(.7, '#c3c7d0'); b.addColorStop(1, '#6f7480') }
+  c.beginPath(); c.arc(x, y, R, 0, 7); c.fillStyle = b; c.fill()
+  // light through the glass from below (caustic) / ceramic bounce
+  const t = c.createRadialGradient(x + R * .15, y + R * .5, 0, x + R * .1, y + R * .45, R * .75)
+  t.addColorStop(0, glass ? 'rgba(160,205,255,.85)' : 'rgba(150,180,255,.22)'); t.addColorStop(1, 'rgba(0,0,0,0)')
+  c.beginPath(); c.arc(x, y, R, 0, 7); c.fillStyle = t; c.fill()
+  // rim
+  c.beginPath(); c.arc(x, y, R - 1, 0, 7); c.lineWidth = 2; c.strokeStyle = glass ? 'rgba(10,25,80,.7)' : 'rgba(40,44,56,.55)'; c.stroke()
+  // specular
+  const s = c.createRadialGradient(x - R * .38, y - R * .42, 0, x - R * .38, y - R * .42, R * .38); s.addColorStop(0, 'rgba(255,255,255,.95)'); s.addColorStop(1, 'rgba(255,255,255,0)')
+  c.beginPath(); c.ellipse(x - R * .36, y - R * .42, R * .34, R * .24, -.6, 0, 7); c.fillStyle = s; c.fill()
+}
+for (let r = 0; r < ROWS; r++) for (let col = 0; col < COLS; col++) {
+  const L = Math.floor(col / 6), cc = col % 6, x = ox + col * P, y = oy + r * P
+  const on = cc < 5 && L < 3 && G[word[L]][r][cc] === '#'
+  socket(x, y); if (on) bead(x, y, L === 2 ? 'g' : 'w')
+}
+// fine film grain over everything
+const im = c.getImageData(0, 0, 1500, 1500), d = im.data; let s = 9
+for (let i = 0; i < d.length; i += 4) { s = (s * 16807) % 2147483647; const n = ((s / 2147483647) - .5) * 10; d[i] += n; d[i + 1] += n; d[i + 2] += n }
+c.putImageData(im, 0, 0)
+window.READY = true
+</script></body></html>
