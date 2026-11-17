@@ -681,7 +681,9 @@ const L = (() => {
   const settings = Object.assign({ rpc: 'https://solana-rpc.publicnode.com', threads: Math.min(16, navigator.hardwareConcurrency || 4) }, load('dzz-settings', {}))
   let keys = load('dzz-keys', []), history = load('dzz-history', []), selected = null, job = null, eng = null
   const engine = async () => eng || (eng = await DZZ.engine({ threads: settings.threads }))
-  const odds = (pre, suf, ci) => { let p = 1; for (const ch of pre + suf) p *= ci ? [...A].filter((a) => a.toLowerCase() === ch.toLowerCase()).length / 58 : 1 / 58; return p }
+  // the first character isn't 1 in 58: a 32-byte key in base58 starts with 2-9 / A-H about 3.4x as often, J 0.83x, every later letter 17x less often
+  const first58 = (c) => { const i = A.indexOf(c); return i < 0 ? 0 : i === 0 ? .23 : i <= 16 ? 3.43 : i === 17 ? .83 : .06 }
+  const odds = (pre, suf, ci) => { let p = 1; [...pre + suf].forEach((ch, k) => { const m = ci ? [...A].filter((a) => a.toLowerCase() === ch.toLowerCase()) : [ch]; p *= (k === 0 && pre ? m.reduce((s, a) => s + first58(a), 0) : m.length) / 58 }); return p }
   const bad = (s, ci) => { for (const ch of s) if (!(ci ? [...A].some((a) => a.toLowerCase() === ch.toLowerCase()) : A.includes(ch))) return `"${ch}" can't appear in a Solana address${ci ? '' : ' (no 0, O, I or l; try "any case")'}` }
   const view = () => ({
     settings: { rpc: settings.rpc, threads: settings.threads, cores: navigator.hardwareConcurrency || 4, engine: 'browser' },
@@ -962,7 +964,8 @@ if (METEORA_JS) {
 }
 
 // ---------------------------------------------------------------- odds and the live meter
-const odds = () => { let p = 1; for (const ch of pre() + suf()) p *= ci ? [...A].filter((a) => a.toLowerCase() === ch.toLowerCase()).length / 58 : 1 / 58; return p }
+const first58 = (c) => { const i = A.indexOf(c); return i < 0 ? 0 : i === 0 ? .23 : i <= 16 ? 3.43 : i === 17 ? .83 : .06 }   // first character: see L.odds
+const odds = () => { let p = 1; [...pre() + suf()].forEach((ch, k) => { const m = ci ? [...A].filter((a) => a.toLowerCase() === ch.toLowerCase()) : [ch]; p *= (k === 0 && pre() ? m.reduce((s, a) => s + first58(a), 0) : m.length) / 58 }); return p }
 function stats() {
   const j = st?.job, running = j && !j.done, rate = (running && j.rate) || lastRate || (st ? st.settings.threads * (st.settings.engine === 'native' ? 500000 : st.settings.engine === 'browser' ? 600000 : 4000) : 60000)
   if (running) {
