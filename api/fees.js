@@ -48,17 +48,18 @@ const u64 = (d, o) => Number(d.readBigUInt64LE(o))
 // pump.fun's CollectCreatorFeeEvent: 8-byte tag, timestamp, creator, creator_fee (lamports actually paid to the creator)
 const CLAIM_EVT = '7a027f010ebf0caf'
 function claimEvents(tx, dev) {
-  let n = 0, seen = false
+  let n = 0, seen = false; const tok = []
   for (const l of tx.meta.logMessages || []) {
     if (!l.startsWith('Program data: ')) continue
     const b = Buffer.from(l.slice(14), 'base64')
     if (b.length < 56 || b.subarray(0, 8).toString('hex') !== CLAIM_EVT || enc58(b.subarray(16, 48)) !== dev) continue
-    // newer events name the token paid out (bytes 56-88): a coin paired with another token claims in that token's own units,
-    // which must never be read as lamports (an XBOX claim of 231,447 CONSOLE showed as 231 SOL)
-    if (b.length >= 88) { const q = enc58(b.subarray(56, 88)); if (q !== WSOL && q !== '11111111111111111111111111111111') { seen = true; continue } }
-    n += u64(b, 48); seen = true
+    seen = true
+    // newer events name the token paid out (quote_mint, bytes 56-88): a coin paired with another token (XBOX/CONSOLE,
+    // Bastion/GTA6) claims in that token's own units, kept apart and valued in SOL at today's price, never read as lamports
+    const q = b.length >= 88 ? enc58(b.subarray(56, 88)) : WSOL
+    if (q === WSOL || q === '11111111111111111111111111111111') n += u64(b, 48); else tok.push([q, u64(b, 48)])
   }
-  return seen ? n : null
+  return seen ? { sol: n, tok } : null
 }
 
 // a Meteora curve pool: total_trading_quote_fee is everything the dev side ever earned, the two fee fields are what's still unclaimed
@@ -139,9 +140,10 @@ const base = (c) => ({ mint: c.mint, name: c.name, symbol: c.symbol, image: c.im
 // every movement through a fee vault, kept by signature: money in is fees, money out is a claim, whoever made it. A stale read can
 // only repeat work, because a signature is never counted twice
 async function flows(address, isToken, dev) {
-  const file = `fees/c-${address}.json`, s = (await load(file)) || { moves: {}, v: 2 }, times = {}; let before, todo = [], full = true
-  // v2: claims are read again once, so token-paired claims counted as SOL before the fix drop out of the totals
-  if ((s.v || 1) < 2) { for (const [sig, n] of Object.entries(s.moves)) if (n < 0) delete s.moves[sig]; s.v = 2 }
+  const file = `fees/c-${address}.json`, s = (await load(file)) || { moves: {}, v: 3 }, times = {}; let before, todo = [], full = true
+  // v3: claims (and empty moves, where v2 parked token claims) are read again once, so paired-token claims land in s.tok
+  if ((s.v || 1) < 3) { for (const [sig, n] of Object.entries(s.moves)) if (n <= 0) delete s.moves[sig]; s.v = 3 }
+  s.tok ??= {}
   for (let page = 0; page < 10; page++) {
     const sigs = await rpc('getSignaturesForAddress', [address, { limit: 1000, ...(before ? { before } : {}) }])
     if (!sigs) { full = false; break }
@@ -154,16 +156,18 @@ async function flows(address, isToken, dev) {
     const tx = await rpc('getTransaction', [x.signature, { encoding: 'json', maxSupportedTransactionVersion: 1, commitment: 'confirmed' }]); if (!tx) { full = false; continue }
     const keys = [...tx.transaction.message.accountKeys, ...(tx.meta.loadedAddresses?.writable || []), ...(tx.meta.loadedAddresses?.readonly || [])], i = keys.indexOf(address)
     const held = (list) => Number((list || []).find((t) => t.accountIndex === i)?.uiTokenAmount.amount || 0)
-    const paid = isToken ? null : claimEvents(tx, dev)
+    const ev = isToken ? null : claimEvents(tx, dev), paid = ev ? ev.sol : null
+    if (ev?.tok.length) s.tok[x.signature] = ev.tok
     s.moves[x.signature] = paid != null ? -paid : i < 0 ? 0 : isToken ? held(tx.meta.postTokenBalances) - held(tx.meta.preTokenBalances) : tx.meta.postBalances[i] - tx.meta.preBalances[i]; changed = true; did++
     if (tx.blockTime) times[x.signature] = tx.blockTime
   }
   // when each claim happened: the signature list carries the time, so claims read before this was kept get theirs here too
   s.when ??= {}
-  for (const [sig, n] of Object.entries(s.moves)) if (n < 0 && !s.when[sig] && times[sig]) { s.when[sig] = times[sig]; changed = true }
+  for (const [sig, n] of Object.entries(s.moves)) if ((n < 0 || s.tok[sig]) && !s.when[sig] && times[sig]) { s.when[sig] = times[sig]; changed = true }
   if (changed) await save(file, s)
   const v = Object.values(s.moves)
-  return { out: v.filter((n) => n < 0).reduce((a, n) => a - n, 0), read: v.length, done: full && did === todo.length, claims: Object.entries(s.moves).filter(([, n]) => n < 0).map(([sig, n]) => ({ sig, at: (s.when[sig] || 0) * 1000, n: -n })) }
+  return { out: v.filter((n) => n < 0).reduce((a, n) => a - n, 0), read: v.length, done: full && did === todo.length, claims: Object.entries(s.moves).filter(([, n]) => n < 0).map(([sig, n]) => ({ sig, at: (s.when[sig] || 0) * 1000, n: -n })),
+    tok: Object.entries(s.tok || {}).map(([sig, list]) => ({ sig, at: (s.when[sig] || 0) * 1000, list })) }
 }
 
 // fees still inside the dev's bonding curves: what a curve holds beyond its rent and its real SOL reserves
@@ -184,9 +188,12 @@ async function vaults(dev, mints) {
   const key = dec58(dev), curve = enc58(pda([Buffer.from('creator-vault'), key], PUMP))
   const auth = pda([Buffer.from('creator_vault'), key], AMM), pool = enc58(pda([auth, dec58(TOKEN), dec58(WSOL)], ATA))
   const [bal, tok, rent, inCurves] = await Promise.all([rpc('getBalance', [curve]), rpc('getTokenAccountBalance', [pool]), rpc('getMinimumBalanceForRentExemption', [0]), unswept(mints)])
-  const [a, b] = await Promise.all([flows(curve, false, dev), tok ? flows(pool, true, dev) : { out: 0, done: true, claims: [] }])
-  const waiting = Math.max(0, (bal?.value || 0) - (rent || 0)) + Number(tok?.value?.amount || 0) + inCurves, claimed = a.out + b.out
-  const by = {}; for (const c of [...a.claims, ...b.claims]) by[c.sig] = by[c.sig] ? { ...by[c.sig], n: by[c.sig].n + c.n } : c   // one transaction can empty both vaults
+  const [a, b] = await Promise.all([flows(curve, false, dev), tok ? flows(pool, true, dev) : { out: 0, done: true, claims: [], tok: [] }])
+  // claims paid in a paired token: valued in SOL at today's price (the same way Meteora and Float pairs are shown)
+  const rate = await rates([...new Set(a.tok.flatMap((c) => c.list.map(([q]) => q)))])
+  const tokClaims = a.tok.map((c) => ({ sig: c.sig, at: c.at, n: c.list.reduce((s, [q, n]) => s + (rate[q] ? Math.round(n * rate[q].perUnit) : 0), 0), paired: c.list.map(([q, n]) => ({ quote: q, raw: n, decimals: rate[q]?.decimals ?? null })) }))
+  const waiting = Math.max(0, (bal?.value || 0) - (rent || 0)) + Number(tok?.value?.amount || 0) + inCurves, claimed = a.out + b.out + tokClaims.reduce((s, c) => s + c.n, 0)
+  const by = {}; for (const c of [...a.claims, ...b.claims, ...tokClaims]) by[c.sig] = by[c.sig] ? { ...by[c.sig], n: by[c.sig].n + c.n, paired: by[c.sig].paired || c.paired } : c   // one transaction can empty both vaults
   return { generated: claimed + waiting, claimed, waiting, done: a.done && b.done, claims: Object.values(by).sort((x, y) => y.at - x.at) }
 }
 
