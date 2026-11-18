@@ -52,7 +52,11 @@ function claimEvents(tx, dev) {
   for (const l of tx.meta.logMessages || []) {
     if (!l.startsWith('Program data: ')) continue
     const b = Buffer.from(l.slice(14), 'base64')
-    if (b.length >= 56 && b.subarray(0, 8).toString('hex') === CLAIM_EVT && enc58(b.subarray(16, 48)) === dev) { n += u64(b, 48); seen = true }
+    if (b.length < 56 || b.subarray(0, 8).toString('hex') !== CLAIM_EVT || enc58(b.subarray(16, 48)) !== dev) continue
+    // newer events name the token paid out (bytes 56-88): a coin paired with another token claims in that token's own units,
+    // which must never be read as lamports (an XBOX claim of 231,447 CONSOLE showed as 231 SOL)
+    if (b.length >= 88) { const q = enc58(b.subarray(56, 88)); if (q !== WSOL && q !== '11111111111111111111111111111111') { seen = true; continue } }
+    n += u64(b, 48); seen = true
   }
   return seen ? n : null
 }
@@ -135,7 +139,9 @@ const base = (c) => ({ mint: c.mint, name: c.name, symbol: c.symbol, image: c.im
 // every movement through a fee vault, kept by signature: money in is fees, money out is a claim, whoever made it. A stale read can
 // only repeat work, because a signature is never counted twice
 async function flows(address, isToken, dev) {
-  const file = `fees/c-${address}.json`, s = (await load(file)) || { moves: {} }, times = {}; let before, todo = [], full = true
+  const file = `fees/c-${address}.json`, s = (await load(file)) || { moves: {}, v: 2 }, times = {}; let before, todo = [], full = true
+  // v2: claims are read again once, so token-paired claims counted as SOL before the fix drop out of the totals
+  if ((s.v || 1) < 2) { for (const [sig, n] of Object.entries(s.moves)) if (n < 0) delete s.moves[sig]; s.v = 2 }
   for (let page = 0; page < 10; page++) {
     const sigs = await rpc('getSignaturesForAddress', [address, { limit: 1000, ...(before ? { before } : {}) }])
     if (!sigs) { full = false; break }
