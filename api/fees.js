@@ -130,10 +130,22 @@ async function rates(others) {
   const rate = {}; if (!others.length) return rate
   try {
     const mints = (await rpc('getMultipleAccounts', [others, { encoding: 'base64' }]))?.value || []
-    const px = await (await fetch('https://lite-api.jup.ag/price/v3?ids=' + [WSOL, ...others].join(','), { signal: AbortSignal.timeout(5000) })).json()
-    others.forEach((q, i) => { const d = mints[i] && Buffer.from(mints[i].data[0], 'base64')[44], usd = px[q]?.usdPrice, solUsd = px[WSOL]?.usdPrice; if (d != null && usd && solUsd) rate[q] = { decimals: d, perUnit: (usd / solUsd) * 1e9 / 10 ** d } })
+    const px = await prices([WSOL, ...others])
+    others.forEach((q, i) => { const d = mints[i] && Buffer.from(mints[i].data[0], 'base64')[44], usd = px[q], solUsd = px[WSOL]; if (d != null && usd && solUsd) rate[q] = { decimals: d, perUnit: (usd / solUsd) * 1e9 / 10 ** d } })
   } catch {}
   return rate
+}
+// USD prices: Jupiter first, DexScreener for anything it didn't answer (a slow or refused call must not value fees at 0)
+async function prices(ids) {
+  const out = {}
+  try { const j = await (await fetch('https://lite-api.jup.ag/price/v3?ids=' + ids.join(','), { signal: AbortSignal.timeout(8000) })).json(); for (const id of ids) if (j[id]?.usdPrice) out[id] = j[id].usdPrice } catch {}
+  const miss = ids.filter((id) => !out[id])
+  if (miss.length) try {
+    const pairs = await (await fetch('https://api.dexscreener.com/tokens/v1/solana/' + miss.join(','), { signal: AbortSignal.timeout(8000) })).json()
+    for (const p of pairs || []) { const id = p.baseToken?.address, liq = p.liquidity?.usd || 0; if (miss.includes(id) && +p.priceUsd && liq > (out['_' + id] || 0)) { out[id] = +p.priceUsd; out['_' + id] = liq } }
+    if (!out[WSOL] && miss.includes(WSOL)) out[WSOL] = 0
+  } catch {}
+  return out
 }
 const base = (c) => ({ mint: c.mint, name: c.name, symbol: c.symbol, image: c.image, venue: c.venue || 'pump', at: c.at })
 
