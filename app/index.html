@@ -528,11 +528,13 @@ body.pc-on { overflow: hidden; }
               <div class="fl" data-only="meteora" hidden>Anti-snipe<div class="seg" id="msnipe" style="justify-self:start"><span class="thumb"></span><button data-v="1" class="on">On</button><button data-v="0">Off</button></div><p class="hint" id="msnipeNote"></p></div>
               <div class="fl" data-only="meteora" hidden>Private launch<div class="seg" id="mpriv" style="justify-self:start"><span class="thumb"></span><button data-v="0" class="on">Off</button><button data-v="1">On</button></div>
                 <p class="hint">On: the coin launches from a fresh wallet whose only funding is a Solana Privacy Rings withdrawal, so nobody can trace who funded the dev. Your connected wallet funds a private vault; the vault pays the launch wallet.</p>
-                <div id="privBox" class="grid" style="gap:10px;margin-top:6px" hidden>
-                  <div class="hint">Launch wallet <code id="privAddr">–</code> · <b id="privBal">–</b> SOL · vault <b id="privVault">–</b> SOL</div>
-                  <div class="row2" style="gap:8px;align-items:center;flex-wrap:wrap"><input class="in mono" id="privAmt" type="number" min="0" step="0.01" placeholder="SOL" style="width:120px">
-                    <button class="ghost" id="privDep">1 · Deposit to vault</button><button class="ghost" id="privOut">2 · Pay launch wallet</button><button class="ghost" id="privKey">Copy launch wallet key</button><button class="ghost" id="privNew">New launch wallet</button></div>
-                  <p class="hint low" id="privNote">For the best privacy, wait a while between step 1 and step 2, and don't move the exact same amount. Keep the launch wallet key: import it into Phantom to claim this coin's fees.</p>
+                <div id="privBox" class="grid" style="gap:10px;margin-top:8px" hidden>
+                  <p class="hint" id="privReady">Checking private launches…</p>
+                  <div class="hint">Launch wallet <code id="privAddr">–</code> holds <b id="privBal">–</b> SOL</div>
+                  <div class="row2" style="gap:8px;align-items:center;flex-wrap:wrap"><input class="in mono" id="privAmt" type="number" min="0" step="0.01" placeholder="SOL" style="width:130px"><button class="ghost" id="privFund" style="font-weight:600">Fund privately</button></div>
+                  <div class="hint" id="privSteps" style="display:grid;gap:4px"><span data-s="approve">1 · Approve the deposit in your wallet</span><span data-s="proving">2 · Paying the launch wallet from Privacy Rings</span><span data-s="ready">3 · Funded. Hold to launch</span></div>
+                  <p class="hint" id="privNote"></p>
+                  <p class="hint low"><a href="#" class="link" id="privKey">Copy launch wallet key</a> (import it into Phantom to claim this coin's fees) · <a href="#" class="link" id="privNew">New launch wallet</a></p>
                 </div></div>
               <div class="fl" data-only="float" hidden>Paired with<div class="seg" id="fpair" style="justify-self:start"><span class="thumb"></span><button data-v="SOL" class="on">SOL</button><button data-v="USDC">USDC</button><button data-v="HYPE">HYPE</button></div><p class="hint" id="fpairNote"></p></div>
               <div class="fl" data-only="float" hidden>Trading fee<p class="hint">2.5% on every trade, Float's top tier. Float splits it: 5% to the creator, 15% to holders, 35% to traders, 35% buys and burns FLOAT, 10% to Float.</p></div>
@@ -1088,26 +1090,45 @@ const privSet = (v) => { try { localStorage.setItem(PK, JSON.stringify(v)) } cat
 const dark = async () => darkLib || (await import('/assets/dark.js'), (darkLib = window.DzzDark))
 const pnote = (t, e) => { $('privNote').textContent = t; $('privNote').style.color = e ? '#ff6b5a' : '' }
 async function privInit() {
-  let p = privGet(); const M = await meteora(), D = await dark()
-  if (!p || !p.vault) p = { vault: D.newSeed(), wallets: [] }
+  let p = privGet(); const M = await meteora()
+  if (!p || !p.vault) p = { vault: null, wallets: [] }
   if (!p.wallets.length || p.wallets[0].used) p.wallets.unshift({ ...M.newWallet(), at: Date.now() })
-  privSet(p); $('privAddr').textContent = p.wallets[0].publicKey.slice(0, 4) + '…' + p.wallets[0].publicKey.slice(-4); privRefresh()
+  privSet(p); $('privAddr').textContent = p.wallets[0].publicKey.slice(0, 4) + '…' + p.wallets[0].publicKey.slice(-4)
+  if (!$('privAmt').value) $('privAmt').value = (Math.ceil((needSol() + 0.005) * 1000) / 1000).toString()
+  privSteps(null); privRefresh()
+  try {
+    const r = await (await fetch('/api/relay')).json()
+    const ok = r.key && r.funded
+    $('privReady').innerHTML = ok ? 'Ready. Enter how much the launch wallet needs (your dev buy + about 0.02 SOL), press Fund privately, approve once.'
+      : !r.key ? '<b>Not switched on yet.</b> dzz needs its Helius API key (Vercel env HELIUS_KEY).'
+      : `<b>Not switched on yet.</b> The relayer needs about 0.002 SOL: send it to <code>${esc(r.relayer)}</code>, ideally from an exchange.`
+    $('privFund').disabled = !ok
+  } catch { $('privReady').textContent = 'Could not reach dzz. Try again in a moment.' }
+}
+function privSteps(at, failed) {
+  const order = ['approve', 'proving', 'ready'], i = order.indexOf(at)
+  $('privSteps').querySelectorAll('span').forEach((el, k) => { el.style.opacity = at == null ? .55 : k <= i ? 1 : .45; el.style.fontWeight = k === i ? 600 : 400; el.style.color = failed && k === i ? '#ff6b5a' : k < i || at === 'ready' ? 'var(--ok, #3ddc97)' : '' })
 }
 async function privRefresh() {
   const p = privGet(); if (!p) return
   try { const r = await (await fetch(st.settings.rpc, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [p.wallets[0].publicKey] }) })).json(); $('privBal').textContent = (r.result.value / 1e9).toFixed(3) } catch {}
-  try { $('privVault').textContent = (await (await dark()).balance(p.vault)).toFixed(3) } catch { $('privVault').textContent = '?' }
 }
 document.addEventListener('click', async (e) => {
-  const id = e.target?.id; if (!['privDep', 'privOut', 'privKey', 'privNew'].includes(id)) return
+  const id = e.target?.id; if (!['privFund', 'privKey', 'privNew'].includes(id)) return
   e.preventDefault(); const p = privGet(); if (!p) return
+  if (id === 'privKey') { await copyText(JSON.stringify(p.wallets[0].secretKey)); pnote('Copied. In Phantom: Add account, Import private key, paste it. Keep it safe.'); return }
+  if (id === 'privNew') { p.wallets[0].used = true; privSet(p); await privInit(); pnote('New launch wallet ready.'); return }
+  const amt = $('privAmt').value.trim(); if (!(+amt > 0)) { pnote('Enter how much SOL the launch wallet needs.', true); return }
+  $('privFund').disabled = true; let at = 'approve'
   try {
-    if (id === 'privKey') { await copyText(JSON.stringify(p.wallets[0].secretKey)); pnote('Copied. In Phantom: Add account, Import private key, paste it. Keep it safe.'); return }
-    if (id === 'privNew') { p.wallets[0].used = true; privSet(p); await privInit(); pnote('New launch wallet ready.'); return }
-    const D = await dark(), amt = $('privAmt').value.trim()
-    if (id === 'privDep') { if (!(+amt > 0)) throw new Error('Enter how much SOL to put in the vault.'); pnote('Approve the deposit in your wallet…'); await D.deposit(p.vault, amt); pnote('In the vault. Wait a while if you can, then pay the launch wallet.'); await privRefresh(); return }
-    if (id === 'privOut') { pnote('Proving and sending through the relayer…'); await D.withdraw(p.vault, p.wallets[0].publicKey, +amt > 0 ? amt : 'all'); pnote('The launch wallet is funded from Privacy Rings. Set your dev buy and hold to launch.'); setTimeout(privRefresh, 2500); return }
-  } catch (err) { pnote(String(err.message || err).slice(0, 220), true) }
+    pnote('Loading the privacy engine (first time only)…'); const D = await dark()
+    if (!p.vault) { p.vault = D.newSeed(); privSet(p) }
+    if (!sol) await connect()
+    pnote('')
+    await D.fund(p.vault, p.wallets[0].publicKey, amt, (s) => { at = s; privSteps(s); if (s === 'proving') pnote('Building the zero-knowledge proof and sending it through the relayer. About 10 to 30 seconds.') })
+    privSteps('ready'); pnote('The launch wallet is funded from Privacy Rings. Set your dev buy and hold to launch.'); setTimeout(privRefresh, 2000)
+  } catch (err) { privSteps(at, true); pnote(darkLib ? darkLib.explain(err) : String(err.message || err), true) }
+  $('privFund').disabled = false
 })
 async function balance() {
   if (!sol || !st) return null

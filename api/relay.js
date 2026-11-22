@@ -22,7 +22,7 @@ export default async function handler(req, res) {
   res.setHeader('cache-control', 'no-store')
   try {
     const { kp, me } = await relayer()
-    if (req.method !== 'POST') return res.status(200).json({ relayer: me })
+    if (req.method !== 'POST') { let lamports = null; try { const j = await (await fetch(process.env.HELIUS_KEY ? `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_KEY}` : 'https://solana-rpc.publicnode.com', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [me] }), signal: AbortSignal.timeout(6000) })).json(); lamports = j.result?.value ?? null } catch {} return res.status(200).json({ relayer: me, key: !!process.env.HELIUS_KEY, lamports, funded: lamports != null && lamports >= 1_000_000 }) }
     if (!process.env.HELIUS_KEY) return res.status(503).json({ error: 'the relayer has no RPC key yet' })
     const b = typeof req.body === 'string' ? JSON.parse(req.body) : req.body || {}
     const bytes = Buffer.from(String(b.tx || ''), 'base64'); if (bytes.length < 100 || bytes.length > 4096) return res.status(400).json({ error: 'bad transaction' })
