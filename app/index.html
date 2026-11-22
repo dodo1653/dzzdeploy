@@ -1089,13 +1089,22 @@ const privGet = () => { try { return JSON.parse(localStorage.getItem(PK) || 'nul
 const privSet = (v) => { try { localStorage.setItem(PK, JSON.stringify(v)) } catch {} }
 const dark = async () => darkLib || (await import('/assets/dark.js'), (darkLib = window.DzzDark))
 const pnote = (t, e) => { $('privNote').textContent = t; $('privNote').style.color = e ? '#ff6b5a' : '' }
+let privTimer = 0
+async function privReady() {
+  try {
+    const r = await (await fetch('/api/relay')).json(), ok = r.key && r.funded
+    privBlock = ok ? '' : (!r.key ? 'Private launches need a Helius API key on dzz first.' : 'Send 0.002 SOL to the relayer first: ' + r.relayer + ' (ideally from an exchange). This updates by itself.')
+    $('privReady').innerHTML = ok ? 'Ready. Enter how much the launch wallet needs (your dev buy + about 0.02 SOL), press Fund privately, approve once.' : '<b>Not switched on yet.</b> ' + esc(privBlock)
+  } catch {}
+}
 async function privInit() {
   let p = privGet(); const M = await meteora()
   if (!p || !p.vault) p = { vault: null, wallets: [] }
   if (!p.wallets.length || p.wallets[0].used) p.wallets.unshift({ ...M.newWallet(), at: Date.now() })
   privSet(p); $('privAddr').textContent = p.wallets[0].publicKey.slice(0, 4) + '…' + p.wallets[0].publicKey.slice(-4)
   if (!$('privAmt').value) $('privAmt').value = (Math.ceil((needSol() + 0.005) * 1000) / 1000).toString()
-  privSteps(null); privRefresh()
+  privSteps(null); privRefresh(); privReady()
+  clearInterval(privTimer); privTimer = setInterval(() => { if (!mPriv || document.hidden) return; privRefresh(); privReady() }, 6000)
   try {
     const r = await (await fetch('/api/relay')).json()
     const ok = r.key && r.funded
