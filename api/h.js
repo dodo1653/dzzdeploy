@@ -27,7 +27,6 @@ export default async function handler(req, res) {
   for (const [k, v] of Object.entries(req.headers)) if (/^(content-type|accept|x-[a-z0-9-]+|spr-tee[a-z0-9-]*)$/i.test(k) && !/^x-(vercel|forwarded|real-ip|middleware|api-key)/i.test(k)) headers[k] = v
   if (kind === 'spr') headers['x-api-key'] = key   // in a header: the prover binds the exact path + query the browser used
   // proofs: ask the prover to queue the job (it answers with a job id at once, the SDK then polls) so no request outlives the function
-  if (kind === 'spr' && rest.startsWith('prove/') && headers['x-sync']) { delete headers['x-sync']; headers['x-async'] = 'true' }
   const once = kind === 'spr' && req.method === 'POST'
   // plain Solana calls go to public RPCs first (Helius credits are kept for Privacy Rings); every upstream gets 3 tries on 429 / 5xx
   const other = keys.find((k) => k !== key), alt = null
@@ -39,6 +38,7 @@ export default async function handler(req, res) {
         const r = await fetch(t, { method: req.method, headers, body, signal: AbortSignal.timeout(50000) })
         if (r.status === 429 || (r.status >= 500 && !once)) { last = r.status; await sleep(600 * (i + 1)); continue }
         const buf = Buffer.from(await r.arrayBuffer())
+        if (kind === 'spr' && r.status >= 400) console.log('spr', req.method, rest, r.status, JSON.stringify(Object.fromEntries([...r.headers].filter(([k]) => !/cookie/i.test(k)))), 'reqHeaders', Object.keys(headers).join(','), 'body', buf.slice(0, 400).toString('utf8').replace(/[^ -~]/g, '.'))
         if (kind === 'rpc' && t !== target && /"error"/.test(buf.slice(0, 300).toString()) && /429|rate|limit/i.test(buf.slice(0, 300).toString())) { last = 429; break }
         res.status(r.status)
         for (const [k, v] of r.headers) if (/^(content-type|retry-after|x-[a-z0-9-]+|spr-tee[a-z0-9-]*)$/i.test(k)) res.setHeader(k, v)
