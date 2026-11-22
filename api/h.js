@@ -8,7 +8,7 @@ const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const RPC_OK = new Set(['getLatestBlockhash', 'getAccountInfo', 'getMultipleAccounts', 'getBalance', 'getTokenAccountsByOwner', 'getTokenAccountBalance', 'sendTransaction', 'getSignatureStatuses', 'getTransaction', 'getSlot', 'getBlockHeight', 'getEpochInfo', 'getMinimumBalanceForRentExemption', 'simulateTransaction', 'getProgramAccounts', 'getFeeForMessage', 'getRecentPrioritizationFees', 'getGenesisHash', 'getVersion', 'getHealth', 'getSignaturesForAddress', 'getTokenSupply', 'getAsset'])
 const raw = (req) => new Promise((ok, no) => { const c = []; req.on('data', (d) => c.push(d)); req.on('end', () => ok(Buffer.concat(c))); req.on('error', no) })
 export default async function handler(req, res) {
-  const key = process.env.HELIUS_KEY
+  const keys = [process.env.HELIUS_KEY, process.env.HELIUS_KEY2].filter(Boolean), key = keys[Math.floor(Math.random() * keys.length)]
   if (!key) return res.status(503).json({ error: 'NO_HELIUS_KEY' })
   const u = new URL(req.url, 'http://x'), parts = String(u.searchParams.get('p') || '').split('/').filter(Boolean)
   u.searchParams.delete('p'); u.searchParams.set('api-key', key)
@@ -26,7 +26,8 @@ export default async function handler(req, res) {
   const headers = {}
   for (const [k, v] of Object.entries(req.headers)) if (/^(content-type|accept|x-[a-z0-9-]+)$/i.test(k) && !/^x-(vercel|forwarded|real-ip|middleware)/i.test(k)) headers[k] = v
   // plain Solana calls go to public RPCs first (Helius credits are kept for Privacy Rings); every upstream gets 3 tries on 429 / 5xx
-  const targets = kind === 'rpc' ? [...PUBLIC, target] : [target]
+  const other = keys.find((k) => k !== key), alt = other ? target.split(key).join(other) : null
+  const targets = kind === 'rpc' ? [...PUBLIC, target] : [target, alt].filter(Boolean)
   let last = null
   for (const t of targets) {
     for (let i = 0; i < 3; i++) {
