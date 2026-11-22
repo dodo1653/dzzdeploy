@@ -27,6 +27,12 @@
   "functions": {
     "api/fees.js": {
       "maxDuration": 60
+    },
+    "api/relay.js": {
+      "maxDuration": 60
+    },
+    "api/h/[...p].js": {
+      "maxDuration": 60
     }
   },
   "rewrites": [
