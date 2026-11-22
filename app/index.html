@@ -1122,7 +1122,7 @@ async function privRefresh() {
   const p = privGet(); if (!p) return
   if (p.vault && darkLib) {
     try { const a = await darkLib.vaultAddress(p.vault), onAddr = Number(await darkLib.solBalance(a)) / 1e9
-      if (Date.now() - (window.__privAt || 0) > 60000) { window.__privAt = Date.now(); try { window.__priv = (await darkLib.privateBalance(p.vault)).toFixed(4) + ' SOL' } catch { window.__priv = 'unreadable right now (Helius over its limit)' } } const priv = window.__priv || 'checking…'
+      if (Date.now() - (window.__privAt || 0) > 60000) { window.__privAt = Date.now(); try { const n = await darkLib.privateBalance(p.vault); window.__privN = n; window.__priv = n.toFixed(4) + ' SOL' } catch { window.__priv = 'unreadable right now (Helius over its limit)' } } const priv = window.__priv || 'checking…'; if (!$('privFund').disabled) $('privFund').textContent = window.__privN > 0 ? 'Send ' + window.__privN.toFixed(4) + ' SOL to launch wallet' : 'Fund privately'
       $('privVaultLine').innerHTML = 'Vault <code>' + a.slice(0, 4) + '…' + a.slice(-4) + '</code> holds ' + onAddr.toFixed(4) + ' SOL · in Privacy Rings: <b>' + priv + '</b>' } catch {}
   } else if (p.vault) { dark().then(() => privRefresh()).catch(() => {}); return }
   try { const r = await (await fetch(st.settings.rpc, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method: 'getBalance', params: [p.wallets[0].publicKey] }) })).json(); $('privBal').textContent = (r.result.value / 1e9).toFixed(3) } catch {}
