@@ -21,15 +21,16 @@ export default async function handler(req, res) {
     const calls = Array.isArray(j) ? j : [j]
     if (calls.length > 20 || calls.some((c) => !RPC_OK.has(c.method))) return res.status(403).json({ error: 'method not allowed' })
     target = `${HOST}/?api-key=${key}`
-  } else if (kind === 'spr') target = `${HOST}/v1/spr${rest ? '/' + rest : ''}?${u.searchParams}`
+  } else if (kind === 'spr') { const q = new URLSearchParams(u.searchParams); q.delete('api-key'); const qs = q.toString(); target = `${HOST}/v1/spr${rest ? '/' + rest : ''}${qs ? '?' + qs : ''}` }
   else return res.status(404).end()
   const headers = {}
-  for (const [k, v] of Object.entries(req.headers)) if (/^(content-type|accept|x-[a-z0-9-]+)$/i.test(k) && !/^x-(vercel|forwarded|real-ip|middleware)/i.test(k)) headers[k] = v
+  for (const [k, v] of Object.entries(req.headers)) if (/^(content-type|accept|x-[a-z0-9-]+|spr-tee[a-z0-9-]*)$/i.test(k) && !/^x-(vercel|forwarded|real-ip|middleware|api-key)/i.test(k)) headers[k] = v
+  if (kind === 'spr') headers['x-api-key'] = key   // in a header: the prover binds the exact path + query the browser used
   // proofs: ask the prover to queue the job (it answers with a job id at once, the SDK then polls) so no request outlives the function
   if (kind === 'spr' && rest.startsWith('prove/') && headers['x-sync']) { delete headers['x-sync']; headers['x-async'] = 'true' }
   const once = kind === 'spr' && req.method === 'POST'
   // plain Solana calls go to public RPCs first (Helius credits are kept for Privacy Rings); every upstream gets 3 tries on 429 / 5xx
-  const other = keys.find((k) => k !== key), alt = other ? target.split(key).join(other) : null
+  const other = keys.find((k) => k !== key), alt = null
   const targets = kind === 'rpc' ? [...PUBLIC, target] : [target, alt].filter(Boolean)
   let last = null
   for (const t of targets) {
@@ -40,7 +41,7 @@ export default async function handler(req, res) {
         const buf = Buffer.from(await r.arrayBuffer())
         if (kind === 'rpc' && t !== target && /"error"/.test(buf.slice(0, 300).toString()) && /429|rate|limit/i.test(buf.slice(0, 300).toString())) { last = 429; break }
         res.status(r.status)
-        for (const [k, v] of r.headers) if (/^(content-type|x-[a-z0-9-]+)$/i.test(k)) res.setHeader(k, v)
+        for (const [k, v] of r.headers) if (/^(content-type|retry-after|x-[a-z0-9-]+|spr-tee[a-z0-9-]*)$/i.test(k)) res.setHeader(k, v)
         res.setHeader('cache-control', 'no-store')
         return res.end(buf)
       } catch (e) { last = String(e.message || e); await sleep(400) }
