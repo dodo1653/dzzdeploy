@@ -3,6 +3,8 @@
 // end-to-end encrypted by the SDK to Helius's enclave.
 export const config = { api: { bodyParser: false } }
 const HOST = 'https://mainnet.helius-rpc.com'
+const PUBLIC = ['https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com']
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms))
 const RPC_OK = new Set(['getLatestBlockhash', 'getAccountInfo', 'getMultipleAccounts', 'getBalance', 'getTokenAccountsByOwner', 'getTokenAccountBalance', 'sendTransaction', 'getSignatureStatuses', 'getTransaction', 'getSlot', 'getBlockHeight', 'getEpochInfo', 'getMinimumBalanceForRentExemption', 'simulateTransaction', 'getProgramAccounts', 'getFeeForMessage', 'getRecentPrioritizationFees', 'getGenesisHash', 'getVersion', 'getHealth', 'getSignaturesForAddress', 'getTokenSupply', 'getAsset'])
 const raw = (req) => new Promise((ok, no) => { const c = []; req.on('data', (d) => c.push(d)); req.on('end', () => ok(Buffer.concat(c))); req.on('error', no) })
 export default async function handler(req, res) {
@@ -23,11 +25,22 @@ export default async function handler(req, res) {
   else return res.status(404).end()
   const headers = {}
   for (const [k, v] of Object.entries(req.headers)) if (/^(content-type|accept|x-[a-z0-9-]+)$/i.test(k) && !/^x-(vercel|forwarded|real-ip|middleware)/i.test(k)) headers[k] = v
-  try {
-    const r = await fetch(target, { method: req.method, headers, body, signal: AbortSignal.timeout(55000) })
-    res.status(r.status)
-    for (const [k, v] of r.headers) if (/^(content-type|x-[a-z0-9-]+)$/i.test(k)) res.setHeader(k, v)
-    res.setHeader('cache-control', 'no-store')
-    return res.end(Buffer.from(await r.arrayBuffer()))
-  } catch (e) { return res.status(502).json({ error: 'gateway: ' + String(e.message || e).slice(0, 120) }) }
+  // plain Solana calls go to public RPCs first (Helius credits are kept for Privacy Rings); every upstream gets 3 tries on 429 / 5xx
+  const targets = kind === 'rpc' ? [...PUBLIC, target] : [target]
+  let last = null
+  for (const t of targets) {
+    for (let i = 0; i < 3; i++) {
+      try {
+        const r = await fetch(t, { method: req.method, headers, body, signal: AbortSignal.timeout(50000) })
+        if (r.status === 429 || r.status >= 500) { last = r.status; await sleep(600 * (i + 1)); continue }
+        const buf = Buffer.from(await r.arrayBuffer())
+        if (kind === 'rpc' && t !== target && /"error"/.test(buf.slice(0, 300).toString()) && /429|rate|limit/i.test(buf.slice(0, 300).toString())) { last = 429; break }
+        res.status(r.status)
+        for (const [k, v] of r.headers) if (/^(content-type|x-[a-z0-9-]+)$/i.test(k)) res.setHeader(k, v)
+        res.setHeader('cache-control', 'no-store')
+        return res.end(buf)
+      } catch (e) { last = String(e.message || e); await sleep(400) }
+    }
+  }
+  return res.status(last === 429 ? 429 : 502).json({ error: last === 429 ? 'RATE_LIMITED' : 'gateway: ' + String(last).slice(0, 120) })
 }

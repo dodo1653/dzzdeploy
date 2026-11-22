@@ -13,9 +13,14 @@ async function relayer() {
   const raw = bs58.decode(process.env.RELAYER_KEY || ''); if (raw.length !== 64) throw new Error('the relayer key is not set')
   kp = await createKeyPairFromBytes(raw); me = await getAddressFromPublicKey(kp.publicKey); return { kp, me }
 }
+const RPCS = () => ['https://solana-rpc.publicnode.com', 'https://api.mainnet-beta.solana.com', `https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_KEY}`]
 const rpc = async (method, params) => {
-  const j = await (await fetch(`https://mainnet.helius-rpc.com/?api-key=${process.env.HELIUS_KEY}`, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: AbortSignal.timeout(25000) })).json()
-  if (j.error) throw new Error(j.error.message || 'rpc error'); return j.result
+  let last
+  for (const u of RPCS()) for (let i = 0; i < 2; i++) {
+    try { const j = await (await fetch(u, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ jsonrpc: '2.0', id: 1, method, params }), signal: AbortSignal.timeout(25000) })).json(); if (j.error) { last = new Error(j.error.message || 'rpc error'); if (/429|rate|limit/i.test(last.message)) { await new Promise((z) => setTimeout(z, 500)); continue } throw last } return j.result }
+    catch (e) { last = e; if (!/429|rate|limit|fetch|timeout/i.test(String(e.message))) throw e }
+  }
+  throw last
 }
 
 export default async function handler(req, res) {
