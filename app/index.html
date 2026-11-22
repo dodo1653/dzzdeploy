@@ -1088,7 +1088,7 @@ let mPriv = false, darkLib = null, privBlock = ''
 const PK = 'dzz-private'
 const privGet = () => { try { return JSON.parse(localStorage.getItem(PK) || 'null') } catch { return null } }
 const privSet = (v) => { try { localStorage.setItem(PK, JSON.stringify(v)) } catch {} }
-const dark = async () => darkLib || (await import('/assets/dark.js'), (darkLib = window.DzzDark))
+const dark = async () => darkLib || (await import('/assets/dark.js?v=1795373824'), (darkLib = window.DzzDark))
 const pnote = (t, e) => { $('privNote').textContent = t; $('privNote').style.color = e ? '#ff6b5a' : '' }
 let privTimer = 0
 async function privReady() {
