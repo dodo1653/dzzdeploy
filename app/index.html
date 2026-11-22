@@ -1086,6 +1086,7 @@ const step = (k, s) => { const el = $('tl').querySelector(`[data-k="${k}"]`); if
 let bal = null
 // ---- private launches (Solana Privacy Rings): the vault seed and the launch wallet live in this browser only
 let mPriv = false, darkLib = null, privBlock = ''
+const b58 = (bytes) => { const A = '123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz'; let n = 0n; for (const x of bytes) n = n * 256n + BigInt(x); let o = ''; while (n > 0n) { o = A[Number(n % 58n)] + o; n /= 58n } for (const x of bytes) { if (x === 0) o = '1' + o; else break } return o }
 const PK = 'dzz-private'
 const privGet = () => { try { return JSON.parse(localStorage.getItem(PK) || 'null') } catch { return null } }
 const privSet = (v) => { try { localStorage.setItem(PK, JSON.stringify(v)) } catch {} }
@@ -1124,7 +1125,7 @@ function privListDraw() {
   const p = privGet(); if (!p) return; const used = p.wallets.filter((w) => w.used)
   $("privList").innerHTML = used.length ? "<b>Launch wallets</b> (each launched one coin; import the key into Phantom to claim that coin's fees):<br>" + used.map((w) => '<code>' + w.publicKey.slice(0, 4) + '…' + w.publicKey.slice(-4) + '</code>' + (w.mint ? ' · coin <code>' + w.mint.slice(0, 4) + '…' + w.mint.slice(-4) + '</code>' : '') + ' · <a href="#" class="link" data-pk="' + w.publicKey + '">copy key</a>').join("<br>") : ""
 }
-document.addEventListener("click", async (e) => { const pk = e.target?.dataset?.pk; if (!pk) return; e.preventDefault(); const w = privGet()?.wallets.find((x) => x.publicKey === pk); if (w) { await copyText(JSON.stringify(w.secretKey)); pnote("Key copied for " + pk.slice(0, 4) + "…" + pk.slice(-4) + ". In Phantom: Add account, Import private key, paste it.") } })
+document.addEventListener("click", async (e) => { const pk = e.target?.dataset?.pk; if (!pk) return; e.preventDefault(); const w = privGet()?.wallets.find((x) => x.publicKey === pk); if (w) { await copyText(b58(w.secretKey)); pnote("Key copied for " + pk.slice(0, 4) + "…" + pk.slice(-4) + ". In Phantom: Add account, Import private key, paste it.") } })
 async function privRefresh() {
   const p = privGet(); if (!p) return; privListDraw()
   if (p.vault && darkLib) {
@@ -1137,8 +1138,8 @@ async function privRefresh() {
 document.addEventListener('click', async (e) => {
   const id = e.target?.id; if (!['privFund', 'privKey', 'privNew', 'privVaultKey'].includes(id)) return
   e.preventDefault(); const p = privGet(); if (!p) return
-  if (id === 'privKey') { await copyText(JSON.stringify(p.wallets[0].secretKey)); pnote('Launch wallet key copied. Keep it for later (it claims the coin fees in Phantom). Next step: press Fund privately above.'); return }
-  if (id === 'privVaultKey') { if (!p.vault) { pnote('No vault yet: it is made on your first Fund privately.'); return } const D = await dark(); const a = await D.vaultAddress(p.vault); await copyText(JSON.stringify(await D.vaultSecret(p.vault))); pnote('Vault key copied. In Phantom: Add account, Import private key, paste it: the vault ' + a.slice(0, 4) + '…' + a.slice(-4) + ' shows up as a normal wallet.'); return }
+  if (id === 'privKey') { await copyText(b58(p.wallets[0].secretKey)); pnote('Launch wallet key copied. Keep it for later (it claims the coin fees in Phantom). Next step: press Fund privately above.'); return }
+  if (id === 'privVaultKey') { if (!p.vault) { pnote('No vault yet: it is made on your first Fund privately.'); return } const D = await dark(); const a = await D.vaultAddress(p.vault); await copyText(b58(await D.vaultSecret(p.vault))); pnote('Vault key copied. In Phantom: Add account, Import private key, paste it: the vault ' + a.slice(0, 4) + '…' + a.slice(-4) + ' shows up as a normal wallet.'); return }
   if (id === 'privNew') { p.wallets[0].used = true; privSet(p); await privInit(); pnote('New launch wallet ready.'); return }
   if (privBlock) { try { const r = await (await fetch('/api/relay')).json(); if (r.key && r.funded) privBlock = '' } catch {} }
   if (privBlock) { pnote(privBlock, true); return }
