@@ -1,3 +1,4 @@
+import crypto from 'node:crypto'
 // Helius gateway for the browser (private launches): Solana RPC (allow-listed methods), the Privacy Rings indexer and the prover.
 // Reached through the rewrite /api/h/<path> -> /api/h?p=<path>. The key stays here (env HELIUS_KEY); prover traffic is
 // end-to-end encrypted by the SDK to Helius's enclave.
@@ -14,6 +15,7 @@ export default async function handler(req, res) {
   u.searchParams.delete('p'); u.searchParams.set('api-key', key)
   const kind = parts[0], rest = parts.slice(1).map(encodeURIComponent).join('/')
   const body = req.method === 'GET' || req.method === 'HEAD' ? undefined : await raw(req)
+  if (kind === 'spr' && rest === '__echo') { const c = crypto; return res.status(200).json({ len: body ? body.length : null, sha: body ? c.createHash('sha256').update(body).digest('hex').slice(0, 16) : null, hasParsed: req.body !== undefined, ct: req.headers['content-type'] }) }
   let target
   if (kind === 'rpc') {
     if (req.method !== 'POST') return res.status(405).end()
