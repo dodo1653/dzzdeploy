@@ -1834,13 +1834,16 @@ summary(); stats()
         window.dzzToast?.(`Claimed ${amt} from ${c.symbol}`); S.click(); c.q.waiting = 0; setTimeout(draw, 1500); return
       }
       const fl = c.venue === 'float'                // on Float anyone can send the claim: the fees go to the coin's fee wallet
-      if (!fl && c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
-      label('Reading…'); const M = fl ? await floatL() : await meteora(), v = await M.feesOf(fl ? c.mint : c.pool, sol)
+      // a coin launched from a private launch wallet: that wallet (its key is in this browser) claims and pays the fee itself
+      const pw = !fl ? (privGet()?.wallets || []).find((w) => (c.dev && w.publicKey === c.dev) || (c.mint && w.mint === c.mint)) : null
+      const who = pw ? pw.publicKey : sol
+      if (!pw && !fl && c.dev && sol !== c.dev) { say(`${c.symbol} was launched from ${short(c.dev)}, and your wallet app is on ${short(sol)}. Switch to ${short(c.dev)} in your wallet app, then press Claim again.`, true); label('Claim'); b.disabled = false; return }
+      label('Reading…'); const M = fl ? await floatL() : await meteora(), v = await M.feesOf(fl ? c.mint : c.pool, who)
       if (!fl && !v.yours) { say(`This wallet is not the creator of ${c.symbol}.`, true); label('Claim'); b.disabled = false; return }
       if (!(v.sol > 0)) { say(`Nothing to claim on ${c.symbol} yet.`); label('Nothing yet'); setTimeout(() => { label('Claim'); b.disabled = false }, 2500); return }
-      label('Approve…'); say(`Approve the claim of ${v.sol.toFixed(4)} ${v.unit} in your wallet.${fl && !v.yours ? ` It goes to the coin's fee wallet, ${short(v.receiver)}.` : ''}`)
+      label(pw ? 'Claiming…' : 'Approve…'); say(pw ? `Claiming ${v.sol.toFixed(4)} ${v.unit} with the coin's private launch wallet. No approval needed.` : `Approve the claim of ${v.sol.toFixed(4)} ${v.unit} in your wallet.${fl && !v.yours ? ` It goes to the coin's fee wallet, ${short(v.receiver)}.` : ''}`)
       const amt = `${v.sol.toFixed(4)} ${v.unit}`
-      const sig = await M.claim({ owner: sol, ...(fl ? { mint: c.mint } : { pool: c.pool }), note: (k, x) => {
+      const sig = await M.claim({ owner: who, ...(pw ? { signerSecret: pw.secretKey } : {}), ...(fl ? { mint: c.mint } : { pool: c.pool }), note: (k, x) => {
         if (k === 'sending') { label('Sending…'); say('Sending the claim…') }
         if (k === 'sent') { label('Confirming…'); $('claimMsg').innerHTML = `Sent. Confirming on Solana… <a class="link" href="https://solscan.io/tx/${esc(x)}" target="_blank" rel="noopener">view ↗</a>`; $('claimMsg').style.color = '' }
       } })
