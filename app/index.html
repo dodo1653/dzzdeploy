@@ -1137,7 +1137,8 @@ document.addEventListener('click', async (e) => {
     if (!p.vault) { p.vault = D.newSeed(); privSet(p) }
     if (!sol) await connect()
     pnote('')
-    await D.fund(p.vault, p.wallets[0].publicKey, amt, (s) => { at = s; privSteps(s); if (s === 'proving') pnote('Building the zero-knowledge proof and sending it through the relayer. About 10 to 30 seconds.') })
+    if (p.pending == null) { try { p.pending = (await D.solBalance(await D.vaultAddress(p.vault))) > 0n } catch { p.pending = true } privSet(p) }
+    await D.fund(p.vault, p.wallets[0].publicKey, amt, (s) => { at = s; privSteps(s); if (s === 'proving') pnote('Building the zero-knowledge proof and sending it through the relayer. About 10 to 30 seconds.') }, p, () => privSet(p))
     privSteps('ready'); pnote('The launch wallet is funded from Privacy Rings. Set your dev buy and hold to launch.'); setTimeout(privRefresh, 2000)
   } catch (err) { privSteps(at, true); pnote(darkLib ? darkLib.explain(err) : String(err.message || err), true) }
   $('privFund').disabled = false
