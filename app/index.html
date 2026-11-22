@@ -1083,7 +1083,7 @@ const step = (k, s) => { const el = $('tl').querySelector(`[data-k="${k}"]`); if
 // the wallet's SOL, shown on the pill and checked before every launch (a short wallet fails on chain with Custom 1)
 let bal = null
 // ---- private launches (Solana Privacy Rings): the vault seed and the launch wallet live in this browser only
-let mPriv = false, darkLib = null
+let mPriv = false, darkLib = null, privBlock = ''
 const PK = 'dzz-private'
 const privGet = () => { try { return JSON.parse(localStorage.getItem(PK) || 'null') } catch { return null } }
 const privSet = (v) => { try { localStorage.setItem(PK, JSON.stringify(v)) } catch {} }
@@ -1102,7 +1102,7 @@ async function privInit() {
     $('privReady').innerHTML = ok ? 'Ready. Enter how much the launch wallet needs (your dev buy + about 0.02 SOL), press Fund privately, approve once.'
       : !r.key ? '<b>Not switched on yet.</b> dzz needs its Helius API key (Vercel env HELIUS_KEY).'
       : `<b>Not switched on yet.</b> The relayer needs about 0.002 SOL: send it to <code>${esc(r.relayer)}</code>, ideally from an exchange.`
-    $('privFund').disabled = !ok
+    privBlock = ok ? '' : (!r.key ? 'Private launches need a Helius API key on dzz first.' : 'Send 0.002 SOL to the relayer first: ' + r.relayer + ' (ideally from an exchange). Then press Fund privately again.')
   } catch { $('privReady').textContent = 'Could not reach dzz. Try again in a moment.' }
 }
 function privSteps(at, failed) {
@@ -1118,6 +1118,8 @@ document.addEventListener('click', async (e) => {
   e.preventDefault(); const p = privGet(); if (!p) return
   if (id === 'privKey') { await copyText(JSON.stringify(p.wallets[0].secretKey)); pnote('Copied. In Phantom: Add account, Import private key, paste it. Keep it safe.'); return }
   if (id === 'privNew') { p.wallets[0].used = true; privSet(p); await privInit(); pnote('New launch wallet ready.'); return }
+  if (privBlock) { try { const r = await (await fetch('/api/relay')).json(); if (r.key && r.funded) privBlock = '' } catch {} }
+  if (privBlock) { pnote(privBlock, true); return }
   const amt = $('privAmt').value.trim(); if (!(+amt > 0)) { pnote('Enter how much SOL the launch wallet needs.', true); return }
   $('privFund').disabled = true; let at = 'approve'
   try {
