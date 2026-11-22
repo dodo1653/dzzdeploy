@@ -1125,7 +1125,7 @@ async function privRefresh() {
 document.addEventListener('click', async (e) => {
   const id = e.target?.id; if (!['privFund', 'privKey', 'privNew', 'privVaultKey'].includes(id)) return
   e.preventDefault(); const p = privGet(); if (!p) return
-  if (id === 'privKey') { await copyText(JSON.stringify(p.wallets[0].secretKey)); pnote('Copied. In Phantom: Add account, Import private key, paste it. Keep it safe.'); return }
+  if (id === 'privKey') { await copyText(JSON.stringify(p.wallets[0].secretKey)); pnote('Launch wallet key copied. Keep it for later (it claims the coin fees in Phantom). Next step: press Fund privately above.'); return }
   if (id === 'privVaultKey') { if (!p.vault) { pnote('No vault yet: it is made on your first Fund privately.'); return } const D = await dark(); const a = await D.vaultAddress(p.vault); await copyText(p.vault); pnote('Vault key copied (vault address ' + a + '). Keep it somewhere safe: with it the vault can always be recovered.'); return }
   if (id === 'privNew') { p.wallets[0].used = true; privSet(p); await privInit(); pnote('New launch wallet ready.'); return }
   if (privBlock) { try { const r = await (await fetch('/api/relay')).json(); if (r.key && r.funded) privBlock = '' } catch {} }
