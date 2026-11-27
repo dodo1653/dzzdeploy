@@ -1058,7 +1058,7 @@ const pick = async (f) => {
   const bmp = await createImageBitmap(f), side = Math.min(bmp.width, bmp.height), cv = document.createElement('canvas'); cv.width = cv.height = 512
   cv.getContext('2d').drawImage(bmp, (bmp.width - side) / 2, (bmp.height - side) / 2, side, side, 0, 0, 512, 512)
   pic64 = f.type === 'image/gif' && f.size < 1_000_000 ? await new Promise((ok) => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f) }) : cv.toDataURL('image/jpeg', 0.9)
-  $('pv').innerHTML = `<img src="${pic64}" alt="">`; S.soft(); summary()
+  $('pv').innerHTML = `<img src="${pic64}" alt="">`; S.soft(); summary(); saveDraft()
 }
 $('file').onchange = (e) => pick(e.target.files[0])
 const drop = $('drop'); drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('drag') }; drop.ondragleave = () => drop.classList.remove('drag'); drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('drag'); pick(e.dataTransfer.files[0]) }
@@ -1072,6 +1072,32 @@ $('addSplit').onclick = () => {
   if (venue !== 'pump') { d.querySelectorAll('input')[1].max = 100; $('addSplit').hidden = true }
   $('splits').appendChild(d); S.click(); summary()
 }
+// ---------------------------------------------------------------- draft: what you filled in survives a reload (this browser only)
+// Kept in localStorage until the coin launches. The picture is kept too (already squared to 512 px).
+const DRAFT = 'dzz-draft'
+function saveDraft() {
+  clearTimeout(saveDraft.t); saveDraft.t = setTimeout(() => {
+    const d = { name: $('name').value, sym: $('sym').value, desc: $('desc').value, x: $('x').value, web: $('web').value, tg: $('tg').value, buy: $('buy').value, qc: $('qc').value, pic: pic64,
+      pair: pair === 'TOKEN' ? 'SOL' : pair, fee: feeBps, splits: [...$('splits').children].map((d) => [...d.querySelectorAll('input')].map((i) => i.value)), at: Date.now() }
+    const empty = !d.name && !d.sym && !d.desc && !d.x && !d.web && !d.tg && !d.pic && !d.qc && !d.splits.length && (!+d.buy)
+    try { empty ? localStorage.removeItem(DRAFT) : localStorage.setItem(DRAFT, JSON.stringify(d)) } catch { try { localStorage.setItem(DRAFT, JSON.stringify({ ...d, pic: null })) } catch {} }
+  }, 250)
+}
+function clearDraft() { clearTimeout(saveDraft.t); try { localStorage.removeItem(DRAFT) } catch {} }
+for (const id of ['name', 'sym', 'desc', 'x', 'web', 'tg', 'buy', 'qc']) $(id).addEventListener('input', saveDraft)
+for (const id of ['pair', 'fee']) $(id).addEventListener('click', () => setTimeout(saveDraft, 0))
+$('splits').addEventListener('input', saveDraft); $('splits').addEventListener('click', () => setTimeout(saveDraft, 0))
+setTimeout(() => {   // after the whole page script has run (note, summary and the selectors all exist by then)
+  let d = null; try { d = JSON.parse(localStorage.getItem(DRAFT) || 'null') } catch {}
+  if (!d) return
+  for (const id of ['name', 'sym', 'desc', 'x', 'web', 'tg', 'buy', 'qc']) if (d[id] != null) $(id).value = d[id]
+  if (d.pic) { pic64 = d.pic; $('pv').innerHTML = `<img src="${pic64}" alt="">` }
+  const pickSeg = (id, v) => { const b = $(id).querySelector(`button[data-v="${v}"]`); if (b && !b.classList.contains('on')) b.click() }
+  if (d.pair) pickSeg('pair', d.pair)
+  if (d.fee != null) pickSeg('fee', String(d.fee))
+  for (const [a, p] of d.splits || []) { $('addSplit').click(); const ins = $('splits').lastElementChild?.querySelectorAll('input'); if (ins) { ins[0].value = a || ''; ins[1].value = p || '' } }
+  summary(); note('Restored what you filled in before the reload.')
+}, 0)
 const splits = () => [...$('splits').children].map((d) => { const [a, p] = d.querySelectorAll('input'); return { address: a.value.trim(), shareBps: Math.round(+p.value * 100) } }).filter((s) => s.address && s.shareBps > 0)
 function summary() {
   const sp = splits(), others = sp.reduce((a, s) => a + s.shareBps, 0) / 100, m = st?.selected, k = st?.keys.find((x) => x.mint === m)
@@ -1244,7 +1270,7 @@ async function launch() {
       ? await (await meteora()).launch({ ...coin, ...meteoraMint(), quote: mQuote(), buySol: +$('buy').value || 0, feeBps: mFee, antiSnipe: mSnipe, graduateAt: mGrad, feeWallet: sp[0]?.address, feeShare: sp[0] ? sp[0].shareBps / 100 : 0 }, prog)
       : venue === 'float' ? await (await floatL()).launch({ ...coin, ...meteoraMint(), pair: fPair, buySol: +$('buy').value || 0, feeWallet: fWallet() || undefined }, prog)
       : await pumpLaunch({ ...coin, pair: pair === 'COIN' ? 'SOL' : pair === 'TOKEN' ? tokenPick.mint : pair, quoteCoin: pair === 'COIN' ? $('qc').value.trim() : undefined, feeBps, buy: +$('buy').value || 0, split: sp.length ? sp : undefined }, prog)
-    ;['meta', 'sign', 'live'].forEach((k) => step(k, 'ok')); note(''); S.launched(); L.launched(r.mint, r.signature, { name, symbol, image: r.image, venue: r.venue, pool: r.pool })
+    ;['meta', 'sign', 'live'].forEach((k) => step(k, 'ok')); note(''); clearDraft(); S.launched(); L.launched(r.mint, r.signature, { name, symbol, image: r.image, venue: r.venue, pool: r.pool })
     const k = st?.keys.find((x) => x.mint === r.mint)
     $('done').innerHTML = `<div class="done"><div class="t">$${esc(symbol)} is live.</div><code>${mark(r.mint, k?.pattern)}</code>
       ${r.venue === 'meteora' || r.venue === 'float' ? `<a href="https://jup.ag/tokens/${esc(r.mint)}" target="_blank" rel="noopener">Jupiter ↗</a>` : `<a href="https://pump.fun/coin/${esc(r.mint)}" target="_blank" rel="noopener">pump.fun ↗</a>`}<a href="https://axiom.trade/meme/${esc(r.pool || r.mint)}" target="_blank" rel="noopener">Axiom ↗</a><a href="https://dexscreener.com/solana/${esc(r.mint)}" target="_blank" rel="noopener">DexScreener ↗</a><a href="https://solscan.io/tx/${esc(r.signature)}" target="_blank" rel="noopener">Transaction ↗</a><a href="#" id="copyCa">Copy CA</a></div>`
@@ -1803,8 +1829,9 @@ summary(); stats()
     draw(); if (pumps.length) say('Checking your pump.fun coins for fees paired in a token…')
     const qs = await Promise.all(pumps.sort((a, b) => (b.at || 0) - (a.at || 0)).slice(0, 12).map((c) => PumpLaunch.quoteFeesOf(c.mint).then((q) => ({ c, q })).catch(() => null)))
     const found = qs.filter((x) => x && !x.q.sol).map((x) => ({ ...x.c, venue: 'pumpq', q: x.q })).sort((a, b) => b.q.waiting - a.q.waiting)
-    list.unshift(...found)   // at the top: these never show anywhere else
-    draw(); if (pumps.length) say(found.length ? `Found ${found.length} pump.fun coin${found.length > 1 ? 's' : ''} paired with a token, at the top. Connect the wallet that launched it and press Claim.` : 'Connect the wallet that launched the coin to claim.')
+    // every coin, paired or not, in one list ordered by when it launched (newest first)
+    list.push(...found); list.sort((a, b) => (b.fee?.born || b.at || 0) - (a.fee?.born || a.at || 0))
+    draw(); if (pumps.length) say(found.length ? `Found ${found.length} pump.fun coin${found.length > 1 ? 's' : ''} paired with a token. Connect the wallet that launched it and press Claim.` : 'Connect the wallet that launched the coin to claim.')
   }
   function draw() {
     $('claimRows').innerHTML = list.length ? list.map((c, i) => {
